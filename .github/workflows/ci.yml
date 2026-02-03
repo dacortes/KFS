@@ -29,13 +29,12 @@ jobs:
             cmake
 
       - name: Code Style Check (checkpatch)
-        continue-on-error: true
         run: |
           if [ -f ./scripts/checkpatch.pl ]; then
             echo "Running checkpatch.pl on C files..."
             for file in $(find src -name "*.c" 2>/dev/null); do
               echo "Checking: $file"
-              ./scripts/checkpatch.pl --no-tree --file "$file" || true
+              ./scripts/checkpatch.pl --no-tree --file "$file"
             done
             echo "Checkpatch validation complete"
           else
@@ -43,11 +42,10 @@ jobs:
           fi
 
       - name: Static Analysis (cppcheck)
-        continue-on-error: true
         run: |
           if [ -d src ]; then
             echo "Running cppcheck..."
-            cppcheck --enable=all --error-exitcode=0 src/ || true
+            cppcheck --enable=warning,style,performance,portability --error-exitcode=1 src/
           fi
 
       - name: Build Project
@@ -58,7 +56,6 @@ jobs:
           echo "Build completed successfully"
 
       - name: Generate Code Coverage
-        continue-on-error: true
         run: |
           if [ -f ./coverage.sh ]; then
             echo "Generating code coverage report..."
@@ -67,11 +64,12 @@ jobs:
             echo "Coverage report generated"
           else
             echo "coverage.sh not found, skipping coverage generation"
+            exit 1
           fi
 
       - name: Upload Coverage Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage_report/
@@ -79,7 +77,6 @@ jobs:
 
       - name: Comment PR with Coverage
         if: github.event_name == 'pull_request' && always()
-        continue-on-error: true
         uses: actions/github-script@v6
         with:
           script: |
