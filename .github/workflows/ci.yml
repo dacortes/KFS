@@ -31,7 +31,8 @@ jobs:
             lcov \
             cppcheck \
             libgtest-dev \
-            cmake
+            cmake \
+            jq
 
       - name: Code Style Check (checkpatch)
         run: |
