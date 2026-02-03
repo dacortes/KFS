@@ -4,7 +4,8 @@
 # Posts coverage report summary to PR
 # Usage: ./scripts/comment_pr_coverage.sh <pr_number> <repo_owner> <repo_name>
 
-set -e
+# Don't exit on error - we want to try all methods
+set +e
 
 # Colors for output
 RED='\033[0;31m'
@@ -44,20 +45,37 @@ COMMENT_BODY="### 📊 Code Coverage Report
 # Use GitHub CLI if available, otherwise use curl
 if command -v gh &> /dev/null; then
     echo -e "${YELLOW}Posting comment to PR #${PR_NUMBER} using GitHub CLI...${NC}"
-    echo "$COMMENT_BODY" | gh pr comment "$PR_NUMBER" --body-file - --repo "${REPO_OWNER}/${REPO_NAME}"
-    echo -e "${GREEN}✓ Comment posted successfully${NC}"
-elif [ -n "$GITHUB_TOKEN" ]; then
+    if echo "$COMMENT_BODY" | gh pr comment "$PR_NUMBER" --body-file - --repo "${REPO_OWNER}/${REPO_NAME}"; then
+        echo -e "${GREEN}✓ Comment posted successfully via gh CLI${NC}"
+        exit 0
+    else
+        echo -e "${RED}Failed to post via gh CLI, trying curl...${NC}"
+    fi
+fi
+
+if [ -n "$GITHUB_TOKEN" ]; then
     echo -e "${YELLOW}Posting comment to PR #${PR_NUMBER} using curl...${NC}"
+    
+    # Escape the comment body for JSON
     COMMENT_JSON=$(jq -n --arg body "$COMMENT_BODY" '{body: $body}')
     
-    curl -X POST \
-        -H "Authorization: token $GITHUB_TOKEN" \
+    RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
         "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${PR_NUMBER}/comments" \
-        -d "$COMMENT_JSON"
+        -d "$COMMENT_JSON")
     
-    echo -e "${GREEN}✓ Comment posted successfully${NC}"
+    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+    
+    if [ "$HTTP_CODE" -eq 201 ]; then
+        echo -e "${GREEN}✓ Comment posted successfully via curl (HTTP $HTTP_CODE)${NC}"
+        exit 0
+    else
+        echo -e "${RED}Failed to post comment via curl (HTTP $HTTP_CODE)${NC}"
+        echo "$RESPONSE"
+        exit 1
+    fi
 else
-    echo -e "${YELLOW}Neither gh CLI nor GITHUB_TOKEN available, skipping PR comment${NC}"
-    exit 0
+    echo -e "${RED}ERROR: Neither gh CLI nor GITHUB_TOKEN available${NC}"
+    exit 1
 fi

@@ -30,32 +30,28 @@ jobs:
 
       - name: Code Style Check (checkpatch)
         run: |
-          chmod +x ./style_check.sh
-          ./style_check.sh
+          chmod +x ./scripts/style_check.sh
+          ./scripts/style_check.sh
 
       - name: Static Analysis (cppcheck)
         run: |
-          if [ -d src ]; then
-            echo "Running cppcheck..."
-            cppcheck --enable=warning,style,performance,portability --error-exitcode=1 src/
-          fi
+          chmod +x ./scripts/static_analysis.sh
+          ./scripts/static_analysis.sh
 
       - name: Build Project
         run: |
-          echo "Building KFS project..."
-          make clean
-          make -j$(nproc)
-          echo "Build completed successfully"
+          chmod +x ./scripts/build.sh
+          ./scripts/build.sh
 
       - name: Generate Code Coverage
         run: |
-          if [ -f ./coverage.sh ]; then
+          if [ -f ./scripts/coverage.sh ]; then
             echo "Generating code coverage report..."
-            chmod +x ./coverage.sh
-            ./coverage.sh
+            chmod +x ./scripts/coverage.sh
+            ./scripts/coverage.sh
             echo "Coverage report generated"
           else
-            echo "coverage.sh not found, skipping coverage generation"
+            echo "scripts/coverage.sh not found, skipping coverage generation"
             exit 1
           fi
 
@@ -69,23 +65,15 @@ jobs:
 
       - name: Comment PR with Coverage
         if: github.event_name == 'pull_request' && always()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            try {
-              const coverage = fs.readFileSync('coverage_report/coverage.info', 'utf8');
-              if (coverage) {
-                github.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: '✅ Code coverage report generated. Check artifacts for details.'
-                });
-              }
-            } catch (e) {
-              console.log('Coverage report not available for comment');
-            }
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "Repo Owner: ${{ github.repository_owner }}"
+          echo "Repo Name: ${{ github.event.repository.name }}"
+          chmod +x ./scripts/comment_pr_coverage.sh
+          ./scripts/comment_pr_coverage.sh "${{ github.event.pull_request.number }}" "${{ github.repository_owner }}" "${{ github.event.repository.name }}" || echo "Failed to post PR comment, but continuing..."
 
   build-summary:
     runs-on: ubuntu-latest
@@ -98,9 +86,12 @@ jobs:
         run: |
           echo "=== KFS Build Pipeline Summary ==="
           echo "Build timestamp: $(date)"
-          echo "Workflow status: ${{ job.status }}"
+          echo "Build and Test job status: ${{ needs.build-and-test.result }}"
           echo ""
-          echo "Jobs completed:"
-          echo "  ✓ Build and Test"
-          echo "  ✓ Code Quality"
-          echo "  ✓ Guidelines Verification"
+          if [ "${{ needs.build-and-test.result }}" == "success" ]; then
+            echo "✅ All checks passed successfully!"
+            exit 0
+          else
+            echo "❌ Build failed. Check the logs above for details."
+            exit 1
+          fi
