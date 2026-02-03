@@ -3,7 +3,7 @@
 /**
  * @file main.c
  * @brief KFS kernel entry point
- * 
+ *
  * Main entry point for the KFS kernel. Initializes the kernel
  * and starts execution.
  */
@@ -12,9 +12,9 @@
 
 /**
  * Main entry point for the kernel.
- * 
+ *
  * Initializes the kernel and demonstrates basic functionality.
- * 
+ *
  * @return Does not return (infinite loop in real kernel)
  */
 int main(void)
