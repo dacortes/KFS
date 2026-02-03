@@ -29,18 +29,45 @@ if [ ! -f coverage_report/coverage.info ]; then
     exit 0
 fi
 
-# Extract coverage percentage
-COVERAGE_PERCENT=$(lcov --summary coverage_report/coverage.info 2>&1 | \
-    grep "lines" | awk '{print $2}' | sed 's/%//' || echo "0")
+# Extract coverage percentage - try multiple methods
+COVERAGE_PERCENT=""
+
+# Method 1: Try lcov --summary
+if [ -z "$COVERAGE_PERCENT" ]; then
+    COVERAGE_PERCENT=$(lcov --summary coverage_report/coverage.info 2>&1 | \
+        grep -i "lines" | head -n1 | grep -oP '\d+\.\d+%' | sed 's/%//' || echo "")
+fi
+
+# Method 2: Parse the info file directly (more reliable)
+if [ -z "$COVERAGE_PERCENT" ]; then
+    COVERAGE_PERCENT=$(awk -F: '/^LF:/ {lf+=$2} /^LH:/ {lh+=$2} END {if(lf>0) printf "%.1f", (lh/lf)*100}' coverage_report/coverage.info)
+fi
+
+# Fallback
+if [ -z "$COVERAGE_PERCENT" ]; then
+    COVERAGE_PERCENT="N/A"
+fi
+
+echo "Extracted coverage: ${COVERAGE_PERCENT}"
 
 # Create comment body
-COMMENT_BODY="### 📊 Code Coverage Report
+if [ "$COVERAGE_PERCENT" = "N/A" ]; then
+    COMMENT_BODY="### 📊 Code Coverage Report
+
+✅ Coverage report generated successfully!
+
+**Coverage:** Unable to extract percentage (see artifacts)
+
+📁 Download the full coverage report from the workflow artifacts."
+else
+    COMMENT_BODY="### 📊 Code Coverage Report
 
 ✅ Coverage report generated successfully!
 
 **Coverage:** ${COVERAGE_PERCENT}%
 
 📁 Download the full coverage report from the workflow artifacts."
+fi
 
 # Use GitHub CLI if available, otherwise use curl
 if command -v gh &> /dev/null; then
