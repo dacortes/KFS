@@ -60,20 +60,28 @@ mkdir -p "$COVERAGE_DIR"
 
 # Initialize lcov
 lcov --directory . --capture --output-file "$COVERAGE_DIR/coverage.info" \
-    --rc lcov_branch_coverage=1 --no-external 2>/dev/null || true
+    --rc lcov_branch_coverage=1 --no-external || true
 
 # Filter out test files and system headers
 lcov --remove "$COVERAGE_DIR/coverage.info" \
     '*/test*' \
     '/usr/*' \
     --output-file "$COVERAGE_DIR/coverage.info" \
-    --rc lcov_branch_coverage=1 2>/dev/null || true
+    --rc lcov_branch_coverage=1 || true
 
 # Generate HTML report
 genhtml "$COVERAGE_DIR/coverage.info" \
     --output-directory "$COVERAGE_DIR/html" \
     --rc lcov_branch_coverage=1 \
-    --title "KFS Code Coverage Report" 2>/dev/null || true
+    --title "KFS Code Coverage Report" >/dev/null 2>&1 || true
+
+# Verify coverage.info exists and has content
+if [ ! -f "$COVERAGE_DIR/coverage.info" ] || [ ! -s "$COVERAGE_DIR/coverage.info" ]; then
+    echo -e "${RED}ERROR: coverage.info file is missing or empty${NC}"
+    exit 1
+fi
+
+echo "DEBUG: coverage.info size: $(wc -l < "$COVERAGE_DIR/coverage.info") lines"
 
 # Extract coverage percentage using the same reliable method
 COVERAGE_PERCENT=$(awk -F: '/^LF:/ {lf+=$2} /^LH:/ {lh+=$2} END {if(lf>0) printf "%.1f", (lh/lf)*100}' "$COVERAGE_DIR/coverage.info" 2>/dev/null)
