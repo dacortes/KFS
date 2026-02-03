@@ -112,4 +112,15 @@ find . -name "*.gcda" -delete
 find . -name "*.gcno" -delete
 
 echo -e "${GREEN}Coverage generation complete!${NC}"
+
+# Post to PR if running in CI with PR context
+if [ -n "$PR_NUMBER" ] && [ -n "$REPO_OWNER" ] && [ -n "$REPO_NAME" ]; then
+    echo ""
+    echo -e "${YELLOW}Posting coverage to PR...${NC}"
+    if [ -f ./scripts/comment_pr_coverage.sh ]; then
+        chmod +x ./scripts/comment_pr_coverage.sh
+        ./scripts/comment_pr_coverage.sh "$PR_NUMBER" "$REPO_OWNER" "$REPO_NAME" "$COVERAGE_PERCENT" || echo "Failed to post to PR, continuing..."
+    fi
+fi
+
 exit 0

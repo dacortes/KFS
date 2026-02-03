@@ -49,6 +49,11 @@ jobs:
           ./scripts/build.sh
 
       - name: Generate Code Coverage
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -f ./scripts/coverage.sh ]; then
             echo "Generating code coverage report..."
@@ -67,18 +72,6 @@ jobs:
           name: coverage-report
           path: coverage_report/
           retention-days: 30
-
-      - name: Comment PR with Coverage
-        if: github.event_name == 'pull_request' && always()
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "PR Number: ${{ github.event.pull_request.number }}"
-          echo "Repo Owner: ${{ github.repository_owner }}"
-          echo "Repo Name: ${{ github.event.repository.name }}"
-          chmod +x ./scripts/comment_pr_coverage.sh
-          ./scripts/comment_pr_coverage.sh "${{ github.event.pull_request.number }}" "${{ github.repository_owner }}" "${{ github.event.repository.name }}" || echo "Failed to post PR comment, but continuing..."
 
   build-summary:
     runs-on: ubuntu-latest

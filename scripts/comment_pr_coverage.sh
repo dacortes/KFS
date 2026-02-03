@@ -2,7 +2,7 @@
 
 # KFS PR Coverage Comment Script
 # Posts coverage report summary to PR
-# Usage: ./scripts/comment_pr_coverage.sh <pr_number> <repo_owner> <repo_name>
+# Usage: ./scripts/comment_pr_coverage.sh <pr_number> <repo_owner> <repo_name> <coverage_percent>
 
 # Don't exit on error - we want to try all methods
 set +e
@@ -16,39 +16,20 @@ NC='\033[0m' # No Color
 PR_NUMBER=$1
 REPO_OWNER=$2
 REPO_NAME=$3
+COVERAGE_PERCENT=$4
 
 if [ -z "$PR_NUMBER" ] || [ -z "$REPO_OWNER" ] || [ -z "$REPO_NAME" ]; then
-    echo -e "${YELLOW}Usage: $0 <pr_number> <repo_owner> <repo_name>${NC}"
+    echo -e "${YELLOW}Usage: $0 <pr_number> <repo_owner> <repo_name> <coverage_percent>${NC}"
     echo "Skipping PR comment (not in PR context or missing parameters)"
     exit 0
 fi
 
-# Check if coverage report exists
-if [ ! -f coverage_report/coverage.info ]; then
-    echo -e "${YELLOW}Coverage report not found, skipping PR comment${NC}"
-    exit 0
-fi
-
-# Extract coverage percentage - try multiple methods
-COVERAGE_PERCENT=""
-
-# Method 1: Try lcov --summary
-if [ -z "$COVERAGE_PERCENT" ]; then
-    COVERAGE_PERCENT=$(lcov --summary coverage_report/coverage.info 2>&1 | \
-        grep -i "lines" | head -n1 | grep -oP '\d+\.\d+%' | sed 's/%//' || echo "")
-fi
-
-# Method 2: Parse the info file directly (more reliable)
-if [ -z "$COVERAGE_PERCENT" ]; then
-    COVERAGE_PERCENT=$(awk -F: '/^LF:/ {lf+=$2} /^LH:/ {lh+=$2} END {if(lf>0) printf "%.1f", (lh/lf)*100}' coverage_report/coverage.info)
-fi
-
-# Fallback
+# Use provided coverage or default to N/A
 if [ -z "$COVERAGE_PERCENT" ]; then
     COVERAGE_PERCENT="N/A"
 fi
 
-echo "Extracted coverage: ${COVERAGE_PERCENT}"
+echo "Coverage to post: ${COVERAGE_PERCENT}%"
 
 # Create comment body
 if [ "$COVERAGE_PERCENT" = "N/A" ]; then
