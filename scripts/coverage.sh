@@ -75,9 +75,16 @@ genhtml "$COVERAGE_DIR/coverage.info" \
     --rc lcov_branch_coverage=1 \
     --title "KFS Code Coverage Report" 2>/dev/null || true
 
-# Extract coverage percentage
-COVERAGE_PERCENT=$(lcov --summary "$COVERAGE_DIR/coverage.info" 2>&1 | \
-    grep "lines" | awk '{print $2}' | sed 's/%//' || echo "0")
+# Extract coverage percentage using the same reliable method
+COVERAGE_PERCENT=$(awk -F: '/^LF:/ {lf+=$2} /^LH:/ {lh+=$2} END {if(lf>0) printf "%.1f", (lh/lf)*100}' "$COVERAGE_DIR/coverage.info" 2>/dev/null)
+
+# Fallback if awk fails
+if [ -z "$COVERAGE_PERCENT" ]; then
+    COVERAGE_PERCENT=$(lcov --summary "$COVERAGE_DIR/coverage.info" 2>&1 | \
+        grep "lines" | awk '{print $2}' | sed 's/%//' || echo "0")
+fi
+
+echo "DEBUG: Extracted COVERAGE_PERCENT='$COVERAGE_PERCENT'"
 
 # Print summary
 echo ""
