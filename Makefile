@@ -22,10 +22,10 @@ OBJ_DIR = build
 BIN_DIR = .
 
 # Source files
-SOURCES = $(SRC_DIR)/math/math.c $(SRC_DIR)/main.c
+SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/display/display.c
 # Test source files (kernel sources without main.c for testing)
-KERNEL_LIB_SOURCES = $(SRC_DIR)/math/math.c
-TEST_SOURCES = $(TEST_DIR)/unit/test_math.cpp
+KERNEL_LIB_SOURCES = $(SRC_DIR)/display/display.c
+TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp
 KERNEL_OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
 KERNEL_LIB_OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(KERNEL_LIB_SOURCES))
 TEST_OBJECTS = $(patsubst $(TEST_DIR)/unit/%.cpp,$(OBJ_DIR)/%.o,$(TEST_SOURCES))
@@ -44,7 +44,7 @@ all: $(BIN_DIR)/$(KERNEL_BIN)
 # Create build directory
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
-	@mkdir -p $(OBJ_DIR)/math
+	@mkdir -p $(OBJ_DIR)/display
 
 # Compile C source files (using g++ for C/C++ test compatibility)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
