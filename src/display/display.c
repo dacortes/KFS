@@ -7,10 +7,13 @@
 
 #include <display/display.h>
 
-/* Forward declarations */
-static void clear(display_t *display);
-static void write_string(display_t *display, const char *string);
-
+/**
+ * clear - Clears the entire display
+ * @display: Pointer to the display object
+ *
+ * Fills the display with space characters using the current color attribute.
+ * Preserves the display's color setting.
+ */
 static void clear(display_t *display)
 {
 	unsigned int total_size;
@@ -22,6 +25,16 @@ static void clear(display_t *display)
 	}
 }
 
+/**
+ * write_string - Writes a null-terminated string to the display
+ * @display: Pointer to the display object
+ * @string: Null-terminated string to write
+ *
+ * Writes the string starting at the beginning of video memory,
+ * using the current color attribute.
+ *
+ * Note: Does not handle line wrapping or scrolling
+ */
 static void write_string(display_t *display, const char *string)
 {
 	unsigned int i;
