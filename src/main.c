@@ -8,17 +8,23 @@
  * and starts execution.
  */
 
-#include <math/math.h>
+#include <display/display.h>
 
 /**
  * Main entry point for the kernel.
  *
- * Initializes the kernel and demonstrates basic functionality.
+ * Initializes the kernel
  *
- * @return Does not return (infinite loop in real kernel)
+ * @return Does not return
  */
 int main(void)
 {
-	int result = math_add(5, 3);
-	(void)result;
+	display_t display;
+
+	display_init(&display);
+	display.clear(&display);
+	display.write_string(&display, "42");
+
+	while (1) // Infinite loop to keep the kernel running
+		;
 }
