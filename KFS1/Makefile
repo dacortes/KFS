@@ -26,7 +26,6 @@ ERROR = $(LIGTH)$(RED)[ERROR]$(END)
 
 RMV = rm -rf
 
-REQUIRED_TOOLS := qemu-system-x86_64 nasm gcc grub-mkrescue
 
 ASM := nasm -f elf32 -w+all -w+error -w+orphan-labels -g
 FLAGS_ASM := -MD -MF
@@ -52,6 +51,8 @@ DEPENDENCIES_C = $(addprefix $(DIRECTORY_DEP)/, $(SOURCES_C:.c=.d))
 
 DIRS_TO_CREATE = $(DIRECTORY_OBJ) $(DIRECTORY_DEP)
 SUB_DIRECTORIES := boot kernel
+
+REQUIRED_TOOLS := qemu-system-x86_64 nasm gcc grub-mkrescue $(CC)
 
 all: check_requirements dir $(OBJECTS)
 
@@ -116,5 +117,36 @@ re: clean all
 .SILENT:
 
 #Nota:
-# Se requier instalar i686-elf-gcc para el debido compilamiento y usos de las flags
-# tiene dependeccias de este paquete sudo apt-get install gcc-13-i686-linux-gnu
+# 1. Instalar dependencias \
+sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo libisl-dev
+
+# 2. Crear directorios \
+export PREFIX="$HOME/opt/cross" \
+export TARGET=i686-elf \
+export PATH="$PREFIX/bin:$PATH" \
+\
+mkdir -p $HOME/src \
+cd $HOME/src \
+
+# 3. Descargar y compilar binutils \
+wget https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz \
+tar xf binutils-2.42.tar.gz \
+mkdir build-binutils \
+cd build-binutils \
+../binutils-2.42/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror \
+make \
+make install \
+cd .. \
+
+# 4. Descargar y compilar GCC \
+wget https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.gz \
+tar xf gcc-13.2.0.tar.gz \
+mkdir build-gcc \
+cd build-gcc \
+../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers \
+make all-gcc \
+make all-target-libgcc \
+make install-gcc \
+make install-target-libgcc \
+agregar las variables PREFIX, TARGET y PATH al archivo ~/.bashrc
+
