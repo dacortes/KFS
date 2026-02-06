@@ -47,6 +47,8 @@ DIRECTORY_DEP = .dep
 OBJECTS = $(addprefix $(DIRECTORY_OBJ)/, $(SOURCES_AS:.s=.o))
 DEPENDENCIES = $(addprefix $(DIRECTORY_DEP)/, $(SOURCES_AS:.s=.d))
 
+OBJECTS_C = $(addprefix $(DIRECTORY_OBJ)/, $(SOURCES_C:.c=.o))
+DEPENDENCIES_C = $(addprefix $(DIRECTORY_DEP)/, $(SOURCES_C:.c=.d))
 
 DIRS_TO_CREATE = $(DIRECTORY_OBJ) $(DIRECTORY_DEP)
 SUB_DIRECTORIES := boot kernel
@@ -84,6 +86,13 @@ $(DIRECTORY_OBJ)/%.o: %.s Makefile
 		printf "$(ERROR) Failed to compile: $<\n"; \
 	fi
 
+$(DIRECTORY_OBJ)/%.o: %.c Makefile
+	@printf "$(INFO) Compiling $< ... \n"
+	@if $(CC) $(CFLAGS) -MMD -MF $(DIRECTORY_DEP)/$*.d -c $< -o $@; then \
+		printf "$(SUCCESS) Object generated: $@\n"; \
+	else \
+		printf "$(ERROR) Failed to compile: $<\n"; \
+	fi
 
 clean:
 	@for DIR in $(DIRS_TO_CREATE); do \
@@ -97,5 +106,15 @@ clean:
 
 	@printf "$(SUCCESS) Object and dependency files cleaned.\n"
 
+hola: $(OBJECTS_C)
+
 re: clean all
+
+-include $(DEPENDENCIES)
+-include $(DEPENDENCIES_C)
+
 .SILENT:
+
+#Nota:
+# Se requier instalar i686-elf-gcc para el debido compilamiento y usos de las flags
+# tiene dependeccias de este paquete sudo apt-get install gcc-13-i686-linux-gnu
