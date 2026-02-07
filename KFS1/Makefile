@@ -199,9 +199,7 @@ $(GRUBCFG):
 # Creates a bootable ISO image using GRUB's mkrescue tool                      #
 # The ISO can be booted in QEMU, VirtualBox, or burned to physical media       #
 ################################################################################
-################################################################################
-#                               ISO CREATION                                   #
-################################################################################
+
 iso: $(ISO)
 
 $(ISO): $(KERNEL) $(GRUBCFG)
