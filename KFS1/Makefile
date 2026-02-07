@@ -179,8 +179,6 @@ $(KERNEL): $(OBJECTS) $(OBJECTS_C) $(LINKER)
 		exit 1; \
 	fi
 
-hola:
-	echo $(KERNEL)
 ################################################################################
 #                               GRUB CONFIGURATION                             #
 # Creates a minimal GRUB configuration file for Multiboot compliance           #
