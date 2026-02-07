@@ -51,5 +51,7 @@ typedef struct display display_t;
  * Initialize a display struct with default values and function pointers.
  *
  * @param display Pointer to the display struct to initialize
+ * 
+ * @note Sets function pointers to the appropriate functions.
  */
 void display_init(display_t *display);
