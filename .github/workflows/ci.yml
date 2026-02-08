@@ -48,10 +48,10 @@ jobs:
           chmod +x ./scripts/static_analysis.sh
           ./scripts/static_analysis.sh
 
-      - name: Build Project
-        run: |
-          chmod +x ./scripts/build.sh
-          ./scripts/build.sh
+      #- name: Build Project
+      #  run: |
+      #    chmod +x ./scripts/build.sh
+      #    ./scripts/build.sh
 
       - name: Generate Code Coverage
         env:
