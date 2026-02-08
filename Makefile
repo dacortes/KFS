@@ -78,7 +78,7 @@ TEST_OBJECTS = $(patsubst $(TEST_DIR)/unit/%.cpp,$(OBJ_DIR)/%.o,$(TEST_SOURCES))
 GTEST_LIBS = -lgtest -lgtest_main
 
 # Required tools
-REQUIRED_TOOLS = qemu-system-x86_64 nasm gcc grub-mkrescue $(CC)
+REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
 KERNEL_SUBDIRS = boot kernel kernel/display
