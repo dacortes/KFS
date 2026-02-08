@@ -32,7 +32,11 @@ jobs:
             cppcheck \
             libgtest-dev \
             cmake \
-            jq
+            jq \
+            qemu-kvm \
+            libvirt-daemon-system \
+            libvirt-clients \
+            virt-manager
 
       - name: Code Style Check (checkpatch)
         run: |
