@@ -30,24 +30,23 @@ KERNEL_OBJ_DIR = .obj
 KERNEL_DEP_DIR = .dep
 
 # Cross-compiler configuration for kernel binary (i686-elf target)
-CROSS_CC = i686-elf-gcc
-CROSS_LD = i686-elf-ld
-ASM = nasm
-ASM_FLAGS = -f elf32 -MD -MF
-CROSS_CFLAGS = -m32 -ffreestanding -O2 -Wall -Wextra -fno-builtin -nostdlib -I$(SRC_DIR)
-CROSS_LDFLAGS = -m elf_i386 -T $(LINKER) -nostdlib
-
-# Test/coverage compiler configuration 
 CC = gcc
 CXX = g++
-CFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
-CXXFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
+LD = ld
+ASM = nasm
+ASM_FLAGS = -f elf32 -MD -MF
+CFLAGS = -m32 -ffreestanding -O2 -Wall -Wextra -fno-builtin -nostdlib -I$(SRC_DIR)
+LDFLAGS = -m elf_i386 -T $(LINKER) -nostdlib
+
+# Test/coverage compiler configuration 
+TEST_CFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
+TEST_CXXFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
 
 # Add coverage flags if COVERAGE is set
 ifdef COVERAGE
-	CFLAGS += -fprofile-arcs -ftest-coverage
-	CXXFLAGS += -fprofile-arcs -ftest-coverage
-	LDFLAGS += -fprofile-arcs -ftest-coverage
+	TEST_CFLAGS += -fprofile-arcs -ftest-coverage
+	TEST_CXXFLAGS += -fprofile-arcs -ftest-coverage
+	TEST_LDFLAGS += -fprofile-arcs -ftest-coverage
 endif
 
 # File definitions
@@ -79,7 +78,7 @@ TEST_OBJECTS = $(patsubst $(TEST_DIR)/unit/%.cpp,$(OBJ_DIR)/%.o,$(TEST_SOURCES))
 GTEST_LIBS = -lgtest -lgtest_main
 
 # Required tools
-REQUIRED_TOOLS = qemu-system-x86_64 nasm gcc grub-mkrescue $(CROSS_CC)
+REQUIRED_TOOLS = qemu-system-x86_64 nasm gcc grub-mkrescue $(CC)
 
 # Subdirectories to create
 KERNEL_SUBDIRS = boot kernel kernel/display
@@ -168,7 +167,7 @@ $(KERNEL_OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 # C compilation rule (cross-compiler)
 $(KERNEL_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 	@printf "$(INFO) Compiling $< ...\n"
-	@if $(CROSS_CC) $(CROSS_CFLAGS) -MMD -MF $(KERNEL_DEP_DIR)/$*.d -c $< -o $@; then \
+	@if $(CC) $(CFLAGS) -MMD -MF $(KERNEL_DEP_DIR)/$*.d -c $< -o $@; then \
 		printf "$(SUCCESS) Created: $@\n"; \
 	else \
 		printf "$(ERROR) Failed to compile: $<\n"; \
@@ -181,7 +180,7 @@ kernel-bin: $(KERNEL_BIN)
 $(KERNEL_BIN): $(KERNEL_OBJECTS_AS) $(KERNEL_OBJECTS_C) $(LINKER)
 	@printf "$(INFO) Linking kernel binary: $(KERNEL_BIN) ...\n"
 	@printf "$(INFO) Using linker script: $(LINKER)\n"
-	@if $(CROSS_LD) $(CROSS_LDFLAGS) -o $@ $(KERNEL_OBJECTS_AS) $(KERNEL_OBJECTS_C); then \
+	@if $(LD) $(LDFLAGS) -o $@ $(KERNEL_OBJECTS_AS) $(KERNEL_OBJECTS_C); then \
 		printf "$(SUCCESS) Created kernel: $(KERNEL_BIN)\n"; \
 		printf "$(INFO) Kernel size: "; \
 		wc -c < $(KERNEL_BIN) | awk '{printf "%d bytes (%.2f KB)\n", $$1, $$1/1024}'; \
@@ -213,7 +212,7 @@ $(ISO): $(KERNEL_BIN) $(GRUBCFG)
 	@cp $(KERNEL_BIN) iso/boot/
 	@cp $(GRUBCFG) iso/boot/grub/
 	@printf "$(INFO) Running grub-mkrescue...\n"
-	@if grub-mkrescue -o $(ISO) iso 2>&1; then \
+	@if grub-mkrescue -o $(ISO) --compress=xz iso 2>&1; then \
 		printf "$(SUCCESS) ISO created successfully\n"; \
 	else \
 		printf "$(WARNING) grub-mkrescue failed, trying alternative...\n"; \
@@ -253,17 +252,17 @@ debug: $(ISO)
 # Compile C sources for testing (using g++ for C/C++ compatibility)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@printf "$(INFO) Compiling $< for tests...\n"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(TEST_CXXFLAGS) -c $< -o $@
 
 # Compile C++ test files
 $(OBJ_DIR)/%.o: $(TEST_DIR)/unit/%.cpp | $(OBJ_DIR)
 	@printf "$(INFO) Compiling test $< ...\n"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CXX) $(TEST_CXXFLAGS) -c $< -o $@
 
 # Link test runner
 $(TEST_RUNNER): $(TEST_LIB_OBJECTS) $(TEST_OBJECTS)
 	@printf "$(INFO) Linking test runner...\n"
-	@$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@ $(GTEST_LIBS)
+	@$(CXX) $(TEST_CXXFLAGS) $(TEST_LDFLAGS) $^ -o $@ $(GTEST_LIBS)
 	@printf "$(SUCCESS) Test runner built: $(TEST_RUNNER)\n"
 
 # Build and run tests
