@@ -38,7 +38,7 @@ ASM_FLAGS = -f elf32 -MD -MF
 CFLAGS = -m32 -ffreestanding -O2 -Wall -Wextra -fno-builtin -nostdlib -I$(SRC_DIR)
 LDFLAGS = -m elf_i386 -T $(LINKER) -nostdlib
 
-# Test/coverage compiler configuration 
+# Test/coverage compiler configuration
 TEST_CFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
 TEST_CXXFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
 
@@ -59,6 +59,8 @@ TEST_RUNNER = test_runner
 # Kernel source files
 KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c $(SRC_DIR)/kernel/display/display.c
+INCLUDES = $(addprefix -I, ./inc)
+INCLUDES += $(addprefix -I, ./inc/stdint)
 
 # Test source files (kernel lib without main.c for testing)
 KERNEL_LIB_SOURCES = $(SRC_DIR)/kernel/display/display.c
@@ -167,7 +169,7 @@ $(KERNEL_OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 # C compilation rule (cross-compiler)
 $(KERNEL_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 	@printf "$(INFO) Compiling $< ...\n"
-	@if $(CC) $(CFLAGS) -MMD -MF $(KERNEL_DEP_DIR)/$*.d -c $< -o $@; then \
+	@if $(CC) $(CFLAGS) $(INCLUDES) -MMD -MF $(KERNEL_DEP_DIR)/$*.d -c $< -o $@; then \
 		printf "$(SUCCESS) Created: $@\n"; \
 	else \
 		printf "$(ERROR) Failed to compile: $<\n"; \
