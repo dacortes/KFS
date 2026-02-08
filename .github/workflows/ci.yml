@@ -33,6 +33,7 @@ jobs:
             libgtest-dev \
             cmake \
             jq
+            ./scripts/install-toolchain.sh
 
       - name: Code Style Check (checkpatch)
         run: |
