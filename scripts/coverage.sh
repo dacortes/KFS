@@ -41,7 +41,7 @@ fi
 echo -e "${YELLOW}[3/4] Building with coverage instrumentation...${NC}"
 
 make clean
-COVERAGE=1 make test-runner
+COVERAGE=1 make test
 
 # Run tests
 echo -e "${YELLOW}[4/4] Running tests and generating coverage...${NC}"

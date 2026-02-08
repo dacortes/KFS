@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <gtest/gtest.h>
-#include <display/display.h>
+#include <kernel/display/display.h>
 #include <cstring>
 
 class DisplayTest : public ::testing::Test {

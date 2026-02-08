@@ -5,7 +5,7 @@
  * @brief Display management implementation
  */
 
-#include <display/display.h>
+#include <kernel/display/display.h>
 
 /**
  * clear - Clears the entire display

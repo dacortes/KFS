@@ -8,7 +8,7 @@
  * and starts execution.
  */
 
-#include <display/display.h>
+#include <kernel/display/display.h>
 
 /**
  * Main entry point for the kernel.
@@ -17,13 +17,13 @@
  *
  * @return Does not return
  */
-int main(void)
+int kernel_main(void)
 {
 	display_t display;
 
 	display_init(&display);
 	display.clear(&display);
-	display.write_string(&display, "42");
+	display.write_string(&display, "HOLA");
 
 	while (1) // Infinite loop to keep the kernel running
 		;
