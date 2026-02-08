@@ -23,7 +23,7 @@ int kernel_main(void)
 
 	display_init(&display);
 	display.clear(&display);
-	display.write_string(&display, "HOLA");
+	display.write_string(&display, "42");
 
 	while (1) // Infinite loop to keep the kernel running
 		;

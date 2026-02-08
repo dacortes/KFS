@@ -89,8 +89,7 @@ TEST_SUBDIRS = kernel/display
 #                               PHONY TARGETS                                  #
 ################################################################################
 .PHONY: all clean distclean re help check_requirements
-.PHONY: kernel-bin iso run debug test test-verbose test-filter
-.PHONY: cross-help install-cross-deps setup-cross-env build-binutils build-gcc install-cross-toolchain
+.PHONY: kernel-bin iso run debug test test-verbose
 
 ################################################################################
 #                               DEFAULT TARGET                                 #
@@ -109,7 +108,6 @@ help:
 	@printf "  $(BLUE)make debug$(END)            $(INFO) Run kernel in QEMU with GDB support\n"
 	@printf "  $(BLUE)make test$(END)             $(INFO) Build and run unit tests\n"
 	@printf "  $(BLUE)make test-verbose$(END)     $(INFO) Run tests with verbose output\n"
-	@printf "  $(BLUE)make test-filter FILTER=<pattern>$(END) $(INFO) Run specific tests\n"
 	@printf "  $(BLUE)make clean$(END)            $(INFO) Remove build artifacts\n"
 	@printf "  $(BLUE)make distclean$(END)        $(INFO) Remove all generated files\n"
 	@printf "  $(BLUE)make re$(END)               $(INFO) Rebuild everything from scratch\n"
@@ -277,9 +275,6 @@ test: $(TEST_RUNNER)
 test-verbose: $(TEST_RUNNER)
 	@./$(TEST_RUNNER) --gtest_print_time=1 --gtest_verbose=1
 
-# Run specific test
-test-filter: $(TEST_RUNNER)
-	@./$(TEST_RUNNER) --gtest_filter="$(FILTER)"
 
 ################################################################################
 #                               CLEANUP TARGETS                                #
