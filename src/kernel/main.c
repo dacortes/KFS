@@ -8,7 +8,7 @@
  * and starts execution.
  */
 
-#include <display/display.h>
+#include <kernel/display/display.h>
 
 /**
  * Main entry point for the kernel.
@@ -17,7 +17,7 @@
  *
  * @return Does not return
  */
-int main(void)
+int kernel_main(void)
 {
 	display_t display;
 

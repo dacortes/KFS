@@ -61,5 +61,5 @@ grub.cfg
 
 test_runner
 coverage_report/
-kernel
 build/
+*.iso

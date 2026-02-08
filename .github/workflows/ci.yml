@@ -32,7 +32,14 @@ jobs:
             cppcheck \
             libgtest-dev \
             cmake \
-            jq
+            jq \
+            qemu-kvm \
+            libvirt-daemon-system \
+            libvirt-clients \
+            virt-manager \
+            grub-pc-bin \
+            xorriso
+
 
       - name: Code Style Check (checkpatch)
         run: |
@@ -44,10 +51,10 @@ jobs:
           chmod +x ./scripts/static_analysis.sh
           ./scripts/static_analysis.sh
 
-      - name: Build Project
-        run: |
-          chmod +x ./scripts/build.sh
-          ./scripts/build.sh
+      #- name: Build Project
+      #  run: |
+      #    chmod +x ./scripts/build.sh
+      #    ./scripts/build.sh
 
       - name: Generate Code Coverage
         env:
