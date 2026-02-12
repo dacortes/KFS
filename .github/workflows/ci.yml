@@ -27,10 +27,14 @@ jobs:
             build-essential \
             gcc \
             g++ \
+            gcc-multilib \
+            g++-multilib \
             nasm \
             lcov \
             cppcheck \
             libgtest-dev \
+            libgtest-dev:i386 \
+            libstdc++6:i386 \
             cmake \
             jq \
             qemu-kvm \
