@@ -38,9 +38,10 @@ ASM_FLAGS = -f elf32 -MD -MF
 CFLAGS = -m32 -ffreestanding -O2 -Wall -Wextra -fno-builtin -nostdlib -I$(SRC_DIR)
 LDFLAGS = -m elf_i386 -T $(LINKER) -nostdlib
 
-# Test/coverage compiler configuration 
-TEST_CFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
-TEST_CXXFLAGS = -Wall -Wextra -O2 -fPIC -I. -I$(SRC_DIR)
+# Test/coverage compiler configuration (32-bit to use assembly directly)
+TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR)
+TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR)
+TEST_LDFLAGS = -m32
 
 # Add coverage flags if COVERAGE is set
 ifdef COVERAGE
@@ -57,12 +58,29 @@ GRUBCFG = grub.cfg
 TEST_RUNNER = test_runner
 
 # Kernel source files
-KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s
-KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c $(SRC_DIR)/kernel/display/display.c
+KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
+	$(SRC_DIR)/kernel/assembly/ft_strlen.s \
+	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
+	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
+KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
+	$(SRC_DIR)/kernel/display/display.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c
 
 # Test source files (kernel lib without main.c for testing)
-KERNEL_LIB_SOURCES = $(SRC_DIR)/kernel/display/display.c
-TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp
+# C wrappers call assembly - both compile in 32-bit mode
+KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c
+KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
+	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
+	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
+TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
+	$(TEST_DIR)/unit/test_strlen.cpp \
+	$(TEST_DIR)/unit/test_strcmp.cpp \
+	$(TEST_DIR)/unit/test_strcpy.cpp
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))
@@ -71,7 +89,9 @@ KERNEL_DEPENDENCIES_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_DEP_DIR)/%.d,$(KERNE
 KERNEL_DEPENDENCIES_C = $(patsubst $(SRC_DIR)/%.c,$(KERNEL_DEP_DIR)/%.d,$(KERNEL_SOURCES_C))
 
 # Object files for test build
-TEST_LIB_OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(KERNEL_LIB_SOURCES))
+TEST_LIB_OBJECTS_C = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(KERNEL_LIB_SOURCES_C))
+TEST_LIB_OBJECTS_ASM = $(patsubst $(SRC_DIR)/%.s,$(OBJ_DIR)/%.o,$(KERNEL_LIB_SOURCES_ASM))
+TEST_LIB_OBJECTS = $(TEST_LIB_OBJECTS_C) $(TEST_LIB_OBJECTS_ASM)
 TEST_OBJECTS = $(patsubst $(TEST_DIR)/unit/%.cpp,$(OBJ_DIR)/%.o,$(TEST_SOURCES))
 
 # Google Test
@@ -81,8 +101,8 @@ GTEST_LIBS = -lgtest -lgtest_main
 REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
-KERNEL_SUBDIRS = boot kernel kernel/display
-TEST_SUBDIRS = kernel/display
+KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers
+TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers
 
 ################################################################################
 #                               PHONY TARGETS                                  #
@@ -253,6 +273,11 @@ debug: $(ISO)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@printf "$(INFO) Compiling $< for tests...\n"
 	@$(CXX) $(TEST_CXXFLAGS) -c $< -o $@
+
+# Compile assembly sources for testing (32-bit)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(OBJ_DIR)
+	@printf "$(INFO) Assembling $< for tests...\n"
+	@$(ASM) $(ASM_FLAGS) $(OBJ_DIR)/$*.d $< -o $@
 
 # Compile C++ test files
 $(OBJ_DIR)/%.o: $(TEST_DIR)/unit/%.cpp | $(OBJ_DIR)
