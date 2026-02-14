@@ -8,6 +8,7 @@
  * rendering text and graphics on the screen. It also defines the display
  * structure used to represent display properties and state.
  */
+#include "stdint.h"
 
 #ifndef DISPLAY_H
 #define DISPLAY_H 25
@@ -51,7 +52,7 @@ typedef struct display display_t;
  * Initialize a display struct with default values and function pointers.
  *
  * @param display Pointer to the display struct to initialize
- * 
+ *
  * @note Sets function pointers to the appropriate functions.
  */
 void display_init(display_t *display);
