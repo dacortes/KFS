@@ -8,6 +8,7 @@
  * rendering text and graphics on the screen. It also defines the display
  * structure used to represent display properties and state.
  */
+#pragma once
 
 #ifndef DISPLAY_H
 #define DISPLAY_H 25
