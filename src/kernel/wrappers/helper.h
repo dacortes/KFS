@@ -8,6 +8,7 @@
  * implemented in x86 32-bit assembly for direct use in a
  * freestanding environment without libc.
  */
+#pragma once
 
 #ifndef HELPER_H
 #define HELPER_H
