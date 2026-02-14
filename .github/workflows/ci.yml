@@ -22,15 +22,20 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
             gcc \
             g++ \
+            gcc-multilib \
+            g++-multilib \
             nasm \
             lcov \
             cppcheck \
             libgtest-dev \
+            libgtest-dev:i386 \
+            libstdc++6:i386 \
             cmake \
             jq \
             qemu-kvm \
