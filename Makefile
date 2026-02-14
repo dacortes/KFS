@@ -67,6 +67,8 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c
+INCLUDES = $(addprefix -I, ./inc)
+INCLUDES += $(addprefix -I, ./inc/stdint)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode
@@ -187,7 +189,7 @@ $(KERNEL_OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 # C compilation rule (cross-compiler)
 $(KERNEL_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 	@printf "$(INFO) Compiling $< ...\n"
-	@if $(CC) $(CFLAGS) -MMD -MF $(KERNEL_DEP_DIR)/$*.d -c $< -o $@; then \
+	@if $(CC) $(CFLAGS) $(INCLUDES) -MMD -MF $(KERNEL_DEP_DIR)/$*.d -c $< -o $@; then \
 		printf "$(SUCCESS) Created: $@\n"; \
 	else \
 		printf "$(ERROR) Failed to compile: $<\n"; \
