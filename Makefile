@@ -66,9 +66,14 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
-	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c
+	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
+	$(SRC_DIR)/kernel/terminal/terminal.c
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
+INCLUDES += $(addprefix -I, ./inc/stdbool)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode
@@ -103,7 +108,8 @@ GTEST_LIBS = -lgtest -lgtest_main
 REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
-KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers
+KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers \
+	kernel/terminal kernel/system kernel/print
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers
 
 ################################################################################

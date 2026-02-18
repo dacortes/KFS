@@ -10,6 +10,7 @@
 
 #include <kernel/display/display.h>
 #include <kernel/wrappers/helper.h>
+#include <terminal.h>
 
 /**
  * Append a string to buffer and return new pointer position
@@ -72,14 +73,21 @@ static void build_demo_message(char *buffer, const char *msg1,
 int kernel_main(void)
 {
 	display_t display;
+	terminal_t	term;
 	char buffer[80];
 
 	display_init(&display);
-	display.clear(&display);
-
-	/* Build and display demonstration message */
+	terminal_init(&term, &display);
+	term.clear(&term);
 	build_demo_message(buffer, "KFS", "Kernel");
-	display.write_string(&display, buffer);
+	term.write_string(&term, buffer);
+	// display.clear(&display);
+
+	// /* Build and display demonstration message */
+	// build_demo_message(buffer, "KFS", "Kernel");
+	// display.write_string(&display, buffer);
+
+
 
 	while (1) /* Infinite loop to keep the kernel running */
 		;
