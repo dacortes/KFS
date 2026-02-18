@@ -61,12 +61,17 @@ TEST_RUNNER = test_runner
 KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
-	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
+	$(SRC_DIR)/kernel/assembly/ft_strcpy.s \
+	$(SRC_DIR)/kernel/assembly/idt.s \
+	$(SRC_DIR)/kernel/assembly/isr.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
-	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c
+	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
+	$(SRC_DIR)/kernel/interrupts/idt.c \
+	$(SRC_DIR)/kernel/interrupts/pic.c \
+	$(SRC_DIR)/kernel/keyboard/keyboard.c
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
 
@@ -103,7 +108,8 @@ GTEST_LIBS = -lgtest -lgtest_main
 REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
-KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers
+KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers \
+	kernel/interrupts kernel/keyboard
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers
 
 ################################################################################
