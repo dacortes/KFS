@@ -24,11 +24,12 @@ extern void irq1_handler(void);
  * @param src Source string to append
  * @return Pointer to end of appended string (after last char)
  */
-/* static char *append_string(char *dest, const char *src)
-{
-	ft_strcpy(dest, src);
-	return dest + ft_strlen(src);
-}
+/*
+ * static char *append_string(char *dest, const char *src)
+ * {
+ *	ft_strcpy(dest, src);
+ *	return dest + ft_strlen(src);
+ * }
  */
 /**
  * Build demonstration message using string helper wrappers
@@ -37,31 +38,33 @@ extern void irq1_handler(void);
  * @param msg1 First test string
  * @param msg2 Second test string
  */
-/* static void build_demo_message(char *buffer, const char *msg1,
-				const char *msg2)
-{
-	char *ptr;
-	unsigned int len;
-
-	ptr = buffer;
-
-	ptr = append_string(ptr, "Copied: ");
-	ptr = append_string(ptr, msg1);
-
-	ptr = append_string(ptr, " | Len: ");
-	len = ft_strlen(msg2);
-	*ptr++ = '0' + len;
-
-	ptr = append_string(ptr, " | Cmp: ");
-	if (ft_strcmp(msg1, msg2) < 0)
-		ptr = append_string(ptr, "KFS<Kernel");
-
-	ptr = append_string(ptr, " | Hello World: ");
-	if (ft_strcmp(msg1, msg2) < 0)
-		ptr = append_string(ptr, "42");
-
-	*ptr = '\0';
-}*/
+/*
+ * static void build_demo_message(char *buffer, const char *msg1,
+ *				const char *msg2)
+ * {
+ *	char *ptr;
+ *	unsigned int len;
+ *
+ *	ptr = buffer;
+ *
+ *	ptr = append_string(ptr, "Copied: ");
+ *	ptr = append_string(ptr, msg1);
+ *
+ *	ptr = append_string(ptr, " | Len: ");
+ *	len = ft_strlen(msg2);
+ *	*ptr++ = '0' + len;
+ *
+ *	ptr = append_string(ptr, " | Cmp: ");
+ *	if (ft_strcmp(msg1, msg2) < 0)
+ *		ptr = append_string(ptr, "KFS<Kernel");
+ *
+ *	ptr = append_string(ptr, " | Hello World: ");
+ *	if (ft_strcmp(msg1, msg2) < 0)
+ *		ptr = append_string(ptr, "42");
+ *
+ *	*ptr = '\0';
+ * }
+ */
 
 /**
  * Main entry point for the kernel.

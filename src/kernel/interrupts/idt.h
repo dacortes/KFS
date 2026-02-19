@@ -56,3 +56,10 @@ void idt_init(void);
  */
 void idt_set_gate(unsigned char num, unsigned int base,
 		  unsigned short selector, unsigned char flags);
+
+/**
+ * Load the IDT into the CPU (assembly routine)
+ *
+ * @param idt_ptr_addr Address of the idt_ptr structure
+ */
+extern void idt_load(unsigned int idt_ptr_addr);
