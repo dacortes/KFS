@@ -24,7 +24,7 @@
 #define KEY_LCTRL_PRESSED	0x1D
 #define KEY_LCTRL_RELEASED	0x9D
 #define KEY_BACKSPACE		0x0E
-#define KEY_ENTER		0x1C
+#define KEY_ENTER			0x1C
 
 /**
  * Keyboard state structure
@@ -32,8 +32,9 @@
  * Tracks modifier key states and provides display output.
  */
 struct keyboard {
-	unsigned char shift_pressed;
-	unsigned char ctrl_pressed;
+	unsigned char	shift_pressed;
+	unsigned char	ctrl_pressed;
+	volatile char	input;
 	display_t *display;
 };
 

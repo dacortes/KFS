@@ -25,29 +25,16 @@ static void clear(display_t *display)
 	}
 }
 
-/**
- * write_string - Writes a null-terminated string to the display
- * @display: Pointer to the display object
- * @string: Null-terminated string to write
- *
- * Writes the string starting at the beginning of video memory,
- * using the current color attribute.
- *
- * Note: Does not handle line wrapping or scrolling
- */
-static void write_string(display_t *display, const char *string)
-{
-	unsigned int i;
-	unsigned int j;
+static void put_at(display_t *display, char c, unsigned int x, unsigned int y) {
+	unsigned int offset;
 
-	i = 0;
-	j = 0;
-	while (string[j] != '\0') {
-		display->videomemptr[i] = string[j];
-		display->videomemptr[i + 1] = display->color;
-		++j;
-		i += display->char_size;
-	}
+	if (x >= display->width || y >= display->height)
+		return;
+
+	offset = (y * display->width + x) * display->char_size;
+
+	display->videomemptr[offset] = c;
+	display->videomemptr[offset + 1] = display->color;
 }
 
 void display_init(display_t *display)
@@ -58,6 +45,5 @@ void display_init(display_t *display)
 	display->char_size = CHAR_SIZE;
 	display->color = WHITE_ON_BLACK;
 	display->clear = clear;
-	display->write_string = write_string;
-
+	display->put_at = put_at;
 }

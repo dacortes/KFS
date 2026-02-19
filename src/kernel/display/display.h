@@ -48,10 +48,8 @@ struct display {
 	unsigned char color;
 	void (*clear)(struct display *self);
 	void (*write_string)(struct display *self, const char *string);
-	void (*switch_buffer)(display_t *self, uint16_t* new_buffer);
+	void (*put_at)(struct display *self, char c, unsigned int x, unsigned int y);
 };
-
-
 
 /**
  * Initialize a display struct with default values and function pointers.

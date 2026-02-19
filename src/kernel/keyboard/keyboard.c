@@ -36,7 +36,6 @@ static const char scancode_to_ascii_shift[SCANCODE_MAX] = {
 static void process_scancode(keyboard_t *kbd, unsigned char scancode)
 {
 	char ascii;
-	char str[2];
 
 	if (scancode == KEY_LSHIFT_PRESSED || scancode == KEY_RSHIFT_PRESSED) {
 		kbd->shift_pressed = 1;
@@ -72,9 +71,7 @@ static void process_scancode(keyboard_t *kbd, unsigned char scancode)
 	if (ascii == 0)
 		return;
 
-	str[0] = ascii;
-	str[1] = '\0';
-	kbd->display->write_string(kbd->display, str);
+	kbd->input = ascii;
 }
 
 /**
@@ -87,6 +84,7 @@ void keyboard_init(keyboard_t *kbd, display_t *disp)
 {
 	kbd->shift_pressed = 0;
 	kbd->ctrl_pressed = 0;
+	kbd->input = 0;
 	kbd->display = disp;
 	active_keyboard = kbd;
 }

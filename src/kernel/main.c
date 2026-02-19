@@ -75,32 +75,47 @@ extern void irq1_handler(void);
 int kernel_main(void)
 {
 	display_t display;
-	// terminal_t	term;
+	terminal_t	term;
 	keyboard_t keyboard;
 
 	display_init(&display);
-	display.clear(&display);
-
-	display.write_string(&display, "KFS Kernel v0.1 - Initializing...\n"); //printk
+	terminal_init(&term, &display);
+	term.clear(&term);
 
 	idt_init();
-	display.write_string(&display, "[OK] IDT initialized\n");
-
 	pic_init();
-	display.write_string(&display, "[OK] PIC initialized\n");
-
 	idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
-	display.write_string(&display, "[OK] Keyboard IRQ registered\n");
-
 	keyboard_init(&keyboard, &display);
-	display.write_string(&display, "[OK] Keyboard initialized\n");
-
 	__asm__ volatile("sti");
-	display.write_string(&display, "[OK] Interrupts enabled\n\n");
+	term.clear(&term);
 
-	display.clear(&display);
-	display.write_string(&display, "Ready. Type something:\n");
+	// term.write_string(&term, (const char *)term.input);
 
-	while (1)
+	// display.write_string(&display, "KFS Kernel v0.1 - Initializing...\n"); //printk
+
+	// idt_init();
+	// display.write_string(&display, "[OK] IDT initialized\n");
+
+	// pic_init();
+	// display.write_string(&display, "[OK] PIC initialized\n");
+
+	// idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
+	// display.write_string(&display, "[OK] Keyboard IRQ registered\n");
+
+	// keyboard_init(&keyboard, &display);
+	// display.write_string(&display, "[OK] Keyboard initialized\n");
+
+	// __asm__ volatile("sti");
+	// display.write_string(&display, "[OK] Interrupts enabled\n\n");
+
+	// display.clear(&display);
+	// display.write_string(&display, "Ready. Type something:\n");
+
+	while (1) {
+		if (keyboard.input) {
+			term.push_char(&term, keyboard.input);
+			keyboard.input = 0;
+		}
 		__asm__ volatile("hlt");
+	}
 }

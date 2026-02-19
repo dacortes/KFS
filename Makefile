@@ -76,6 +76,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
 INCLUDES += $(addprefix -I, ./inc/stdbool)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/keyboard/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
