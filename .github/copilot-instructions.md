@@ -104,6 +104,7 @@ KFS/
 3. **SPDX License Identifier**: First line of every file: `// SPDX-License-Identifier: GPL-2.0`
 4. **Docstrings Required**: All public functions need docstrings (Doxygen style with `@param`, `@return`)
 5. **Include Paths**: Use `<module/header.h>` (not relative paths) - Makefile sets `-Isrc`
+6. **Header Guards**: Use `#pragma once` (not traditional `#ifndef` guards)
 
 ## Code Style Enforcement
 
@@ -208,12 +209,9 @@ make test-filter FILTER="DisplayTest.ClearFillsWithSpaces"
  * @brief Brief description of public API
  */
 
-#ifndef MODULE_NAME_H
-#define MODULE_NAME_H
+#pragma once
 
 /* Declarations here */
-
-#endif /* MODULE_NAME_H */
 ```
 
 ### New Unit Test

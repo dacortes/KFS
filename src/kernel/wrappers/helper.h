@@ -8,10 +8,8 @@
  * implemented in x86 32-bit assembly for direct use in a
  * freestanding environment without libc.
  */
-#pragma once
 
-#ifndef HELPER_H
-#define HELPER_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,5 +61,3 @@ char *ft_strcpy_asm(char *dst, const char *src);
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* HELPER_H */
