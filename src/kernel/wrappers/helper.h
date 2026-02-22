@@ -58,6 +58,8 @@ unsigned int ft_strlen_asm(const char *s);
 int ft_strcmp_asm(const char *s1, const char *s2);
 char *ft_strcpy_asm(char *dst, const char *src);
 
+char	*ft_strncpy(char *dst, const char *src, unsigned int len);
+
 #ifdef __cplusplus
 }
 #endif

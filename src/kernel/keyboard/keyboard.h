@@ -25,6 +25,14 @@
 #define KEY_LCTRL_RELEASED	0x9D
 #define KEY_BACKSPACE		0x0E
 #define KEY_ENTER			0x1C
+#define KEY_UP_PRESSED      0x48
+#define KEY_UP_RELEASED     0xC8
+#define KEY_DOWN_PRESSED    0x50
+#define KEY_DOWN_RELEASED   0xD0
+#define KEY_LEFT_PRESSED    0x4B
+#define KEY_LEFT_RELEASED   0xCB
+#define KEY_RIGHT_PRESSED   0x4D
+#define KEY_RIGHT_RELEASED  0xCD
 
 /**
  * Keyboard state structure

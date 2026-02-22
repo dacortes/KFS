@@ -46,13 +46,12 @@ struct terminal_s {
 	void (*clear)(terminal_t *self);
 
 	void (*scroll_up)(terminal_t *self, uint32_t lines);
-    void (*scroll_down)(terminal_t *self, uint32_t lines);
-    void (*set_color)(terminal_t *self, uint8_t color);
+	void (*scroll_down)(terminal_t *self, uint32_t lines);
+	void (*set_color)(terminal_t *self, uint8_t color);
 
 	void (*push_char)(terminal_t *self, char input);
-    char *(*read_line)(terminal_t *self);
 
-	void (*save_history)(terminal_t *self);
+	void (*save_history)(terminal_t *self, const char *text);
 };
 
 void terminal_init(terminal_t	*terminal, display_t *display);
