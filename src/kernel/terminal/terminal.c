@@ -1,35 +1,72 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/**
+ * @file terminal.c
+ * @brief Virtual terminal implementation
+ */
+
 #include <terminal.h>
 
-static void clear_buffer(char *buff) {
+/**
+ * clear_buffer - Zero out a buffer
+ * @buff: Buffer to clear
+ *
+ * Fills the entire buffer with null terminators up to DEVICE_BUFFER_SIZE.
+ */
+static void clear_buffer(char *buff)
+{
 	if (!buff)
-		return ;
-	for(int i = 0; i < DEVICE_BUFFER_SIZE; i++)
+		return;
+	for (int i = 0; i < DEVICE_BUFFER_SIZE; i++)
 		buff[i] = '\0';
 }
 
-static void clear_ter(terminal_t *self) {
+/**
+ * clear_ter - Clear terminal display and line buffer
+ * @self: Terminal instance
+ *
+ * Clears the display and resets the current line buffer.
+ */
+static void clear_ter(terminal_t *self)
+{
 	if (!self)
 		return;
 	self->display->clear(self->display);
 	clear_buffer(self->line);
 }
 
-static void save_history(terminal_t *self, const char *text) {
+/**
+ * save_history - Save a command to terminal history
+ * @self: Terminal instance
+ * @text: Text to save in history
+ *
+ * Saves text to the circular history buffer and updates history pointers.
+ */
+static void save_history(terminal_t *self, const char *text)
+{
 	if (!self || !text)
 		return;
 
 	ft_strncpy(self->history[self->his_head], text, TERMINAL_HISTORY_LEN - 1);
 	self->history[self->his_head][TERMINAL_HISTORY_LEN - 1] = '\0';
 	self->his_head = (self->his_head + 1) % TERMINAL_HISTORY_SIZE;
-	 if (self->his_size < TERMINAL_HISTORY_SIZE) {
-        self->his_size++;
-    }
+	if (self->his_size < TERMINAL_HISTORY_SIZE)
+		self->his_size++;
 }
 
-static void write_char(terminal_t *self, char c) {
+/**
+ * write_char - Write a single character to terminal
+ * @self: Terminal instance
+ * @c: Character to write
+ *
+ * Writes a character at the current cursor position and advances the cursor.
+ * Handles newlines and wrapping at display boundaries.
+ */
+static void write_char(terminal_t *self, char c)
+{
 	if (!self)
 		return;
-	
+
 	if (c == '\n') {
 		self->cursor_x = 0;
 		self->cursor_y++;
@@ -43,12 +80,19 @@ static void write_char(terminal_t *self, char c) {
 		self->cursor_y++;
 	}
 
-	if (self->cursor_y >= self->display->height) {
+	if (self->cursor_y >= self->display->height)
 		self->cursor_y = self->display->height - 1;
-	}
 }
 
-static void write_string(terminal_t *self, const char *str) {
+/**
+ * write_string - Write a string to terminal
+ * @self: Terminal instance
+ * @str: Null-terminated string to write
+ *
+ * Writes each character in the string and saves it to history.
+ */
+static void write_string(terminal_t *self, const char *str)
+{
 	unsigned int i;
 
 	if (!self)
@@ -62,21 +106,30 @@ static void write_string(terminal_t *self, const char *str) {
 	}
 }
 
-static void push_char(terminal_t *self, char input) {
+/**
+ * push_char - Handle character input from keyboard
+ * @self: Terminal instance
+ * @input: Input character
+ *
+ * Processes keyboard input including backspace, newline, and regular characters.
+ * Updates the line buffer and displays the character.
+ */
+static void push_char(terminal_t *self, char input)
+{
 	if (!self || !input)
 		return;
 
 	if (input == '\b') {
-			if (self->line_pos > 0) {
-				if (self->cursor_x > 0) {
-					self->cursor_x--;
-				} else if (self->cursor_y > 0) {
-					self->cursor_y--;
-					self->cursor_x = self->display->width - 1;
-				}
-				self->display->put_at(self->display, ' ', self->cursor_x, self->cursor_y);
-				self->line_pos--;
-				self->line[self->line_pos] = '\0';
+		if (self->line_pos > 0) {
+			if (self->cursor_x > 0) {
+				self->cursor_x--;
+			} else if (self->cursor_y > 0) {
+				self->cursor_y--;
+				self->cursor_x = self->display->width - 1;
+			}
+			self->display->put_at(self->display, ' ', self->cursor_x, self->cursor_y);
+			self->line_pos--;
+			self->line[self->line_pos] = '\0';
 		}
 		return;
 	}
@@ -96,15 +149,23 @@ static void push_char(terminal_t *self, char input) {
 	self->write_char(self, input);
 }
 
-void terminal_init(terminal_t *self, display_t *display) {
+/**
+ * terminal_init - Initialize a terminal instance
+ * @self: Terminal instance to initialize
+ * @display: Display device for output
+ *
+ * Sets up the terminal state, clears history, initializes cursor position,
+ * and assigns function pointers.
+ */
+void terminal_init(terminal_t *self, display_t *display)
+{
 	if (!self)
 		return;
 
 	self->id = 1;
 	ft_strcpy(self->name, "virtual Terminal");
-	for (int i = 0; i < TERMINAL_HISTORY_SIZE; i++) {
+	for (int i = 0; i < TERMINAL_HISTORY_SIZE; i++)
 		self->history[i][0] = '\0';
-	}
 	self->his_size = 0;
 	self->his_head = 0;
 	self->cursor_x = 0;

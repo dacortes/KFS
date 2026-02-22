@@ -25,7 +25,8 @@ static void clear(display_t *display)
 	}
 }
 
-static void put_at(display_t *display, char c, unsigned int x, unsigned int y) {
+static void put_at(display_t *display, char c, unsigned int x, unsigned int y)
+{
 	unsigned int offset;
 
 	if (x >= display->width || y >= display->height)

@@ -66,86 +66,104 @@ TEST_F(DisplayTest, ClearFillsEntireDisplay)
 	}
 }
 
-TEST_F(DisplayTest, WriteStringSimpleText)
+TEST_F(DisplayTest, PutAtTopLeft)
 {
-	const char *text = "Hello";
+	display.put_at(&display, 'A', 0, 0);
 
-	display.write_string(&display, text);
-
-	/* Verify characters are written */
-	EXPECT_EQ('H', video_memory[0]);
-	EXPECT_EQ('e', video_memory[2]);
-	EXPECT_EQ('l', video_memory[4]);
-	EXPECT_EQ('l', video_memory[6]);
-	EXPECT_EQ('o', video_memory[8]);
-}
-
-TEST_F(DisplayTest, WriteStringSetColorAttributes)
-{
-	const char *text = "ABC";
-
-	display.write_string(&display, text);
-
-	/* Verify color attributes are set */
-	EXPECT_EQ(WHITE_ON_BLACK, video_memory[1]);
-	EXPECT_EQ(WHITE_ON_BLACK, video_memory[3]);
-	EXPECT_EQ(WHITE_ON_BLACK, video_memory[5]);
-}
-
-TEST_F(DisplayTest, WriteStringEmptyString)
-{
-	/* Fill with known values */
-	video_memory[0] = 'X';
-	video_memory[1] = 0xFF;
-
-	display.write_string(&display, "");
-
-	/* Verify nothing was written */
-	EXPECT_EQ('X', video_memory[0]);
-	EXPECT_EQ((char)0xFF, video_memory[1]);
-}
-
-TEST_F(DisplayTest, WriteStringSingleCharacter)
-{
-	display.write_string(&display, "A");
-
+	/* Verify character written at position (0,0) */
 	EXPECT_EQ('A', video_memory[0]);
 	EXPECT_EQ(WHITE_ON_BLACK, video_memory[1]);
 }
 
-TEST_F(DisplayTest, WriteStringUsesDisplayColor)
+TEST_F(DisplayTest, PutAtCustomPosition)
+{
+	/* Write 'X' at column 5, row 3 */
+	display.put_at(&display, 'X', 5, 3);
+
+	/* Calculate expected offset: (3 * 80 + 5) * 2 = 490 */
+	unsigned int offset = (3 * 80 + 5) * 2;
+	EXPECT_EQ('X', video_memory[offset]);
+	EXPECT_EQ(WHITE_ON_BLACK, video_memory[offset + 1]);
+}
+
+TEST_F(DisplayTest, PutAtUsesDisplayColor)
 {
 	display.color = 0x4E; /* Yellow on red */
 	
-	display.write_string(&display, "Test");
+	display.put_at(&display, 'B', 10, 2);
 
-	/* Verify custom color is used */
-	EXPECT_EQ(0x4E, video_memory[1]);
-	EXPECT_EQ(0x4E, video_memory[3]);
-	EXPECT_EQ(0x4E, video_memory[5]);
-	EXPECT_EQ(0x4E, video_memory[7]);
+	/* Calculate offset: (2 * 80 + 10) * 2 = 340 */
+	unsigned int offset = (2 * 80 + 10) * 2;
+	EXPECT_EQ('B', video_memory[offset]);
+	EXPECT_EQ(0x4E, video_memory[offset + 1]);
 }
 
-TEST_F(DisplayTest, WriteStringLongText)
+TEST_F(DisplayTest, PutAtMultipleCharacters)
 {
-	const char *text = "This is a longer test string";
+	display.put_at(&display, 'H', 0, 0);
+	display.put_at(&display, 'i', 1, 0);
+	display.put_at(&display, '!', 2, 0);
 
-	display.write_string(&display, text);
+	EXPECT_EQ('H', video_memory[0]);
+	EXPECT_EQ('i', video_memory[2]);
+	EXPECT_EQ('!', video_memory[4]);
+}
 
-	/* Verify first and last characters */
-	EXPECT_EQ('T', video_memory[0]);
-	EXPECT_EQ('\0', video_memory[56]); /* Last char 'g' at position 28*2 */
+TEST_F(DisplayTest, PutAtOutOfBoundsX)
+{
+	/* Fill with known value */
+	memset(video_memory, 'Z', sizeof(video_memory));
 	
-	/* Verify specific word */
-	EXPECT_EQ('l', video_memory[20]); /* 'l' in "longer" */
-	EXPECT_EQ('o', video_memory[22]);
-	EXPECT_EQ('n', video_memory[24]);
-	EXPECT_EQ('g', video_memory[26]);
+	/* Try to write beyond width */
+	display.put_at(&display, 'A', 80, 0);
+
+	/* Verify nothing was written - memory should still be 'Z' */
+	int all_z = 1;
+	for (int i = 0; i < 100; i++) {
+		if (video_memory[i] != 'Z') {
+			all_z = 0;
+			break;
+		}
+	}
+	EXPECT_EQ(1, all_z);
 }
 
-TEST_F(DisplayTest, ClearAfterWrite)
+TEST_F(DisplayTest, PutAtOutOfBoundsY)
 {
-	display.write_string(&display, "Test");
+	/* Fill with known value */
+	memset(video_memory, 'Z', sizeof(video_memory));
+	
+	/* Try to write beyond height */
+	display.put_at(&display, 'A', 0, 25);
+
+	/* Verify nothing was written - memory should still be 'Z' */
+	int all_z = 1;
+	for (int i = 0; i < 100; i++) {
+		if (video_memory[i] != 'Z') {
+			all_z = 0;
+			break;
+		}
+	}
+	EXPECT_EQ(1, all_z);
+}
+
+TEST_F(DisplayTest, PutAtBottomRight)
+{
+	/* Write to last valid position (79, 24) */
+	display.put_at(&display, '$', 79, 24);
+
+	/* Calculate offset: (24 * 80 + 79) * 2 = 3998 */
+	unsigned int offset = (24 * 80 + 79) * 2;
+	EXPECT_EQ('$', video_memory[offset]);
+	EXPECT_EQ(WHITE_ON_BLACK, video_memory[offset + 1]);
+}
+
+TEST_F(DisplayTest, ClearAfterPutAt)
+{
+	display.put_at(&display, 'T', 0, 0);
+	display.put_at(&display, 'e', 1, 0);
+	display.put_at(&display, 's', 2, 0);
+	display.put_at(&display, 't', 3, 0);
 	display.clear(&display);
 
 	/* Verify written text is cleared */

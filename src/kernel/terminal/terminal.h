@@ -1,3 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/**
+ * @file terminal.h
+ * @brief Virtual terminal interface for user input/output
+ *
+ * Provides a terminal abstraction with command history, cursor management,
+ * and character input handling using the display subsystem.
+ */
+
 #pragma once
 
 #include <display.h>
@@ -23,6 +33,29 @@
 
 typedef struct terminal_s terminal_t;
 
+/**
+ * struct terminal_s - Virtual terminal state and methods
+ * @id: Terminal identifier
+ * @name: Terminal name string
+ * @history: Circular buffer of command history
+ * @his_size: Current number of items in history
+ * @his_head: Current position in circular history buffer
+ * @cursor_x: Horizontal cursor position
+ * @cursor_y: Vertical cursor position
+ * @curr_color: Current color attribute for text
+ * @display: Pointer to associated display device
+ * @line: Current input line buffer
+ * @line_pos: Current position in line buffer
+ * @line_len: Current length of line buffer
+ * @write_char: Function to write a single character
+ * @write_string: Function to write a string
+ * @clear: Function to clear the terminal
+ * @scroll_up: Function to scroll up (not yet implemented)
+ * @scroll_down: Function to scroll down (not yet implemented)
+ * @set_color: Function to set text color (not yet implemented)
+ * @push_char: Function to handle keyboard input
+ * @save_history: Function to save text to history
+ */
 struct terminal_s {
 	uint32_t		id;
 	char			name[MAX_NAME];
@@ -54,4 +87,10 @@ struct terminal_s {
 	void (*save_history)(terminal_t *self, const char *text);
 };
 
+/**
+ * Initialize a terminal instance with a display device
+ *
+ * @param terminal Pointer to the terminal struct to initialize
+ * @param display Pointer to the display device to use for output
+ */
 void terminal_init(terminal_t	*terminal, display_t *display);

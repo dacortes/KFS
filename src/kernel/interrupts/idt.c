@@ -10,8 +10,6 @@
 static struct idt_entry idt[IDT_ENTRIES];
 static struct idt_ptr idtp;
 
-extern void idt_load(unsigned int idt_ptr_addr);
-
 /**
  * Set an entry in the IDT
  *
