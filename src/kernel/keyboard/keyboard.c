@@ -30,30 +30,30 @@ static const char scancode_to_ascii_shift[SCANCODE_MAX] = {
 /**
  * Process a scan code and display the corresponding character
  *
- * @param kbd Keyboard state structure
+ * @param self Keyboard state structure
  * @param scancode Raw scan code from keyboard
  */
-static void process_scancode(keyboard_t *kbd, unsigned char scancode)
+static void process_scancode(keyboard_t *self, unsigned char scancode)
 {
 	char ascii;
 
 	if (scancode == KEY_LSHIFT_PRESSED || scancode == KEY_RSHIFT_PRESSED) {
-		kbd->shift_pressed = 1;
+		self->shift_pressed = 1;
 		return;
 	}
 
 	if (scancode == KEY_LSHIFT_RELEASED || scancode == KEY_RSHIFT_RELEASED) {
-		kbd->shift_pressed = 0;
+		self->shift_pressed = 0;
 		return;
 	}
 
 	if (scancode == KEY_LCTRL_PRESSED) {
-		kbd->ctrl_pressed = 1;
+		self->ctrl_pressed = 1;
 		return;
 	}
 
 	if (scancode == KEY_LCTRL_RELEASED) {
-		kbd->ctrl_pressed = 0;
+		self->ctrl_pressed = 0;
 		return;
 	}
 
@@ -63,7 +63,7 @@ static void process_scancode(keyboard_t *kbd, unsigned char scancode)
 	if (scancode >= SCANCODE_MAX)
 		return;
 
-	if (kbd->shift_pressed)
+	if (self->shift_pressed)
 		ascii = scancode_to_ascii_shift[scancode];
 	else
 		ascii = scancode_to_ascii[scancode];
@@ -71,32 +71,32 @@ static void process_scancode(keyboard_t *kbd, unsigned char scancode)
 	if (ascii == 0)
 		return;
 
-	kbd->input = ascii;
+	self->input = ascii;
 }
 
 /**
  * Initialize the keyboard driver
  *
- * @param kbd Keyboard structure to initialize
+ * @param self Keyboard structure to initialize
  * @param disp Display for output
  */
-void keyboard_init(keyboard_t *kbd, display_t *disp)
+void keyboard_init(keyboard_t *self, display_t *disp)
 {
-	kbd->shift_pressed = 0;
-	kbd->ctrl_pressed = 0;
-	kbd->input = 0;
-	kbd->display = disp;
-	active_keyboard = kbd;
+	self->shift_pressed = 0;
+	self->ctrl_pressed = 0;
+	self->input = 0;
+	self->display = disp;
+	active_keyboard = self;
 }
 
 /**
  * Set the active keyboard instance
  *
- * @param kbd Keyboard instance to use in interrupt handler
+ * @param self Keyboard instance to use in interrupt handler
  */
-void keyboard_set_instance(keyboard_t *kbd)
+void keyboard_set_instance(keyboard_t *self)
 {
-	active_keyboard = kbd;
+	active_keyboard = self;
 }
 
 /**
