@@ -47,7 +47,6 @@ struct display {
 	unsigned int char_size;
 	unsigned char color;
 	void (*clear)(struct display *self);
-	void (*write_string)(struct display *self, const char *string);
 	void (*put_at)(struct display *self, char c, unsigned int x, unsigned int y);
 };
 
