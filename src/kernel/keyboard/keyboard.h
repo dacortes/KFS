@@ -34,6 +34,7 @@
 #define KEY_RIGHT_PRESSED   0x4D
 #define KEY_RIGHT_RELEASED  0xCD
 
+typedef struct keyboard keyboard_t;
 /**
  * Keyboard state structure
  *
@@ -46,7 +47,6 @@ struct keyboard {
 	display_t *display;
 };
 
-typedef struct keyboard keyboard_t;
 
 /**
  * Initialize the keyboard driver
@@ -54,7 +54,7 @@ typedef struct keyboard keyboard_t;
  * @param kbd Keyboard structure to initialize
  * @param disp Display for output
  */
-void keyboard_init(keyboard_t *kbd, display_t *disp);
+void keyboard_init(keyboard_t *self, display_t *disp);
 
 /**
  * Keyboard interrupt handler
@@ -69,4 +69,4 @@ void keyboard_interrupt(void);
  *
  * @param kbd Keyboard instance to use in interrupt handler
  */
-void keyboard_set_instance(keyboard_t *kbd);
+void keyboard_set_instance(keyboard_t *self);
