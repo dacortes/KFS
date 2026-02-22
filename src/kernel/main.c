@@ -5,11 +5,18 @@
  * @brief KFS kernel entry point
  *
  * Main entry point for the KFS kernel. Initializes the kernel
- * and starts execution.
+ * subsystems including interrupts and keyboard, then enters
+ * the main loop.
  */
 
 #include <kernel/display/display.h>
 #include <kernel/wrappers/helper.h>
+#include <terminal.h>
+#include <kernel/interrupts/idt.h>
+#include <kernel/interrupts/pic.h>
+#include <kernel/keyboard/keyboard.h>
+
+extern void irq1_handler(void);
 
 /**
  * Append a string to buffer and return new pointer position
@@ -18,12 +25,13 @@
  * @param src Source string to append
  * @return Pointer to end of appended string (after last char)
  */
-static char *append_string(char *dest, const char *src)
-{
-	ft_strcpy(dest, src);
-	return dest + ft_strlen(src);
-}
-
+/*
+ * static char *append_string(char *dest, const char *src)
+ * {
+ *	ft_strcpy(dest, src);
+ *	return dest + ft_strlen(src);
+ * }
+ */
 /**
  * Build demonstration message using string helper wrappers
  *
@@ -31,56 +39,86 @@ static char *append_string(char *dest, const char *src)
  * @param msg1 First test string
  * @param msg2 Second test string
  */
-static void build_demo_message(char *buffer, const char *msg1,
-				const char *msg2)
-{
-	char *ptr;
-	unsigned int len;
-
-	ptr = buffer;
-
-	/* Demonstrate ft_strcpy wrapper */
-	ptr = append_string(ptr, "Copied: ");
-	ptr = append_string(ptr, msg1);
-
-	/* Demonstrate ft_strlen wrapper */
-	ptr = append_string(ptr, " | Len: ");
-	len = ft_strlen(msg2);
-	/* Convert length to string manually */
-	*ptr++ = '0' + len;
-
-	/* Demonstrate ft_strcmp wrapper */
-	ptr = append_string(ptr, " | Cmp: ");
-	if (ft_strcmp(msg1, msg2) < 0)
-		ptr = append_string(ptr, "KFS<Kernel");
-
-	ptr = append_string(ptr, " | Hello World: ");
-	if (ft_strcmp(msg1, msg2) < 0)
-		ptr = append_string(ptr, "42");
-
-	/* Null terminate */
-	*ptr = '\0';
-}
+/*
+ * static void build_demo_message(char *buffer, const char *msg1,
+ *				const char *msg2)
+ * {
+ *	char *ptr;
+ *	unsigned int len;
+ *
+ *	ptr = buffer;
+ *
+ *	ptr = append_string(ptr, "Copied: ");
+ *	ptr = append_string(ptr, msg1);
+ *
+ *	ptr = append_string(ptr, " | Len: ");
+ *	len = ft_strlen(msg2);
+ *	*ptr++ = '0' + len;
+ *
+ *	ptr = append_string(ptr, " | Cmp: ");
+ *	if (ft_strcmp(msg1, msg2) < 0)
+ *		ptr = append_string(ptr, "KFS<Kernel");
+ *
+ *	ptr = append_string(ptr, " | Hello World: ");
+ *	if (ft_strcmp(msg1, msg2) < 0)
+ *		ptr = append_string(ptr, "42");
+ *
+ *	*ptr = '\0';
+ * }
+ */
 
 /**
  * Main entry point for the kernel.
  *
- * Initializes the kernel and demonstrates string helper wrappers
+ * Initializes display, interrupts, PIC, and keyboard.
+ * Enters main loop waiting for keyboard input.
  *
  * @return Does not return
  */
 int kernel_main(void)
 {
 	display_t display;
-	char buffer[80];
+	terminal_t	term;
+	keyboard_t keyboard;
 
 	display_init(&display);
-	display.clear(&display);
+	terminal_init(&term, &display);
+	term.clear(&term);
 
-	/* Build and display demonstration message */
-	build_demo_message(buffer, "KFS", "Kernel");
-	display.write_string(&display, buffer);
+	idt_init();
+	pic_init();
+	idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
+	keyboard_init(&keyboard, &display);
+	__asm__ volatile("sti");
+	term.clear(&term);
 
-	while (1) /* Infinite loop to keep the kernel running */
-		;
+	// term.write_string(&term, (const char *)term.input);
+
+	// display.write_string(&display, "KFS Kernel v0.1 - Initializing...\n"); //printk
+
+	// idt_init();
+	// display.write_string(&display, "[OK] IDT initialized\n");
+
+	// pic_init();
+	// display.write_string(&display, "[OK] PIC initialized\n");
+
+	// idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
+	// display.write_string(&display, "[OK] Keyboard IRQ registered\n");
+
+	// keyboard_init(&keyboard, &display);
+	// display.write_string(&display, "[OK] Keyboard initialized\n");
+
+	// __asm__ volatile("sti");
+	// display.write_string(&display, "[OK] Interrupts enabled\n\n");
+
+	// display.clear(&display);
+	// display.write_string(&display, "Ready. Type something:\n");
+
+	while (1) {
+		if (keyboard.input) {
+			term.push_char(&term, keyboard.input);
+			keyboard.input = 0;
+		}
+		__asm__ volatile("hlt");
+	}
 }

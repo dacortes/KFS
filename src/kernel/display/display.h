@@ -10,6 +10,8 @@
  */
 #pragma once
 
+#include <stdint.h>
+
 #ifndef DISPLAY_H
 #define DISPLAY_H 25
 #endif
@@ -36,17 +38,17 @@
  * Encapsulates the state and methods for managing a display device,
  * including video memory access and text rendering operations.
  */
+typedef struct display display_t;
+
 struct display {
 	char *videomemptr;
 	unsigned int width;
 	unsigned int height;
 	unsigned int char_size;
 	unsigned char color;
-	void (*clear)(struct display *display);
-	void (*write_string)(struct display *display, const char *string);
+	void (*clear)(struct display *self);
+	void (*put_at)(struct display *self, char c, unsigned int x, unsigned int y);
 };
-
-typedef struct display display_t;
 
 /**
  * Initialize a display struct with default values and function pointers.

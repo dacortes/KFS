@@ -8,10 +8,8 @@
  * implemented in x86 32-bit assembly for direct use in a
  * freestanding environment without libc.
  */
-#pragma once
 
-#ifndef HELPER_H
-#define HELPER_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,6 +49,20 @@ int ft_strcmp(const char *s1, const char *s2);
  */
 char *ft_strcpy(char *dst, const char *src);
 
+/**
+ * Copy at most len bytes from src to dst, null-padding to len.
+ *
+ * Copies up to len characters from src to dst. If src is shorter than len,
+ * dst is padded with null bytes up to len. If src is longer than len,
+ * only len bytes are copied (no null terminator added).
+ *
+ * @param dst Destination buffer (must have space for at least len bytes)
+ * @param src Source string
+ * @param len Maximum number of bytes to copy
+ * @return Pointer to dst, or empty string "" if either argument is NULL
+ */
+char *ft_strncpy(char *dst, const char *src, unsigned int len);
+
 /*
  * Internal assembly implementations
  * These symbols are exported from the .s files and should not be
@@ -63,5 +75,3 @@ char *ft_strcpy_asm(char *dst, const char *src);
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* HELPER_H */
