@@ -37,6 +37,14 @@
  *
  * Encapsulates the state and methods for managing a display device,
  * including video memory access and text rendering operations.
+ *
+ * @videomemptr: Pointer to VGA text mode video memory
+ * @width: Display width in characters
+ * @height: Display height in characters
+ * @char_size: Bytes per character (char + attribute)
+ * @color: Current color attribute
+ * @clear: Function to clear the entire display
+ * @put_at: Function to write a character at specific coordinates
  */
 typedef struct display display_t;
 

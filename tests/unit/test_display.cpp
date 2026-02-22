@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0
 
+/**
+ * @file test_display.cpp
+ * @brief Unit tests for display subsystem
+ */
+
 #include <gtest/gtest.h>
 #include <kernel/display/display.h>
 #include <cstring>
