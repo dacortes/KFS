@@ -10,6 +10,10 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PIC1_CMD	0x20
 #define PIC1_DATA	0x21
 #define PIC2_CMD	0xA0
@@ -59,3 +63,7 @@ void pic_mask_irq(unsigned char irq);
  * @param irq IRQ number to unmask (0-15)
  */
 void pic_unmask_irq(unsigned char irq);
+
+#ifdef __cplusplus
+}
+#endif

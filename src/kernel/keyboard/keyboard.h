@@ -12,6 +12,10 @@
 
 #include <kernel/display/display.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define KEYBOARD_DATA_PORT	0x60
 #define KEYBOARD_STATUS_PORT	0x64
 
@@ -34,7 +38,10 @@
 #define KEY_RIGHT_PRESSED   0x4D
 #define KEY_RIGHT_RELEASED  0xCD
 
+#define SHORTCUT_BUFFER_MAX 10
+
 typedef struct keyboard keyboard_t;
+typedef void (*shortcut_handler_t)(const unsigned char *keys, int count);
 /**
  * Keyboard state structure
  *
@@ -45,6 +52,12 @@ struct keyboard {
 	unsigned char	ctrl_pressed;
 	volatile char	input;
 	display_t *display;
+	unsigned char	shortcut_buffer[SHORTCUT_BUFFER_MAX];
+	int		shortcut_count;
+	shortcut_handler_t shortcut_handler;
+	void (*process_scancode)(struct keyboard *self, unsigned char scancode);
+	void (*set_shortcut_handler)(struct keyboard *self,
+				     shortcut_handler_t handler);
 };
 
 
@@ -70,3 +83,7 @@ void keyboard_interrupt(void);
  * @param kbd Keyboard instance to use in interrupt handler
  */
 void keyboard_set_instance(keyboard_t *self);
+
+#ifdef __cplusplus
+}
+#endif

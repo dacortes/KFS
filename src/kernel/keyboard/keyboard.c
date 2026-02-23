@@ -49,11 +49,16 @@ static void process_scancode(keyboard_t *self, unsigned char scancode)
 
 	if (scancode == KEY_LCTRL_PRESSED) {
 		self->ctrl_pressed = 1;
+		self->shortcut_count = 0;
 		return;
 	}
 
 	if (scancode == KEY_LCTRL_RELEASED) {
 		self->ctrl_pressed = 0;
+		if (self->shortcut_count > 0 && self->shortcut_handler)
+			self->shortcut_handler(self->shortcut_buffer,
+					       self->shortcut_count);
+		self->shortcut_count = 0;
 		return;
 	}
 
@@ -62,6 +67,14 @@ static void process_scancode(keyboard_t *self, unsigned char scancode)
 
 	if (scancode >= SCANCODE_MAX)
 		return;
+
+	if (self->ctrl_pressed) {
+		if (self->shortcut_count < SHORTCUT_BUFFER_MAX) {
+			self->shortcut_buffer[self->shortcut_count] = scancode;
+			self->shortcut_count++;
+		}
+		return;
+	}
 
 	if (self->shift_pressed)
 		ascii = scancode_to_ascii_shift[scancode];
@@ -75,19 +88,17 @@ static void process_scancode(keyboard_t *self, unsigned char scancode)
 }
 
 /**
- * Initialize the keyboard driver
+ * Register a shortcut handler
  *
- * @param self Keyboard structure to initialize
- * @param disp Display for output
+ * @param self Keyboard instance
+ * @param handler Function to call when shortcut is triggered
  */
-void keyboard_init(keyboard_t *self, display_t *disp)
+static void set_shortcut_handler(keyboard_t *self,
+				 shortcut_handler_t handler)
 {
-	self->shift_pressed = 0;
-	self->ctrl_pressed = 0;
-	self->input = 0;
-	self->display = disp;
-	active_keyboard = self;
+	self->shortcut_handler = handler;
 }
+
 
 /**
  * Set the active keyboard instance
@@ -111,7 +122,30 @@ void keyboard_interrupt(void)
 	scancode = inb(KEYBOARD_DATA_PORT);
 
 	if (active_keyboard)
-		process_scancode(active_keyboard, scancode);
+		active_keyboard->process_scancode(active_keyboard, scancode);
 
 	pic_send_eoi(IRQ_KEYBOARD);
+}
+
+/**
+ * Initialize the keyboard driver
+ *
+ * @param self Keyboard structure to initialize
+ * @param disp Display for output
+ */
+void keyboard_init(keyboard_t *self, display_t *disp)
+{
+	int i;
+
+	self->shift_pressed = 0;
+	self->ctrl_pressed = 0;
+	self->input = 0;
+	self->display = disp;
+	self->shortcut_count = 0;
+	self->shortcut_handler = 0;
+	self->process_scancode = process_scancode;
+	self->set_shortcut_handler = set_shortcut_handler;
+	for (i = 0; i < SHORTCUT_BUFFER_MAX; i++)
+		self->shortcut_buffer[i] = 0;
+	active_keyboard = self;
 }

@@ -18,54 +18,52 @@
 
 extern void irq1_handler(void);
 
+static display_t *g_display;
+
+static const char g_scancode_to_ascii[58] = {
+	0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
+	'\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
+	0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',
+	0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0,
+	'*', 0, ' '
+};
+
 /**
- * Append a string to buffer and return new pointer position
+ * Demo keyboard shortcut handler
  *
- * @param dest Destination pointer in buffer
- * @param src Source string to append
- * @return Pointer to end of appended string (after last char)
+ * Displays captured shortcut keys when Ctrl is released.
+ * Converts scancodes to ASCII and writes them to display.
+ *
+ * @param scancodes Buffer containing captured scancodes
+ * @param count Number of scancodes in buffer
  */
-/*
- * static char *append_string(char *dest, const char *src)
- * {
- *	ft_strcpy(dest, src);
- *	return dest + ft_strlen(src);
- * }
- */
-/**
- * Build demonstration message using string helper wrappers
- *
- * @param buffer Destination buffer for the message
- * @param msg1 First test string
- * @param msg2 Second test string
- */
-/*
- * static void build_demo_message(char *buffer, const char *msg1,
- *				const char *msg2)
- * {
- *	char *ptr;
- *	unsigned int len;
- *
- *	ptr = buffer;
- *
- *	ptr = append_string(ptr, "Copied: ");
- *	ptr = append_string(ptr, msg1);
- *
- *	ptr = append_string(ptr, " | Len: ");
- *	len = ft_strlen(msg2);
- *	*ptr++ = '0' + len;
- *
- *	ptr = append_string(ptr, " | Cmp: ");
- *	if (ft_strcmp(msg1, msg2) < 0)
- *		ptr = append_string(ptr, "KFS<Kernel");
- *
- *	ptr = append_string(ptr, " | Hello World: ");
- *	if (ft_strcmp(msg1, msg2) < 0)
- *		ptr = append_string(ptr, "42");
- *
- *	*ptr = '\0';
- * }
- */
+static void shortcut_demo_handler(const unsigned char *scancodes, int count)
+{
+	int i;
+	char ascii;
+	const char *prefix = "Ctrl+";
+	unsigned int x;
+	unsigned int y;
+
+	if (!g_display || count == 0)
+		return;
+
+	x = 0;
+	y = 10;
+
+	while (*prefix) {
+		g_display->put_at(g_display, *prefix, x++, y);
+		prefix++;
+	}
+
+	for (i = 0; i < count; i++) {
+		if (scancodes[i] < 58) {
+			ascii = g_scancode_to_ascii[scancodes[i]];
+			if (ascii != 0)
+				g_display->put_at(g_display, ascii, x++, y);
+		}
+	}
+}
 
 /**
  * Main entry point for the kernel.
@@ -82,6 +80,7 @@ int kernel_main(void)
 	keyboard_t keyboard;
 
 	display_init(&display);
+	g_display = &display;
 	terminal_init(&term, &display);
 	term.clear(&term);
 
@@ -89,30 +88,10 @@ int kernel_main(void)
 	pic_init();
 	idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
 	keyboard_init(&keyboard, &display);
+	keyboard.set_shortcut_handler(&keyboard, shortcut_demo_handler);
 	__asm__ volatile("sti");
 	term.clear(&term);
 
-	// term.write_string(&term, (const char *)term.input);
-
-	// display.write_string(&display, "KFS Kernel v0.1 - Initializing...\n"); //printk
-
-	// idt_init();
-	// display.write_string(&display, "[OK] IDT initialized\n");
-
-	// pic_init();
-	// display.write_string(&display, "[OK] PIC initialized\n");
-
-	// idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
-	// display.write_string(&display, "[OK] Keyboard IRQ registered\n");
-
-	// keyboard_init(&keyboard, &display);
-	// display.write_string(&display, "[OK] Keyboard initialized\n");
-
-	// __asm__ volatile("sti");
-	// display.write_string(&display, "[OK] Interrupts enabled\n\n");
-
-	// display.clear(&display);
-	// display.write_string(&display, "Ready. Type something:\n");
 
 	while (1) {
 		if (keyboard.input) {
