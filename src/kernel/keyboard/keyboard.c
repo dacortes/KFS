@@ -80,12 +80,11 @@ static void process_scancode(keyboard_t *self, unsigned char scancode)
  * @param self Keyboard structure to initialize
  * @param disp Display for output
  */
-void keyboard_init(keyboard_t *self, display_t *disp)
+void keyboard_init(keyboard_t *self)
 {
 	self->shift_pressed = 0;
 	self->ctrl_pressed = 0;
 	self->input = 0;
-	self->display = disp;
 	active_keyboard = self;
 }
 

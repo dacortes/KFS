@@ -93,4 +93,4 @@ struct terminal_s {
  * @param terminal Pointer to the terminal struct to initialize
  * @param display Pointer to the display device to use for output
  */
-void terminal_init(terminal_t	*terminal, display_t *display);
+void terminal_init(terminal_t	*terminal, display_t *display, uint32_t id);

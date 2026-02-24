@@ -157,12 +157,12 @@ static void push_char(terminal_t *self, char input)
  * Sets up the terminal state, clears history, initializes cursor position,
  * and assigns function pointers.
  */
-void terminal_init(terminal_t *self, display_t *display)
+void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 {
 	if (!self)
 		return;
 
-	self->id = 1;
+	self->id = id;
 	ft_strcpy(self->name, "virtual Terminal");
 	for (int i = 0; i < TERMINAL_HISTORY_SIZE; i++)
 		self->history[i][0] = '\0';

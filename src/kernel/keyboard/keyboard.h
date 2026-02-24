@@ -38,13 +38,12 @@ typedef struct keyboard keyboard_t;
 /**
  * Keyboard state structure
  *
- * Tracks modifier key states and provides display output.
+ * Tracks modifier key states.
  */
 struct keyboard {
 	unsigned char	shift_pressed;
 	unsigned char	ctrl_pressed;
 	volatile char	input;
-	display_t *display;
 };
 
 
@@ -54,7 +53,7 @@ struct keyboard {
  * @param kbd Keyboard structure to initialize
  * @param disp Display for output
  */
-void keyboard_init(keyboard_t *self, display_t *disp);
+void keyboard_init(keyboard_t *self);
 
 /**
  * Keyboard interrupt handler
