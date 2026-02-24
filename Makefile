@@ -71,6 +71,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
+	$(SRC_DIR)/kernel/wrappers/ft_memset.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
 	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
@@ -91,7 +92,8 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
-	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c
+	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
+	$(SRC_DIR)/kernel/wrappers/ft_memset.c
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s

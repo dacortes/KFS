@@ -41,9 +41,9 @@ static void create_terminal(void)
  */
 static void main_loop(system_t *self)
 {
-	uint32_t	active;
-	char		*ascii;
-	terminal_t	*term;
+	uint32_t		active;
+	volatile char	*ascii;
+	terminal_t		*term;
 
 	if (!self)
 		return;
