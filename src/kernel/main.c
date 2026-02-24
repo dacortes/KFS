@@ -2,139 +2,31 @@
 
 /**
  * @file main.c
- * @brief KFS kernel entry point
+ * @brief KFS kernel entry point.
  *
- * Main entry point for the KFS kernel. Initializes the kernel
- * subsystems including interrupts and keyboard, then enters
- * the main loop.
+ * The kernel entry is responsible for bootstrapping core subsystems
+ * and transferring control to the system runtime loop.
  */
-
-// #include <kernel/display/display.h>
-// #include <kernel/wrappers/helper.h>
-// #include <terminal.h>
-// #include <kernel/interrupts/idt.h>
-// #include <kernel/interrupts/pic.h>
-// #include <kernel/keyboard/keyboard.h>
 
 #include <system.h>
 
-extern void irq1_handler(void);
-
-
-/**
- * Append a string to buffer and return new pointer position
- *
- * @param dest Destination pointer in buffer
- * @param src Source string to append
- * @return Pointer to end of appended string (after last char)
- */
-/*
- * static char *append_string(char *dest, const char *src)
- * {
- *	ft_strcpy(dest, src);
- *	return dest + ft_strlen(src);
- * }
- */
-/**
- * Build demonstration message using string helper wrappers
- *
- * @param buffer Destination buffer for the message
- * @param msg1 First test string
- * @param msg2 Second test string
- */
-/*
- * static void build_demo_message(char *buffer, const char *msg1,
- *				const char *msg2)
- * {
- *	char *ptr;
- *	unsigned int len;
- *
- *	ptr = buffer;
- *
- *	ptr = append_string(ptr, "Copied: ");
- *	ptr = append_string(ptr, msg1);
- *
- *	ptr = append_string(ptr, " | Len: ");
- *	len = ft_strlen(msg2);
- *	*ptr++ = '0' + len;
- *
- *	ptr = append_string(ptr, " | Cmp: ");
- *	if (ft_strcmp(msg1, msg2) < 0)
- *		ptr = append_string(ptr, "KFS<Kernel");
- *
- *	ptr = append_string(ptr, " | Hello World: ");
- *	if (ft_strcmp(msg1, msg2) < 0)
- *		ptr = append_string(ptr, "42");
- *
- *	*ptr = '\0';
- * }
+/* Helper string builders are intentionally retained as commented-out
+ * examples for future reference.
  */
 
 /**
- * Main entry point for the kernel.
+ * @brief Kernel entry point.
  *
- * Initializes display, interrupts, PIC, and keyboard.
- * Enters main loop waiting for keyboard input.
+ * Calls `init_system()` to initialize kernel subsystems and then
+ * transfers control to the runtime main loop defined by
+ * `sys.main_loop`. Under normal operation this function does not
+ * return.
  *
- * @return Does not return
+ * @return Zero on unexpected return (function generally does not return).
  */
-// int kernel_main(void)
-// {
-// 	display_t display;
-// 	terminal_t	term;
-// 	keyboard_t keyboard;
-
-// 	display_init(&display);
-// 	terminal_init(&term, &display);
-// 	term.clear(&term);
-
-// 	idt_init();
-// 	pic_init();
-// 	idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
-// 	keyboard_init(&keyboard, &display);
-// 	__asm__ volatile("sti");
-// 	term.clear(&term);
-
-// 	// term.write_string(&term, (const char *)term.input);
-
-// 	// display.write_string(&display, "KFS Kernel v0.1 - Initializing...\n"); //printk
-
-// 	// idt_init();
-// 	// display.write_string(&display, "[OK] IDT initialized\n");
-
-// 	// pic_init();
-// 	// display.write_string(&display, "[OK] PIC initialized\n");
-
-// 	// idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
-// 	// display.write_string(&display, "[OK] Keyboard IRQ registered\n");
-
-// 	// keyboard_init(&keyboard, &display);
-// 	// display.write_string(&display, "[OK] Keyboard initialized\n");
-
-// 	// __asm__ volatile("sti");
-// 	// display.write_string(&display, "[OK] Interrupts enabled\n\n");
-
-// 	// display.clear(&display);
-// 	// display.write_string(&display, "Ready. Type something:\n");
-
-// 	while (1) {
-// 		if (keyboard.input) {
-// 			term.push_char(&term, keyboard.input);
-// 			keyboard.input = 0;
-// 		}
-// 		__asm__ volatile("hlt");
-// 	}
-// }
-
 int kernel_main(void)
 {
 	init_system();
-	while (1) {
-		if (sys.keyboard.input) {
-			sys.terminals[0].push_char(&sys.terminals[0], sys.keyboard.input);
-			sys.keyboard.input = 0;
-		}
-		__asm__ volatile("hlt");
-	}
+	sys.main_loop(&sys);
 	return 0;
 }
