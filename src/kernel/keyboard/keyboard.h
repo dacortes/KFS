@@ -29,13 +29,13 @@ extern "C" {
 #define KEY_LCTRL_RELEASED	0x9D
 #define KEY_BACKSPACE		0x0E
 #define KEY_ENTER			0x1C
-#define KEY_UP_PRESSED      0x48
+#define KEY_UP_PRESSED      0x81
 #define KEY_UP_RELEASED     0xC8
-#define KEY_DOWN_PRESSED    0x50
+#define KEY_DOWN_PRESSED    0x82
 #define KEY_DOWN_RELEASED   0xD0
-#define KEY_LEFT_PRESSED    0x4B
+#define KEY_LEFT_PRESSED    0x83
 #define KEY_LEFT_RELEASED   0xCB
-#define KEY_RIGHT_PRESSED   0x4D
+#define KEY_RIGHT_PRESSED   0x84
 #define KEY_RIGHT_RELEASED  0xCD
 
 #define SHORTCUT_BUFFER_MAX 10
@@ -50,7 +50,8 @@ typedef void (*shortcut_handler_t)(const unsigned char *keys, int count);
 struct keyboard {
 	unsigned char	shift_pressed;
 	unsigned char	ctrl_pressed;
-	volatile char	input;
+	unsigned char	extended_code;
+	volatile unsigned char	input;
 	display_t *display;
 	unsigned char	shortcut_buffer[SHORTCUT_BUFFER_MAX];
 	int		shortcut_count;

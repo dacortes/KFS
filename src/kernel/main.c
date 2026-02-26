@@ -92,10 +92,9 @@ int kernel_main(void)
 	__asm__ volatile("sti");
 	term.clear(&term);
 
-
 	while (1) {
 		if (keyboard.input) {
-			term.push_char(&term, keyboard.input);
+			term.handle_keyboard_input(&term, keyboard.input);
 			keyboard.input = 0;
 		}
 		__asm__ volatile("hlt");

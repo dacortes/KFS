@@ -31,6 +31,19 @@
 #define TERMINAL_HISTORY_LEN 80 
 #endif
 
+#ifndef BLACK_ON_WHITE
+#define BLACK_ON_WHITE 0x70
+#endif
+
+#ifndef CURSOR_LEFT
+#define CURSOR_LEFT -1
+#endif
+
+#ifndef CURSOR_RIGHT
+#define CURSOR_RIGHT 1
+#endif
+
+
 typedef struct terminal_s terminal_t;
 
 /**
@@ -47,14 +60,19 @@ typedef struct terminal_s terminal_t;
  * @line: Current input line buffer
  * @line_pos: Current position in line buffer
  * @line_len: Current length of line buffer
+ * @cursor_visible: Whether cursor is currently visible
+ * @cursor_blink_state: Current blink state (for alternating colors)
+ * @cursor_char: Character currently under the cursor
  * @write_char: Function to write a single character
  * @write_string: Function to write a string
  * @clear: Function to clear the terminal
  * @scroll_up: Function to scroll up (not yet implemented)
  * @scroll_down: Function to scroll down (not yet implemented)
  * @set_color: Function to set text color (not yet implemented)
- * @push_char: Function to handle keyboard input
+ * @handle_keyboard_input: Function to handle keyboard input
  * @save_history: Function to save text to history
+ * @update_cursor: Function to update cursor visual state
+ * @move_cursor: Function to move cursor left or right
  */
 struct terminal_s {
 	uint32_t		id;
@@ -67,6 +85,7 @@ struct terminal_s {
 	uint16_t		cursor_x;
 	uint16_t		cursor_y;
 	uint8_t			curr_color;
+	char			cursor_char;
 
 	display_t		*display;
 
@@ -82,9 +101,12 @@ struct terminal_s {
 	void (*scroll_down)(terminal_t *self, uint32_t lines);
 	void (*set_color)(terminal_t *self, uint8_t color);
 
-	void (*push_char)(terminal_t *self, char input);
+	void (*handle_keyboard_input)(terminal_t *self, unsigned char input);
 
 	void (*save_history)(terminal_t *self, const char *text);
+
+	void (*update_cursor)(terminal_t *self);
+	void (*move_cursor)(terminal_t *self, int direction);
 };
 
 /**
