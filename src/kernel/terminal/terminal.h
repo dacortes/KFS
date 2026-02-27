@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <helper.h>
 #include <keyboard.h>
+#include <color_parser.h>
 
 #ifndef MAX_NAME
 #define MAX_NAME 32
@@ -73,6 +74,8 @@ struct terminal_s {
 	char			line[DEVICE_BUFFER_SIZE];
 	uint32_t		line_pos;
 	uint32_t		line_len;
+
+	color_parser_t	color_parser;
 
 	void (*write_char)(terminal_t *self, char c);
 	void (*write_string)(terminal_t *self, const char *string);

@@ -95,10 +95,11 @@ static void write_string(terminal_t *self, const char *str)
 {
 	unsigned int i;
 
-	if (!self)
+	if (!self || !str)
 		return;
 
-	self->save_history(self, str);
+	if (!*str)
+		self->save_history(self, str);
 	i = 0;
 	while (str[i]) {
 		self->write_char(self, str[i]);

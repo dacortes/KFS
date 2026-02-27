@@ -11,6 +11,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <color.h>
 
 #ifdef __cplusplus
 extern "C" {

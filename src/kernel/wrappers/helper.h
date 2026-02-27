@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <../inc/stdint/stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -71,6 +73,11 @@ char *ft_strncpy(char *dst, const char *src, unsigned int len);
 unsigned int ft_strlen_asm(const char *s);
 int ft_strcmp_asm(const char *s1, const char *s2);
 char *ft_strcpy_asm(char *dst, const char *src);
+
+void *ft_memchr(const void *s, int c, unsigned int n);
+char *ft_strchr(const char *s, int c);
+int	ft_isdigit(int c);
+int	ft_atoi(const char *str);
 
 #ifdef __cplusplus
 }
