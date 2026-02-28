@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <kernel/display/display.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,14 +44,13 @@ typedef void (*shortcut_handler_t)(const unsigned char *keys, int count);
 /**
  * Keyboard state structure
  *
- * Tracks modifier key states and provides display output.
+ * Tracks modifier key states.
  */
 struct keyboard {
 	unsigned char	shift_pressed;
 	unsigned char	ctrl_pressed;
 	unsigned char	extended_code;
-	volatile unsigned char	input;
-	display_t *display;
+	unsigned char	input;
 	unsigned char	shortcut_buffer[SHORTCUT_BUFFER_MAX];
 	int		shortcut_count;
 	shortcut_handler_t shortcut_handler;
@@ -66,9 +64,8 @@ struct keyboard {
  * Initialize the keyboard driver
  *
  * @param kbd Keyboard structure to initialize
- * @param disp Display for output
  */
-void keyboard_init(keyboard_t *self, display_t *disp);
+void keyboard_init(keyboard_t *self);
 
 /**
  * Keyboard interrupt handler

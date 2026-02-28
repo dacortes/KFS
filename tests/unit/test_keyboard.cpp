@@ -12,7 +12,7 @@ protected:
 	void SetUp() override
 	{
 		display_init(&display);
-		keyboard_init(&keyboard, &display);
+		keyboard_init(&keyboard);
 	}
 };
 
@@ -162,7 +162,7 @@ TEST_F(KeyboardTest, SetInstanceChangesActiveKeyboard)
 	display_t display2;
 
 	display_init(&display2);
-	keyboard_init(&keyboard2, &display2);
+	keyboard_init(&keyboard2);
 
 	keyboard2.set_shortcut_handler(&keyboard2, test_shortcut_handler);
 	keyboard_set_instance(&keyboard2);

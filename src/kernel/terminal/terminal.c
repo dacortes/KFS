@@ -258,10 +258,11 @@ static void write_string(terminal_t *self, const char *str)
 {
 	unsigned int i;
 
-	if (!self)
+	if (!self || !str)
 		return;
 
-	self->save_history(self, str);
+	if (!*str)
+		self->save_history(self, str);
 	i = 0;
 	while (str[i]) {
 		self->write_char(self, str[i]);
@@ -519,12 +520,12 @@ static void move_cursor(terminal_t *self, int direction)
  * Sets up the terminal state, clears history, initializes cursor position,
  * and assigns function pointers.
  */
-void terminal_init(terminal_t *self, display_t *display)
+void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 {
 	if (!self)
 		return;
 
-	self->id = 1;
+	self->id = id;
 	ft_strcpy(self->name, "virtual Terminal");
 	for (int i = 0; i < TERMINAL_HISTORY_SIZE; i++)
 		self->history[i][0] = '\0';

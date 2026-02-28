@@ -6,7 +6,6 @@
  */
 
 #include <kernel/wrappers/helper.h>
-#include <stdint.h>
 
 /**
  * ft_strncpy - Copy at most len bytes from src to dst
@@ -25,7 +24,7 @@ char	*ft_strncpy(char *dst, const char *src, unsigned int len)
 	unsigned int    i;
 
 	if (!dst || !src)
-		return "";
+		return NULL;
 	i = 0;
 	while (i < len && src[i]) {
 		dst[i] = src[i];

@@ -28,7 +28,7 @@ static const char scancode_to_ascii_shift[SCANCODE_MAX] = {
 };
 
 /**
- * Process a scan code and display the corresponding character
+ * Process a scan code
  *
  * @param self Keyboard state structure
  * @param scancode Raw scan code from keyboard
@@ -148,9 +148,8 @@ void keyboard_interrupt(void)
  * Initialize the keyboard driver
  *
  * @param self Keyboard structure to initialize
- * @param disp Display for output
  */
-void keyboard_init(keyboard_t *self, display_t *disp)
+void keyboard_init(keyboard_t *self)
 {
 	int i;
 
@@ -158,7 +157,6 @@ void keyboard_init(keyboard_t *self, display_t *disp)
 	self->ctrl_pressed = 0;
 	self->extended_code = 0;
 	self->input = 0;
-	self->display = disp;
 	self->shortcut_count = 0;
 	self->shortcut_handler = 0;
 	self->process_scancode = process_scancode;

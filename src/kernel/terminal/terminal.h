@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <kernel/wrappers/helper.h>
 #include <kernel/keyboard/keyboard.h>
+#include <color_parser.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,6 +108,8 @@ struct terminal_s {
 	uint32_t		line_pos;
 	uint32_t		line_len;
 
+	color_parser_t	color_parser;
+
 	void (*write_char)(terminal_t *self, char c);
 	void (*write_string)(terminal_t *self, const char *string);
 	void (*clear)(terminal_t *self);
@@ -127,8 +130,9 @@ struct terminal_s {
  *
  * @param terminal Pointer to the terminal struct to initialize
  * @param display Pointer to the display device to use for output
+ * @param id Unique identifier for the terminal instance
  */
-void terminal_init(terminal_t	*terminal, display_t *display);
+void terminal_init(terminal_t	*terminal, display_t *display, uint32_t id);
 
 #ifdef __cplusplus
 }

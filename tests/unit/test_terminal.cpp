@@ -21,7 +21,7 @@ protected:
 		memset(video_memory, 0, sizeof(video_memory));
 		display_init(&display);
 		display.videomemptr = video_memory;
-		terminal_init(&term, &display);
+		terminal_init(&term, &display, 0);
 	}
 
 	/**
