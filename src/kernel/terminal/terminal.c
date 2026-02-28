@@ -71,8 +71,8 @@ static void scroll_line_up(terminal_t *self)
 {
 	uint16_t row_idx;
 	uint16_t line_bytes;
+	const char *src;
 	char *dst;
-	char *src;
 	int y;
 	int i;
 
