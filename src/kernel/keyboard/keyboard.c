@@ -35,7 +35,24 @@ static const char scancode_to_ascii_shift[SCANCODE_MAX] = {
  */
 static void process_scancode(keyboard_t *self, unsigned char scancode)
 {
-	char ascii;
+	char input;
+
+	if (scancode == 0xE0) {
+		self->extended_code = 1;
+		return;
+	}
+	if (self->extended_code) {
+		self->extended_code = 0;
+		if (scancode == 0x48)
+			self->input = KEY_UP_PRESSED;
+		else if (scancode == 0x50)
+			self->input = KEY_DOWN_PRESSED;
+		else if (scancode == 0x4B)
+			self->input = KEY_LEFT_PRESSED;
+		else if (scancode == 0x4D)
+			self->input = KEY_RIGHT_PRESSED;
+		return;
+	}
 
 	if (scancode == KEY_LSHIFT_PRESSED || scancode == KEY_RSHIFT_PRESSED) {
 		self->shift_pressed = 1;
@@ -77,14 +94,14 @@ static void process_scancode(keyboard_t *self, unsigned char scancode)
 	}
 
 	if (self->shift_pressed)
-		ascii = scancode_to_ascii_shift[scancode];
+		input = scancode_to_ascii_shift[scancode];
 	else
-		ascii = scancode_to_ascii[scancode];
+		input = scancode_to_ascii[scancode];
 
-	if (ascii == 0)
+	if (input == 0)
 		return;
 
-	self->input = ascii;
+	self->input = input;
 }
 
 /**
@@ -139,6 +156,7 @@ void keyboard_init(keyboard_t *self, display_t *disp)
 
 	self->shift_pressed = 0;
 	self->ctrl_pressed = 0;
+	self->extended_code = 0;
 	self->input = 0;
 	self->display = disp;
 	self->shortcut_count = 0;

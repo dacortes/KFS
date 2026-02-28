@@ -75,9 +75,9 @@ static void shortcut_demo_handler(const unsigned char *scancodes, int count)
  */
 int kernel_main(void)
 {
-	display_t display;
-	terminal_t	term;
-	keyboard_t keyboard;
+	static display_t display;
+	static terminal_t term;
+	static keyboard_t keyboard;
 
 	display_init(&display);
 	g_display = &display;
@@ -92,10 +92,9 @@ int kernel_main(void)
 	__asm__ volatile("sti");
 	term.clear(&term);
 
-
 	while (1) {
 		if (keyboard.input) {
-			term.push_char(&term, keyboard.input);
+			term.handle_keyboard_input(&term, keyboard.input);
 			keyboard.input = 0;
 		}
 		__asm__ volatile("hlt");

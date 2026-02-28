@@ -9,3 +9,7 @@ http://www.math.utah.edu/docs/info/ld_3.html#SEC4
 
 keyboard 
 http://www.osdever.net/bkerndev/Docs/keyboard.htm
+
+GET SCAN CODES
+sudo showkey -s
+

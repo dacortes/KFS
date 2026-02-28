@@ -39,8 +39,13 @@ CFLAGS = -m32 -ffreestanding -O2 -Wall -Wextra -fno-builtin -nostdlib -I$(SRC_DI
 LDFLAGS = -m elf_i386 -T $(LINKER) -nostdlib
 
 # Test/coverage compiler configuration (32-bit to use assembly directly)
-TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR)
-TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR)
+# Module include paths needed for both kernel and test builds
+MODULE_INCLUDES = $(addprefix -I, $(SRC_DIR)/kernel/keyboard/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
+TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
+TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
 TEST_LDFLAGS = -m32
 
 # Add coverage flags if COVERAGE is set
@@ -89,7 +94,8 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
-	$(SRC_DIR)/kernel/keyboard/keyboard.c
+	$(SRC_DIR)/kernel/keyboard/keyboard.c \
+	$(SRC_DIR)/kernel/terminal/terminal.c
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
@@ -99,7 +105,8 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_strcmp.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \
 	$(TEST_DIR)/unit/test_strncpy.cpp \
-	$(TEST_DIR)/unit/test_keyboard.cpp
+	$(TEST_DIR)/unit/test_keyboard.cpp \
+	$(TEST_DIR)/unit/test_terminal.cpp
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))
@@ -125,7 +132,7 @@ KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers \
 	kernel/terminal kernel/system kernel/print \
 	kernel/interrupts kernel/keyboard
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
-	kernel/keyboard fixtures
+	kernel/keyboard kernel/terminal fixtures
 
 ################################################################################
 #                               PHONY TARGETS                                  #
