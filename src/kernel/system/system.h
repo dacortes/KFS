@@ -61,6 +61,7 @@ struct system_s {
 
     void (*init)(system_t *self);
 	void (*main_loop)(system_t *self);
+	void (*switch_terminal)(system_t *self, uint32_t id);
 };
 
 /** Global singleton instance of the kernel system context. */
