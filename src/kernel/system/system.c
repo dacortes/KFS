@@ -14,6 +14,49 @@
 system_t sys;
 
 /**
+ * @brief Switch the active terminal and redraw the display.
+ *
+ * Changes `sys.active_terminal` to the given index and redraws
+ * that terminal's scrollback content to video memory.
+ *
+ * @param self System instance
+ * @param id Terminal index to switch to (must be < MAX_TERMINAL)
+ */
+static void switch_terminal(system_t *self, uint32_t id)
+{
+	terminal_t *term;
+
+	if (!self || id >= MAX_TERMINAL || id == self->active_terminal)
+		return;
+	self->active_terminal = id;
+	term = &self->terminals[id];
+	term->set_offset(term, 0);
+	term->render(term);
+}
+
+/**
+ * @brief Keyboard shortcut handler for terminal switching.
+ *
+ * Interprets Ctrl+<number-key> shortcuts to switch terminals.
+ * Scancode 0x02 = '1' (terminal 0), 0x03 = '2' (terminal 1), etc.
+ *
+ * @param keys Array of scancodes pressed during Ctrl hold
+ * @param count Number of scancodes
+ */
+static void shortcut_handler(const unsigned char *keys, int count)
+{
+	if (!keys || count < 1)
+		return;
+
+	/* Scancodes 0x02..0x0B correspond to keys '1'..'0' */
+	if (keys[0] >= 0x02 && keys[0] <= 0x0B) {
+		uint32_t id = keys[0] - 0x02;
+
+		sys.switch_terminal(&sys, id);
+	}
+}
+
+/**
  * @brief Initialize all configured virtual terminals.
  *
  * Calls `terminal_init()` for each terminal and clears its state.
@@ -86,9 +129,11 @@ void init_system(void)
 	idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
 
 	keyboard_init(&sys.keyboard);
+	sys.keyboard.set_shortcut_handler(&sys.keyboard, shortcut_handler);
 
 	/* Enable interrupts */
 	__asm__ volatile("sti");
 
+	sys.switch_terminal = switch_terminal;
 	sys.main_loop = main_loop;
 }

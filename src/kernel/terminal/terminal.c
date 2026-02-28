@@ -111,13 +111,17 @@ static void scroll_line_up(terminal_t *self)
  * @self: Terminal instance
  *
  * Repaints the entire display using the scrollback buffer
- * content at the current view_offset position.
+ * content at the current view_offset position. Restores
+ * the cursor highlight when viewing the latest content.
  */
 static void render_view(terminal_t *self)
 {
 	uint16_t base;
 	int y;
 	int x;
+
+	if (!self)
+		return;
 
 	if (self->scroll_count <= self->display->height)
 		base = 0;
@@ -136,6 +140,9 @@ static void render_view(terminal_t *self)
 					      c, x, y);
 		}
 	}
+
+	if (self->view_offset == 0)
+		self->set_cursor_color(self, BLACK_ON_WHITE);
 }
 
 /**
@@ -171,8 +178,6 @@ static void scroll_ter(terminal_t *self, int lines)
 	}
 
 	render_view(self);
-	if (self->view_offset == 0)
-		self->set_cursor_color(self, BLACK_ON_WHITE);
 }
 
 /**
@@ -522,6 +527,17 @@ static void write_prefix(terminal_t *self)
 }
 
 /**
+ * set_offset - Set the scrollback view offset
+ * @self: Terminal instance
+ * @offset: New view offset (0 = latest content)
+ */
+
+static void set_offset(terminal_t *self, uint16_t offset)
+{
+	self->view_offset = offset;
+}
+
+/**
  * terminal_init - Initialize a terminal instance
  * @self: Terminal instance to initialize
  * @display: Display device for output
@@ -567,6 +583,8 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->save_history = save_history;
 	self->set_cursor_color = set_cursor_color;
 	self->move_cursor = move_cursor;
+	self->render = render_view;
+	self->set_offset = set_offset;
 
 	self->write_prefix(self);
 }

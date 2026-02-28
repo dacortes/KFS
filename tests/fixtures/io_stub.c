@@ -39,3 +39,36 @@ void pic_send_eoi(unsigned char irq)
 {
 	(void)irq;
 }
+
+/**
+ * Stub for idt_init - not used in unit tests
+ */
+void idt_init(void)
+{
+}
+
+/**
+ * Stub for pic_init - not used in unit tests
+ */
+void pic_init(void)
+{
+}
+
+/**
+ * Stub for idt_set_gate - not used in unit tests
+ */
+void idt_set_gate(unsigned char num, unsigned int base,
+		  unsigned short selector, unsigned char flags)
+{
+	(void)num;
+	(void)base;
+	(void)selector;
+	(void)flags;
+}
+
+/**
+ * Stub for irq1_handler - not used in unit tests
+ */
+void irq1_handler(void)
+{
+}

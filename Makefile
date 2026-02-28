@@ -44,6 +44,8 @@ MODULE_INCLUDES = $(addprefix -I, $(SRC_DIR)/kernel/keyboard/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
 TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
 TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
 TEST_LDFLAGS = -m32
@@ -119,7 +121,13 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \
 	$(TEST_DIR)/unit/test_strncpy.cpp \
 	$(TEST_DIR)/unit/test_keyboard.cpp \
-	$(TEST_DIR)/unit/test_terminal.cpp
+	$(TEST_DIR)/unit/test_terminal.cpp \
+	$(TEST_DIR)/unit/test_system.cpp \
+	$(TEST_DIR)/unit/test_atoi.cpp \
+	$(TEST_DIR)/unit/test_isdigit.cpp \
+	$(TEST_DIR)/unit/test_memchr.cpp \
+	$(TEST_DIR)/unit/test_memset.cpp \
+	$(TEST_DIR)/unit/test_strchr.cpp
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))

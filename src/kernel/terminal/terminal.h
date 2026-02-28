@@ -94,6 +94,7 @@ typedef struct terminal_s terminal_t;
  * @set_cursor_color: Function to set cursor cell color
  * @move_cursor: Function to move cursor left or right
  * @write_prefix: Function to write the terminal prefix/prompt
+ * @render: Function to redraw terminal content on display
  */
 struct terminal_s {
 	uint32_t		id;
@@ -138,6 +139,8 @@ struct terminal_s {
 	void (*set_cursor_color)(terminal_t *self, uint8_t color);
 	void (*move_cursor)(terminal_t *self, int direction);
 	void (*write_prefix)(terminal_t *self);
+	void (*render)(terminal_t *self);
+	void (*set_offset)(terminal_t *self, uint16_t offset);
 };
 
 /**

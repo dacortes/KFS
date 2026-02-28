@@ -174,3 +174,90 @@ TEST_F(KeyboardTest, SetInstanceChangesActiveKeyboard)
 
 	EXPECT_EQ(captured_count, 1);
 }
+
+/* ------------------------------------------------------------------ */
+/*                     Extended code (0xE0 prefix) tests              */
+/* ------------------------------------------------------------------ */
+
+TEST_F(KeyboardTest, ExtendedCodeSetsFlag)
+{
+	keyboard.process_scancode(&keyboard, 0xE0);
+
+	EXPECT_EQ(keyboard.extended_code, 1);
+}
+
+TEST_F(KeyboardTest, ExtendedCodeClearedAfterNextScancode)
+{
+	keyboard.process_scancode(&keyboard, 0xE0);
+	EXPECT_EQ(keyboard.extended_code, 1);
+
+	keyboard.process_scancode(&keyboard, 0x48);
+	EXPECT_EQ(keyboard.extended_code, 0);
+}
+
+TEST_F(KeyboardTest, ExtendedUpArrow)
+{
+	keyboard.input = 0;
+
+	keyboard.process_scancode(&keyboard, 0xE0);
+	keyboard.process_scancode(&keyboard, 0x48);
+
+	EXPECT_EQ(keyboard.input, KEY_UP_PRESSED);
+}
+
+TEST_F(KeyboardTest, ExtendedDownArrow)
+{
+	keyboard.input = 0;
+
+	keyboard.process_scancode(&keyboard, 0xE0);
+	keyboard.process_scancode(&keyboard, 0x50);
+
+	EXPECT_EQ(keyboard.input, KEY_DOWN_PRESSED);
+}
+
+TEST_F(KeyboardTest, ExtendedLeftArrow)
+{
+	keyboard.input = 0;
+
+	keyboard.process_scancode(&keyboard, 0xE0);
+	keyboard.process_scancode(&keyboard, 0x4B);
+
+	EXPECT_EQ(keyboard.input, KEY_LEFT_PRESSED);
+}
+
+TEST_F(KeyboardTest, ExtendedRightArrow)
+{
+	keyboard.input = 0;
+
+	keyboard.process_scancode(&keyboard, 0xE0);
+	keyboard.process_scancode(&keyboard, 0x4D);
+
+	EXPECT_EQ(keyboard.input, KEY_RIGHT_PRESSED);
+}
+
+TEST_F(KeyboardTest, ExtendedUnknownCodeNoInput)
+{
+	keyboard.input = 0;
+
+	keyboard.process_scancode(&keyboard, 0xE0);
+	keyboard.process_scancode(&keyboard, 0x99);
+
+	/* Unknown extended code should not set input */
+	EXPECT_EQ(keyboard.input, 0);
+	/* extended_code flag should still be cleared */
+	EXPECT_EQ(keyboard.extended_code, 0);
+}
+
+TEST_F(KeyboardTest, ExtendedCodeDoesNotAffectNormalKeys)
+{
+	/* A normal key after the extended sequence is consumed */
+	keyboard.input = 0;
+	keyboard.process_scancode(&keyboard, 0xE0);
+	keyboard.process_scancode(&keyboard, 0x48); /* Up arrow */
+
+	EXPECT_EQ(keyboard.input, KEY_UP_PRESSED);
+
+	/* Now a regular 'a' key (scancode 0x1E) should work normally */
+	keyboard.process_scancode(&keyboard, 0x1E);
+	EXPECT_EQ(keyboard.input, 'a');
+}

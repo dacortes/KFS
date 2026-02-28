@@ -650,3 +650,100 @@ TEST_F(TerminalTest, PrefixSetDuringInit)
 	EXPECT_EQ(term.prefix_len, TERMINAL_PREFIX_LEN);
 	EXPECT_STREQ(term.prefix, TERMINAL_PREFIX);
 }
+
+/* ------------------------------------------------------------------ */
+/*                     Render tests                                   */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, RenderRestoresDisplayFromScrollback)
+{
+	/* Write 'Z' at prefix position on row 0 */
+	term.handle_keyboard_input(&term, 'Z');
+
+	/* Manually wipe video memory to verify render repaints */
+	memset(video_memory, 0, sizeof(video_memory));
+	EXPECT_EQ(char_at(TERMINAL_PREFIX_LEN, 0), '\0');
+
+	term.render(&term);
+
+	/* 'Z' should be repainted from scrollback */
+	EXPECT_EQ(char_at(TERMINAL_PREFIX_LEN, 0), 'Z');
+}
+
+TEST_F(TerminalTest, RenderRestoresCursorAtBottom)
+{
+	term.handle_keyboard_input(&term, 'A');
+
+	/* Wipe video memory */
+	memset(video_memory, 0, sizeof(video_memory));
+
+	term.render(&term);
+
+	/* Cursor should be highlighted at current position */
+	EXPECT_EQ(attr_at(term.cursor_x, term.cursor_y), BLACK_ON_WHITE);
+}
+
+TEST_F(TerminalTest, RenderDoesNotCrashWithNull)
+{
+	term.render(NULL);
+}
+
+TEST_F(TerminalTest, RenderShowsOlderContentWhenScrolled)
+{
+	/* Write 'Q' then push it off screen */
+	term.write_char(&term, 'Q');
+	for (int i = 0; i < 25; i++)
+		term.write_char(&term, '\n');
+
+	/* Scroll up to see 'Q' */
+	term.set_offset(&term, 1);
+	term.render(&term);
+
+	EXPECT_EQ(char_at(TERMINAL_PREFIX_LEN, 0), 'Q');
+}
+
+TEST_F(TerminalTest, RenderDoesNotHighlightCursorWhenScrolled)
+{
+	/* Write content and push off screen */
+	term.handle_keyboard_input(&term, 'A');
+	for (int i = 0; i < 25; i++)
+		term.write_char(&term, '\n');
+
+	/* Scroll up — cursor highlight should NOT appear */
+	term.set_offset(&term, 1);
+	term.render(&term);
+
+	/* Current cursor position should not be BLACK_ON_WHITE
+	 * since we're viewing old content, not the latest
+	 */
+	EXPECT_NE(attr_at(term.cursor_x, term.cursor_y), BLACK_ON_WHITE);
+}
+
+/* ------------------------------------------------------------------ */
+/*                     set_offset tests                               */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, SetOffsetChangesViewOffset)
+{
+	term.set_offset(&term, 5);
+	EXPECT_EQ(term.view_offset, 5);
+}
+
+TEST_F(TerminalTest, SetOffsetToZeroResetsView)
+{
+	term.set_offset(&term, 10);
+	EXPECT_EQ(term.view_offset, 10);
+
+	term.set_offset(&term, 0);
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+TEST_F(TerminalTest, InitAssignsRenderPointer)
+{
+	EXPECT_NE(term.render, nullptr);
+}
+
+TEST_F(TerminalTest, InitAssignsSetOffsetPointer)
+{
+	EXPECT_NE(term.set_offset, nullptr);
+}
