@@ -23,10 +23,164 @@ static void clear_buffer(char *buff)
 }
 
 /**
+ * clear_scroll_buf - Fill the scrollback buffer with spaces
+ * @self: Terminal instance
+ *
+ * Initializes all scrollback buffer rows with space characters.
+ */
+static void clear_scroll_buf(terminal_t *self)
+{
+	int i;
+	int j;
+
+	for (i = 0; i < SCROLL_BUFFER_ROWS; i++)
+		for (j = 0; j < DISPLAY_W; j++)
+			self->scroll_buf[i][j] = ' ';
+}
+
+/**
+ * buf_write - Write a character to the scrollback buffer
+ * @self: Terminal instance
+ * @x: Screen column
+ * @y: Screen row
+ * @c: Character to write
+ *
+ * Writes a character into the scrollback buffer at the position
+ * corresponding to the current screen coordinates.
+ */
+static void buf_write(terminal_t *self, uint16_t x, uint16_t y,
+		      char c)
+{
+	uint16_t base;
+	uint16_t row;
+
+	base = self->scroll_count - self->display->height;
+	row = (self->scroll_first + base + y) % SCROLL_BUFFER_ROWS;
+	self->scroll_buf[row][x] = c;
+}
+
+/**
+ * scroll_line_up - Scroll display content up by one line
+ * @self: Terminal instance
+ *
+ * Called when the cursor reaches the bottom of the display.
+ * Adds a new row to the circular scrollback buffer, shifts
+ * video memory up by one line, and clears the bottom line.
+ */
+static void scroll_line_up(terminal_t *self)
+{
+	uint16_t row_idx;
+	uint16_t line_bytes;
+	char *dst;
+	char *src;
+	int y;
+	int i;
+
+	self->scroll_count++;
+	if (self->scroll_count > SCROLL_BUFFER_ROWS) {
+		self->scroll_first = (self->scroll_first + 1) %
+				     SCROLL_BUFFER_ROWS;
+		self->scroll_count = SCROLL_BUFFER_ROWS;
+	}
+
+	row_idx = (self->scroll_first + self->scroll_count - 1) %
+		  SCROLL_BUFFER_ROWS;
+	for (i = 0; i < (int)self->display->width; i++)
+		self->scroll_buf[row_idx][i] = ' ';
+
+	line_bytes = self->display->width * self->display->char_size;
+	for (y = 0; y < (int)self->display->height - 1; y++) {
+		dst = self->display->videomemptr + y * line_bytes;
+		src = dst + line_bytes;
+		for (i = 0; i < (int)line_bytes; i++)
+			dst[i] = src[i];
+	}
+
+	dst = self->display->videomemptr +
+	      ((int)self->display->height - 1) * line_bytes;
+	for (i = 0; i < (int)line_bytes; i += self->display->char_size) {
+		dst[i] = ' ';
+		dst[i + 1] = self->display->color;
+	}
+
+	self->cursor_y = self->display->height - 1;
+}
+
+/**
+ * render_view - Redraw display from scrollback buffer
+ * @self: Terminal instance
+ *
+ * Repaints the entire display using the scrollback buffer
+ * content at the current view_offset position.
+ */
+static void render_view(terminal_t *self)
+{
+	uint16_t base;
+	int y;
+	int x;
+
+	if (self->scroll_count <= self->display->height)
+		base = 0;
+	else
+		base = self->scroll_count - self->display->height
+		       - self->view_offset;
+
+	for (y = 0; y < (int)self->display->height; y++) {
+		uint16_t row = (self->scroll_first + base + y) %
+		      SCROLL_BUFFER_ROWS;
+
+		for (x = 0; x < (int)self->display->width; x++) {
+			char c = self->scroll_buf[row][x];
+
+			self->display->put_at(self->display,
+					      c, x, y);
+		}
+	}
+}
+
+/**
+ * scroll_ter - Scroll terminal view up or down
+ * @self: Terminal instance
+ * @lines: Lines to scroll (positive = up/older, negative = down/newer)
+ *
+ * Adjusts the view_offset and repaints the display from the
+ * scrollback buffer. Does nothing when there is no hidden content
+ * in the requested direction. Restores the cursor highlight when
+ * the view returns to the bottom.
+ */
+static void scroll_ter(terminal_t *self, int lines)
+{
+	uint16_t max_offset;
+	int i;
+
+	if (!self || self->scroll_count <= self->display->height)
+		return;
+
+	max_offset = self->scroll_count - self->display->height;
+
+	if (lines > 0) {
+		for (i = 0; i < lines &&
+		     self->view_offset < max_offset; i++)
+			self->view_offset++;
+	} else {
+		int step = -lines;
+
+		for (i = 0; i < step &&
+		     self->view_offset > 0; i++)
+			self->view_offset--;
+	}
+
+	render_view(self);
+	if (self->view_offset == 0)
+		self->set_cursor_color(self, BLACK_ON_WHITE);
+}
+
+/**
  * clear_ter - Clear terminal display and line buffer
  * @self: Terminal instance
  *
- * Clears the display and resets the current line buffer.
+ * Clears the display, resets the current line buffer,
+ * and reinitializes the scrollback buffer.
  */
 static void clear_ter(terminal_t *self)
 {
@@ -34,6 +188,10 @@ static void clear_ter(terminal_t *self)
 		return;
 	self->display->clear(self->display);
 	clear_buffer(self->line);
+	self->scroll_first = 0;
+	self->scroll_count = self->display->height;
+	self->view_offset = 0;
+	clear_scroll_buf(self);
 	self->set_cursor_color(self, BLACK_ON_WHITE);
 }
 
@@ -76,6 +234,7 @@ static void write_char(terminal_t *self, char c)
 	} else {
 		self->display->put_at(self->display, c, self->cursor_x,
 				      self->cursor_y);
+		buf_write(self, self->cursor_x, self->cursor_y, c);
 		self->cursor_x++;
 	}
 
@@ -85,7 +244,7 @@ static void write_char(terminal_t *self, char c)
 	}
 
 	if (self->cursor_y >= self->display->height)
-		self->cursor_y = self->display->height - 1;
+		scroll_line_up(self);
 }
 
 /**
@@ -155,6 +314,7 @@ static void redraw_line_from(terminal_t *self, uint16_t from,
 		if (!c)
 			c = ' ';
 		self->display->put_at(self->display, c, sx, sy);
+		buf_write(self, sx, sy, c);
 		sx++;
 		if (sx >= self->display->width) {
 			sx = 0;
@@ -261,7 +421,7 @@ static void handle_printable(terminal_t *self, unsigned char input)
 		self->cursor_y++;
 	}
 	if (self->cursor_y >= self->display->height)
-		self->cursor_y = self->display->height - 1;
+		scroll_line_up(self);
 }
 
 /**
@@ -276,6 +436,21 @@ static void handle_keyboard_input(terminal_t *self, unsigned char input)
 {
 	if (!self || !input)
 		return;
+
+	if (input == KEY_UP_PRESSED) {
+		self->scroll(self, 1);
+		return;
+	}
+
+	if (input == KEY_DOWN_PRESSED) {
+		self->scroll(self, -1);
+		return;
+	}
+
+	if (self->view_offset > 0) {
+		self->view_offset = 0;
+		render_view(self);
+	}
 
 	if (input == KEY_LEFT_PRESSED) {
 		self->move_cursor(self, CURSOR_LEFT);
@@ -362,11 +537,17 @@ void terminal_init(terminal_t *self, display_t *display)
 	self->cursor_char = ' ';
 	self->display = display;
 
+	self->scroll_first = 0;
+	self->scroll_count = display->height;
+	self->view_offset = 0;
+	clear_scroll_buf(self);
+
 	clear_buffer(self->line);
 	self->line_pos = 0;
 	self->line_len = 0;
 
 	self->clear = clear_ter;
+	self->scroll = scroll_ter;
 	self->write_char = write_char;
 	self->write_string = write_string;
 	self->handle_keyboard_input = handle_keyboard_input;

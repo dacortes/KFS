@@ -75,9 +75,9 @@ static void shortcut_demo_handler(const unsigned char *scancodes, int count)
  */
 int kernel_main(void)
 {
-	display_t display;
-	terminal_t	term;
-	keyboard_t keyboard;
+	static display_t display;
+	static terminal_t term;
+	static keyboard_t keyboard;
 
 	display_init(&display);
 	g_display = &display;

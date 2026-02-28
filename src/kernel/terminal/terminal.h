@@ -32,7 +32,11 @@ extern "C" {
 #endif
 
 #ifndef TERMINAL_HISTORY_LEN
-#define TERMINAL_HISTORY_LEN 80 
+#define TERMINAL_HISTORY_LEN 80
+#endif
+
+#ifndef SCROLL_BUFFER_ROWS
+#define SCROLL_BUFFER_ROWS 200
 #endif
 
 #ifndef BLACK_ON_WHITE
@@ -64,14 +68,15 @@ typedef struct terminal_s terminal_t;
  * @line: Current input line buffer
  * @line_pos: Current position in line buffer
  * @line_len: Current length of line buffer
- * @cursor_visible: Whether cursor is currently visible
- * @cursor_blink_state: Current blink state (for alternating colors)
  * @cursor_char: Character currently under the cursor
+ * @scroll_buf: Circular buffer storing scrollback row content
+ * @scroll_first: Index of oldest row in circular scrollback buffer
+ * @scroll_count: Number of valid rows in scrollback buffer
+ * @view_offset: Lines scrolled up from the bottom (0 = latest)
  * @write_char: Function to write a single character
  * @write_string: Function to write a string
  * @clear: Function to clear the terminal
- * @scroll_up: Function to scroll up (not yet implemented)
- * @scroll_down: Function to scroll down (not yet implemented)
+ * @scroll: Function to scroll view (positive = up, negative = down)
  * @set_color: Function to set text color (not yet implemented)
  * @handle_keyboard_input: Function to handle keyboard input
  * @save_history: Function to save text to history
@@ -93,6 +98,11 @@ struct terminal_s {
 
 	display_t		*display;
 
+	char			scroll_buf[SCROLL_BUFFER_ROWS][DISPLAY_W];
+	uint16_t		scroll_first;
+	uint16_t		scroll_count;
+	uint16_t		view_offset;
+
 	char			line[DEVICE_BUFFER_SIZE];
 	uint32_t		line_pos;
 	uint32_t		line_len;
@@ -101,8 +111,7 @@ struct terminal_s {
 	void (*write_string)(terminal_t *self, const char *string);
 	void (*clear)(terminal_t *self);
 
-	void (*scroll_up)(terminal_t *self, uint32_t lines);
-	void (*scroll_down)(terminal_t *self, uint32_t lines);
+	void (*scroll)(terminal_t *self, int lines);
 	void (*set_color)(terminal_t *self, uint8_t color);
 
 	void (*handle_keyboard_input)(terminal_t *self, unsigned char input);

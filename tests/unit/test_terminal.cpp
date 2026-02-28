@@ -387,3 +387,223 @@ TEST_F(TerminalTest, CursorWrapsAtDisplayWidth)
 	EXPECT_EQ(term.cursor_x, 0);
 	EXPECT_EQ(term.cursor_y, 1);
 }
+
+/* ------------------------------------------------------------------ */
+/*                     Scroll initialization tests                    */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, InitSetsScrollDefaults)
+{
+	EXPECT_EQ(term.scroll_first, 0);
+	EXPECT_EQ(term.scroll_count, display.height);
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+TEST_F(TerminalTest, InitAssignsScrollPointer)
+{
+	EXPECT_NE(term.scroll, nullptr);
+}
+
+TEST_F(TerminalTest, ClearResetsScrollState)
+{
+	/* Push content into scrollback by writing many newlines */
+	for (int i = 0; i < 30; i++)
+		term.write_char(&term, '\n');
+	EXPECT_GT(term.scroll_count, display.height);
+
+	term.clear(&term);
+
+	EXPECT_EQ(term.scroll_first, 0);
+	EXPECT_EQ(term.scroll_count, display.height);
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+/* ------------------------------------------------------------------ */
+/*                     Scroll no-op tests                             */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, ScrollUpDoesNothingWhenScreenNotFull)
+{
+	/* Write some chars but don't fill the screen */
+	term.handle_keyboard_input(&term, 'A');
+
+	term.scroll(&term, 1);
+
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+TEST_F(TerminalTest, ScrollDownDoesNothingAtBottom)
+{
+	term.scroll(&term, -1);
+
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+TEST_F(TerminalTest, ScrollNullSelfDoesNotCrash)
+{
+	term.scroll(NULL, 1);
+	term.scroll(NULL, -1);
+}
+
+/* ------------------------------------------------------------------ */
+/*                     Scroll content tests                           */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, NewlineScrollsDisplayWhenFull)
+{
+	/* Put 'A' on first row */
+	term.write_char(&term, 'A');
+
+	/* Push it off the visible area: 25 newlines to go from
+	 * row 0 past row 24
+	 */
+	for (int i = 0; i < 25; i++)
+		term.write_char(&term, '\n');
+
+	/* Screen should have scrolled; 'A' no longer visible */
+	EXPECT_EQ(term.cursor_y, (uint16_t)(display.height - 1));
+	EXPECT_GT(term.scroll_count, display.height);
+
+	/* Row 0 on screen should NOT be 'A' anymore (it scrolled away) */
+	EXPECT_NE(char_at(0, 0), 'A');
+}
+
+TEST_F(TerminalTest, ScrollUpShowsOlderContent)
+{
+	/* Write 'Z' on the first visible row */
+	term.write_char(&term, 'Z');
+
+	/* Push it off screen */
+	for (int i = 0; i < 25; i++)
+		term.write_char(&term, '\n');
+
+	/* Scroll up to see the old row */
+	term.scroll(&term, 1);
+
+	EXPECT_EQ(term.view_offset, 1);
+	/* The old row with 'Z' should now be visible at screen row 0 */
+	EXPECT_EQ(char_at(0, 0), 'Z');
+}
+
+TEST_F(TerminalTest, ScrollDownReturnsToLatest)
+{
+	term.write_char(&term, 'Z');
+	for (int i = 0; i < 25; i++)
+		term.write_char(&term, '\n');
+
+	term.scroll(&term, 1);
+	EXPECT_EQ(term.view_offset, 1);
+
+	term.scroll(&term, -1);
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+TEST_F(TerminalTest, ScrollUpClampsAtMaxOffset)
+{
+	/* Create exactly 1 line of scrollback */
+	term.write_char(&term, 'X');
+	for (int i = 0; i < 25; i++)
+		term.write_char(&term, '\n');
+
+	uint16_t max = term.scroll_count - display.height;
+
+	/* Try to scroll past the maximum */
+	term.scroll(&term, (int)(max + 10));
+
+	EXPECT_EQ(term.view_offset, max);
+}
+
+TEST_F(TerminalTest, ScrollDownClampsAtZero)
+{
+	/* Create scrollback and scroll up first */
+	for (int i = 0; i < 30; i++)
+		term.write_char(&term, '\n');
+	term.scroll(&term, 2);
+	EXPECT_GT(term.view_offset, (uint16_t)0);
+
+	/* Scroll down more than view_offset */
+	term.scroll(&term, -100);
+
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+TEST_F(TerminalTest, ScrollDownRestoresCursorAtBottom)
+{
+	for (int i = 0; i < 30; i++)
+		term.write_char(&term, '\n');
+
+	term.scroll(&term, 1);
+	term.scroll(&term, -1);
+
+	/* Cursor highlight should be restored */
+	EXPECT_EQ(attr_at(term.cursor_x, term.cursor_y), BLACK_ON_WHITE);
+}
+
+/* ------------------------------------------------------------------ */
+/*                     Typing snaps scroll to bottom                  */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, TypingSnapsViewToBottom)
+{
+	/* Create scrollback */
+	for (int i = 0; i < 30; i++)
+		term.write_char(&term, '\n');
+
+	term.scroll(&term, 2);
+	EXPECT_GT(term.view_offset, (uint16_t)0);
+
+	/* Type a character - should snap back */
+	term.handle_keyboard_input(&term, 'A');
+
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+/* ------------------------------------------------------------------ */
+/*                     Up/Down key dispatch tests                     */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, UpKeyTriggersScrollUp)
+{
+	/* Create scrollback */
+	for (int i = 0; i < 30; i++)
+		term.write_char(&term, '\n');
+
+	term.handle_keyboard_input(&term, KEY_UP_PRESSED);
+
+	EXPECT_EQ(term.view_offset, 1);
+}
+
+TEST_F(TerminalTest, DownKeyTriggersScrollDown)
+{
+	for (int i = 0; i < 30; i++)
+		term.write_char(&term, '\n');
+
+	term.handle_keyboard_input(&term, KEY_UP_PRESSED);
+	EXPECT_EQ(term.view_offset, 1);
+
+	term.handle_keyboard_input(&term, KEY_DOWN_PRESSED);
+	EXPECT_EQ(term.view_offset, 0);
+}
+
+/* ------------------------------------------------------------------ */
+/*                     Scrollback buffer wrapping test                */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, ScrollbackWrapsCircularBuffer)
+{
+	/* Push more than SCROLL_BUFFER_ROWS lines to force wrap */
+	for (int i = 0; i < SCROLL_BUFFER_ROWS + 10; i++)
+		term.write_char(&term, '\n');
+
+	/* scroll_count should be clamped at SCROLL_BUFFER_ROWS */
+	EXPECT_EQ(term.scroll_count, SCROLL_BUFFER_ROWS);
+
+	/* Should still be able to scroll without crash */
+	uint16_t max = term.scroll_count - display.height;
+
+	term.scroll(&term, (int)max);
+	EXPECT_EQ(term.view_offset, max);
+
+	term.scroll(&term, -(int)max);
+	EXPECT_EQ(term.view_offset, 0);
+}
