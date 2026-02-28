@@ -50,7 +50,7 @@ static void main_loop(system_t *self)
 		uint32_t active = self->active_terminal;
 		terminal_t *term = &sys.terminals[active];
 
-		if (ascii)
+		if (*ascii)
 			term->handle_keyboard_input(term, *ascii);
 		self->keyboard.input = 0;
 		__asm__ volatile("hlt");
