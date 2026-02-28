@@ -88,15 +88,18 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
-	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c
+	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
+	$(SRC_DIR)/kernel/keyboard/keyboard.c
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
+TEST_FIXTURE_SOURCES = $(TEST_DIR)/fixtures/io_stub.c
 TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_strlen.cpp \
 	$(TEST_DIR)/unit/test_strcmp.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \
-	$(TEST_DIR)/unit/test_strncpy.cpp
+	$(TEST_DIR)/unit/test_strncpy.cpp \
+	$(TEST_DIR)/unit/test_keyboard.cpp
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))
@@ -107,7 +110,8 @@ KERNEL_DEPENDENCIES_C = $(patsubst $(SRC_DIR)/%.c,$(KERNEL_DEP_DIR)/%.d,$(KERNEL
 # Object files for test build
 TEST_LIB_OBJECTS_C = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(KERNEL_LIB_SOURCES_C))
 TEST_LIB_OBJECTS_ASM = $(patsubst $(SRC_DIR)/%.s,$(OBJ_DIR)/%.o,$(KERNEL_LIB_SOURCES_ASM))
-TEST_LIB_OBJECTS = $(TEST_LIB_OBJECTS_C) $(TEST_LIB_OBJECTS_ASM)
+TEST_FIXTURE_OBJECTS = $(patsubst $(TEST_DIR)/%.c,$(OBJ_DIR)/%.o,$(TEST_FIXTURE_SOURCES))
+TEST_LIB_OBJECTS = $(TEST_LIB_OBJECTS_C) $(TEST_LIB_OBJECTS_ASM) $(TEST_FIXTURE_OBJECTS)
 TEST_OBJECTS = $(patsubst $(TEST_DIR)/unit/%.cpp,$(OBJ_DIR)/%.o,$(TEST_SOURCES))
 
 # Google Test
@@ -120,7 +124,8 @@ REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers \
 	kernel/terminal kernel/system kernel/print \
 	kernel/interrupts kernel/keyboard
-TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers
+TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
+	kernel/keyboard fixtures
 
 ################################################################################
 #                               PHONY TARGETS                                  #
@@ -287,10 +292,10 @@ debug: $(ISO)
 #                               TEST BUILD RULES                               #
 ################################################################################
 
-# Compile C sources for testing (using g++ for C/C++ compatibility)
+# Compile C sources for testing (using gcc to avoid name mangling)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	@printf "$(INFO) Compiling $< for tests...\n"
-	@$(CXX) $(TEST_CXXFLAGS) -c $< -o $@
+	@$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 # Compile assembly sources for testing (32-bit)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(OBJ_DIR)
@@ -301,6 +306,11 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(OBJ_DIR)
 $(OBJ_DIR)/%.o: $(TEST_DIR)/unit/%.cpp | $(OBJ_DIR)
 	@printf "$(INFO) Compiling test $< ...\n"
 	@$(CXX) $(TEST_CXXFLAGS) -c $< -o $@
+
+# Compile test fixture C files
+$(OBJ_DIR)/%.o: $(TEST_DIR)/%.c | $(OBJ_DIR)
+	@printf "$(INFO) Compiling test fixture $< ...\n"
+	@$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 # Link test runner
 $(TEST_RUNNER): $(TEST_LIB_OBJECTS) $(TEST_OBJECTS)

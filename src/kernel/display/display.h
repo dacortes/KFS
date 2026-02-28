@@ -12,6 +12,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef DISPLAY_H
 #define DISPLAY_H 25
 #endif
@@ -66,3 +70,7 @@ struct display {
  * @note Sets function pointers to the appropriate functions.
  */
 void display_init(display_t *display);
+
+#ifdef __cplusplus
+}
+#endif
