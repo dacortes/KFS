@@ -188,10 +188,15 @@ static void clear_ter(terminal_t *self)
 		return;
 	self->display->clear(self->display);
 	clear_buffer(self->line);
+	self->line_pos = 0;
+	self->line_len = 0;
+	self->cursor_x = 0;
+	self->cursor_y = 0;
 	self->scroll_first = 0;
 	self->scroll_count = self->display->height;
 	self->view_offset = 0;
 	clear_scroll_buf(self);
+	self->write_prefix(self);
 	self->set_cursor_color(self, BLACK_ON_WHITE);
 }
 
@@ -368,22 +373,12 @@ static void handle_backspace(terminal_t *self)
  */
 static void handle_newline(terminal_t *self)
 {
-	const char *prefix = "GOT: ";
-
 	self->save_history(self, self->line);
 	self->write_char(self, '\n');
-
-	while (*prefix) {
-		self->write_char(self, *prefix);
-		prefix++;
-	}
-	for (uint32_t j = 0; j < self->line_len; j++)
-		self->write_char(self, self->line[j]);
-	self->write_char(self, '\n');
-
 	self->line_pos = 0;
 	self->line_len = 0;
 	clear_buffer(self->line);
+	self->write_prefix(self);
 }
 
 /**
@@ -513,6 +508,20 @@ static void move_cursor(terminal_t *self, int direction)
 }
 
 /**
+ * write_prefix - Write the terminal prompt prefix
+ * @self: Terminal instance
+ *
+ * Outputs the terminal prefix string at the current cursor
+ * position using write_string.
+ */
+static void write_prefix(terminal_t *self)
+{
+	if (!self)
+		return;
+	self->write_string(self, self->prefix);
+}
+
+/**
  * terminal_init - Initialize a terminal instance
  * @self: Terminal instance to initialize
  * @display: Display device for output
@@ -527,6 +536,8 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 
 	self->id = id;
 	ft_strcpy(self->name, "virtual Terminal");
+	ft_strcpy(self->prefix, TERMINAL_PREFIX);
+	self->prefix_len = TERMINAL_PREFIX_LEN;
 	for (int i = 0; i < TERMINAL_HISTORY_SIZE; i++)
 		self->history[i][0] = '\0';
 	self->his_size = 0;
@@ -551,8 +562,11 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->scroll = scroll_ter;
 	self->write_char = write_char;
 	self->write_string = write_string;
+	self->write_prefix = write_prefix;
 	self->handle_keyboard_input = handle_keyboard_input;
 	self->save_history = save_history;
 	self->set_cursor_color = set_cursor_color;
 	self->move_cursor = move_cursor;
+
+	self->write_prefix(self);
 }

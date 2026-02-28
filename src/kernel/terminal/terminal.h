@@ -40,6 +40,14 @@ extern "C" {
 #define SCROLL_BUFFER_ROWS 200
 #endif
 
+#ifndef TERMINAL_PREFIX
+#define TERMINAL_PREFIX "<42> : "
+#endif
+
+#ifndef TERMINAL_PREFIX_LEN
+#define TERMINAL_PREFIX_LEN 7
+#endif
+
 #ifndef BLACK_ON_WHITE
 #define BLACK_ON_WHITE 0x70
 #endif
@@ -70,6 +78,8 @@ typedef struct terminal_s terminal_t;
  * @line_pos: Current position in line buffer
  * @line_len: Current length of line buffer
  * @cursor_char: Character currently under the cursor
+ * @prefix: Terminal prompt prefix string
+ * @prefix_len: Length of the prefix string
  * @scroll_buf: Circular buffer storing scrollback row content
  * @scroll_first: Index of oldest row in circular scrollback buffer
  * @scroll_count: Number of valid rows in scrollback buffer
@@ -83,6 +93,7 @@ typedef struct terminal_s terminal_t;
  * @save_history: Function to save text to history
  * @set_cursor_color: Function to set cursor cell color
  * @move_cursor: Function to move cursor left or right
+ * @write_prefix: Function to write the terminal prefix/prompt
  */
 struct terminal_s {
 	uint32_t		id;
@@ -96,6 +107,9 @@ struct terminal_s {
 	uint16_t		cursor_y;
 	uint8_t			curr_color;
 	char			cursor_char;
+
+	char			prefix[MAX_NAME];
+	uint16_t		prefix_len;
 
 	display_t		*display;
 
@@ -123,6 +137,7 @@ struct terminal_s {
 
 	void (*set_cursor_color)(terminal_t *self, uint8_t color);
 	void (*move_cursor)(terminal_t *self, int direction);
+	void (*write_prefix)(terminal_t *self);
 };
 
 /**
