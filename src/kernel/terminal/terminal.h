@@ -10,11 +10,15 @@
 
 #pragma once
 
-#include <display.h>
+#include <kernel/display/display.h>
 #include <stdint.h>
-#include <helper.h>
-#include <keyboard.h>
+#include <kernel/wrappers/helper.h>
+#include <kernel/keyboard/keyboard.h>
 #include <color_parser.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef MAX_NAME
 #define MAX_NAME 32
@@ -29,8 +33,25 @@
 #endif
 
 #ifndef TERMINAL_HISTORY_LEN
-#define TERMINAL_HISTORY_LEN 80 
+#define TERMINAL_HISTORY_LEN 80
 #endif
+
+#ifndef SCROLL_BUFFER_ROWS
+#define SCROLL_BUFFER_ROWS 200
+#endif
+
+#ifndef BLACK_ON_WHITE
+#define BLACK_ON_WHITE 0x70
+#endif
+
+#ifndef CURSOR_LEFT
+#define CURSOR_LEFT -1
+#endif
+
+#ifndef CURSOR_RIGHT
+#define CURSOR_RIGHT 1
+#endif
+
 
 typedef struct terminal_s terminal_t;
 
@@ -48,14 +69,20 @@ typedef struct terminal_s terminal_t;
  * @line: Current input line buffer
  * @line_pos: Current position in line buffer
  * @line_len: Current length of line buffer
+ * @cursor_char: Character currently under the cursor
+ * @scroll_buf: Circular buffer storing scrollback row content
+ * @scroll_first: Index of oldest row in circular scrollback buffer
+ * @scroll_count: Number of valid rows in scrollback buffer
+ * @view_offset: Lines scrolled up from the bottom (0 = latest)
  * @write_char: Function to write a single character
  * @write_string: Function to write a string
  * @clear: Function to clear the terminal
- * @scroll_up: Function to scroll up (not yet implemented)
- * @scroll_down: Function to scroll down (not yet implemented)
+ * @scroll: Function to scroll view (positive = up, negative = down)
  * @set_color: Function to set text color (not yet implemented)
- * @push_char: Function to handle keyboard input
+ * @handle_keyboard_input: Function to handle keyboard input
  * @save_history: Function to save text to history
+ * @set_cursor_color: Function to set cursor cell color
+ * @move_cursor: Function to move cursor left or right
  */
 struct terminal_s {
 	uint32_t		id;
@@ -68,8 +95,14 @@ struct terminal_s {
 	uint16_t		cursor_x;
 	uint16_t		cursor_y;
 	uint8_t			curr_color;
+	char			cursor_char;
 
 	display_t		*display;
+
+	char			scroll_buf[SCROLL_BUFFER_ROWS][DISPLAY_W];
+	uint16_t		scroll_first;
+	uint16_t		scroll_count;
+	uint16_t		view_offset;
 
 	char			line[DEVICE_BUFFER_SIZE];
 	uint32_t		line_pos;
@@ -81,13 +114,15 @@ struct terminal_s {
 	void (*write_string)(terminal_t *self, const char *string);
 	void (*clear)(terminal_t *self);
 
-	void (*scroll_up)(terminal_t *self, uint32_t lines);
-	void (*scroll_down)(terminal_t *self, uint32_t lines);
+	void (*scroll)(terminal_t *self, int lines);
 	void (*set_color)(terminal_t *self, uint8_t color);
 
-	void (*push_char)(terminal_t *self, char input);
+	void (*handle_keyboard_input)(terminal_t *self, unsigned char input);
 
 	void (*save_history)(terminal_t *self, const char *text);
+
+	void (*set_cursor_color)(terminal_t *self, uint8_t color);
+	void (*move_cursor)(terminal_t *self, int direction);
 };
 
 /**
@@ -95,5 +130,10 @@ struct terminal_s {
  *
  * @param terminal Pointer to the terminal struct to initialize
  * @param display Pointer to the display device to use for output
+ * @param id Unique identifier for the terminal instance
  */
 void terminal_init(terminal_t	*terminal, display_t *display, uint32_t id);
+
+#ifdef __cplusplus
+}
+#endif

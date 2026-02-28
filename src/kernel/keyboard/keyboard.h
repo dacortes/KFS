@@ -10,7 +10,10 @@
 
 #pragma once
 
-#include <kernel/display/display.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define KEYBOARD_DATA_PORT	0x60
 #define KEYBOARD_STATUS_PORT	0x64
@@ -25,16 +28,19 @@
 #define KEY_LCTRL_RELEASED	0x9D
 #define KEY_BACKSPACE		0x0E
 #define KEY_ENTER			0x1C
-#define KEY_UP_PRESSED      0x48
+#define KEY_UP_PRESSED      0x81
 #define KEY_UP_RELEASED     0xC8
-#define KEY_DOWN_PRESSED    0x50
+#define KEY_DOWN_PRESSED    0x82
 #define KEY_DOWN_RELEASED   0xD0
-#define KEY_LEFT_PRESSED    0x4B
+#define KEY_LEFT_PRESSED    0x83
 #define KEY_LEFT_RELEASED   0xCB
-#define KEY_RIGHT_PRESSED   0x4D
+#define KEY_RIGHT_PRESSED   0x84
 #define KEY_RIGHT_RELEASED  0xCD
 
+#define SHORTCUT_BUFFER_MAX 10
+
 typedef struct keyboard keyboard_t;
+typedef void (*shortcut_handler_t)(const unsigned char *keys, int count);
 /**
  * Keyboard state structure
  *
@@ -43,7 +49,14 @@ typedef struct keyboard keyboard_t;
 struct keyboard {
 	unsigned char	shift_pressed;
 	unsigned char	ctrl_pressed;
-	volatile char	input;
+	unsigned char	extended_code;
+	unsigned char	input;
+	unsigned char	shortcut_buffer[SHORTCUT_BUFFER_MAX];
+	int		shortcut_count;
+	shortcut_handler_t shortcut_handler;
+	void (*process_scancode)(struct keyboard *self, unsigned char scancode);
+	void (*set_shortcut_handler)(struct keyboard *self,
+				     shortcut_handler_t handler);
 };
 
 
@@ -51,7 +64,6 @@ struct keyboard {
  * Initialize the keyboard driver
  *
  * @param kbd Keyboard structure to initialize
- * @param disp Display for output
  */
 void keyboard_init(keyboard_t *self);
 
@@ -69,3 +81,7 @@ void keyboard_interrupt(void);
  * @param kbd Keyboard instance to use in interrupt handler
  */
 void keyboard_set_instance(keyboard_t *self);
+
+#ifdef __cplusplus
+}
+#endif

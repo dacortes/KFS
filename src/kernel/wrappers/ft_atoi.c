@@ -6,7 +6,7 @@ int	ft_atoi(const char *str)
 {
 	int				s;
 	unsigned int	c;
-	long int		r;
+	long			r;
 
 	s = 1;
 	c = 0;
@@ -18,8 +18,7 @@ int	ft_atoi(const char *str)
 	if (str[c] == '+' || str[c] == '-')
 		if (str[c++] == '-')
 			s *= -1;
-	while (ft_isdigit(str[c]))
-	{
+	while (ft_isdigit(str[c])) {
 		r = (r * 10) + str[c] - 48;
 		c++;
 	}

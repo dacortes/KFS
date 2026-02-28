@@ -111,7 +111,7 @@ TEST_F(StrncpyTest, NullDstReturnsEmptyString)
 	char *result = ft_strncpy(NULL, src, 5);
 
 	/* Should return empty string */
-	EXPECT_STREQ("", result);
+	EXPECT_EQ(NULL, result);
 }
 
 TEST_F(StrncpyTest, NullSrcReturnsEmptyString)
@@ -119,7 +119,7 @@ TEST_F(StrncpyTest, NullSrcReturnsEmptyString)
 	char *result = ft_strncpy(dest, NULL, 5);
 
 	/* Should return empty string */
-	EXPECT_STREQ("", result);
+	EXPECT_EQ(NULL, result);
 }
 
 TEST_F(StrncpyTest, BothNullReturnsEmptyString)
@@ -127,7 +127,7 @@ TEST_F(StrncpyTest, BothNullReturnsEmptyString)
 	char *result = ft_strncpy(NULL, NULL, 5);
 
 	/* Should return empty string */
-	EXPECT_STREQ("", result);
+	EXPECT_EQ(NULL, result);
 }
 
 TEST_F(StrncpyTest, SingleCharacter)

@@ -41,20 +41,18 @@ static void create_terminal(void)
  */
 static void main_loop(system_t *self)
 {
-	uint32_t		active;
-	volatile char	*ascii;
-	terminal_t		*term;
 
 	if (!self)
 		return;
 
 	while (1) {
-		ascii = &self->keyboard.input;
-		active = self->active_terminal;
-		term = &sys.terminals[active];
+		unsigned char *ascii = &self->keyboard.input;
+		uint32_t active = self->active_terminal;
+		terminal_t *term = &sys.terminals[active];
+
 		if (ascii)
-			term->push_char(term, *ascii);
-		*ascii = 0;
+			term->handle_keyboard_input(term, *ascii);
+		self->keyboard.input = 0;
 		__asm__ volatile("hlt");
 	}
 }
@@ -92,7 +90,7 @@ void init_system(void)
 	/* Enable interrupts */
 	__asm__ volatile("sti");
 
-	sys.terminals[sys.active_terminal].clear(&sys.terminals[sys.active_terminal]);
+	//sys.terminals[sys.active_terminal].clear(&sys.terminals[sys.active_terminal]);
 	sys.terminals[0].write_string(&sys.terminals[0], "<42> : ");
 	sys.main_loop = main_loop;
 }
