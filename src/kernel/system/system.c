@@ -90,7 +90,5 @@ void init_system(void)
 	/* Enable interrupts */
 	__asm__ volatile("sti");
 
-	//sys.terminals[sys.active_terminal].clear(&sys.terminals[sys.active_terminal]);
-	sys.terminals[0].write_string(&sys.terminals[0], "<42> : ");
 	sys.main_loop = main_loop;
 }
