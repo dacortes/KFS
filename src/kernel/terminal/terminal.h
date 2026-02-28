@@ -10,10 +10,14 @@
 
 #pragma once
 
-#include <display.h>
+#include <kernel/display/display.h>
 #include <stdint.h>
-#include <helper.h>
-#include <keyboard.h>
+#include <kernel/wrappers/helper.h>
+#include <kernel/keyboard/keyboard.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef MAX_NAME
 #define MAX_NAME 32
@@ -71,7 +75,7 @@ typedef struct terminal_s terminal_t;
  * @set_color: Function to set text color (not yet implemented)
  * @handle_keyboard_input: Function to handle keyboard input
  * @save_history: Function to save text to history
- * @update_cursor: Function to update cursor visual state
+ * @set_cursor_color: Function to set cursor cell color
  * @move_cursor: Function to move cursor left or right
  */
 struct terminal_s {
@@ -105,7 +109,7 @@ struct terminal_s {
 
 	void (*save_history)(terminal_t *self, const char *text);
 
-	void (*update_cursor)(terminal_t *self);
+	void (*set_cursor_color)(terminal_t *self, uint8_t color);
 	void (*move_cursor)(terminal_t *self, int direction);
 };
 
@@ -116,3 +120,7 @@ struct terminal_s {
  * @param display Pointer to the display device to use for output
  */
 void terminal_init(terminal_t	*terminal, display_t *display);
+
+#ifdef __cplusplus
+}
+#endif
