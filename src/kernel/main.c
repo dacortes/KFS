@@ -9,6 +9,7 @@
  */
 
 #include <system.h>
+#include <print.h>
 
 /* Helper string builders are intentionally retained as commented-out
  * examples for future reference.

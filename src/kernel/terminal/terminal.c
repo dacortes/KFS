@@ -264,12 +264,12 @@ static void write_char(terminal_t *self, char c)
  *
  * Writes each character in the string and saves it to history.
  */
-static void write_string(terminal_t *self, const char *str)
+static int write_string(terminal_t *self, const char *str)
 {
 	unsigned int i;
 
 	if (!self || !str)
-		return;
+		return 0;
 
 	if (!*str)
 		self->save_history(self, str);
@@ -278,6 +278,7 @@ static void write_string(terminal_t *self, const char *str)
 		self->write_char(self, str[i]);
 		i++;
 	}
+	return i;
 }
 
 /**

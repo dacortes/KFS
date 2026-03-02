@@ -126,7 +126,7 @@ struct terminal_s {
 	color_parser_t	color_parser;
 
 	void (*write_char)(terminal_t *self, char c);
-	void (*write_string)(terminal_t *self, const char *string);
+	int (*write_string)(terminal_t *self, const char *string);
 	void (*clear)(terminal_t *self);
 
 	void (*scroll)(terminal_t *self, int lines);

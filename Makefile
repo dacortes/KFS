@@ -45,7 +45,9 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+
 TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
 TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
 TEST_LDFLAGS = -m32
@@ -73,6 +75,9 @@ KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/isr.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/display/display.c \
+	$(SRC_DIR)/kernel/print/printf.c \
+	$(SRC_DIR)/kernel/print/write.c \
+	$(SRC_DIR)/kernel/print/formats.c \
 	$(SRC_DIR)/kernel/system/system.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
@@ -96,6 +101,7 @@ INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode
