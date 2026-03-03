@@ -68,3 +68,9 @@ int	formats(va_list *args, char const type, int *count);
  * @return Number of characters printed, or -1 on error.
  */
 int printf(const char *str, ...);
+
+/* Runtime hook to redirect write() output temporarily. Used by
+ * `printk` to capture formatted output into a buffer. */
+typedef int (*write_fn_t)(const char *text, unsigned int count);
+int set_global_writer(write_fn_t fn);
+int write_redirectable(const char *text, unsigned int count);

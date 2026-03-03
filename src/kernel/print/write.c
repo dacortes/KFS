@@ -24,3 +24,25 @@ int write(const char *text, unsigned int count)
 	terminal->write_char(terminal, *text);
 	return terminal->write_string(terminal, text);
 }
+
+/* Redirectable writer support: allows printf/format routines to
+ * temporarily capture output into a buffer by setting a custom
+ * writer function. By default the writer is NULL and the behavior
+ * falls back to the terminal write above.
+ */
+typedef int (*write_fn_t)(const char *text, unsigned int count);
+
+static write_fn_t global_writer;
+
+int set_global_writer(write_fn_t fn)
+{
+	global_writer = fn;
+	return 0;
+}
+
+int write_redirectable(const char *text, unsigned int count)
+{
+	if (global_writer)
+		return global_writer(text, count);
+	return write(text, count);
+}

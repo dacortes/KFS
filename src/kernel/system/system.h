@@ -33,6 +33,8 @@
 #define MAX_TERMINAL 2
 #endif
 
+#include <system_log.h>
+
 typedef struct system_s system_t;
 
 /**
@@ -57,7 +59,7 @@ struct system_s {
 	uint32_t active_terminal;
 
 	/* Pointer reserved for a system-wide logger (unused). */
-	// system_log_t *syslog;
+	system_log_t	syslog;
 
     void (*init)(system_t *self);
 	void (*main_loop)(system_t *self);

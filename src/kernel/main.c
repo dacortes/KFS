@@ -28,6 +28,8 @@
 int kernel_main(void)
 {
 	init_system();
+	printf("Welcome to KFS! Active terminal: %u\n", sys.active_terminal);
+	kprintk(KERN_INFO, "Kernel initialized successfully.\n");
 	sys.main_loop(&sys);
 	return 0;
 }

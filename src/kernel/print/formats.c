@@ -11,7 +11,7 @@
 
 int char_format(char c, int *count)
 {
-	if (write(&c, 1) == -1)
+	if (write_redirectable(&c, 1) == -1)
 		return (-1);
 	*count = (*count + 1);
 	return *count;

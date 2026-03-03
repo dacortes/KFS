@@ -75,10 +75,12 @@ KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/isr.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/display/display.c \
+	$(SRC_DIR)/kernel/print/printk.c \
 	$(SRC_DIR)/kernel/print/printf.c \
 	$(SRC_DIR)/kernel/print/write.c \
 	$(SRC_DIR)/kernel/print/formats.c \
 	$(SRC_DIR)/kernel/system/system.c \
+	$(SRC_DIR)/kernel/system/system_log.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
