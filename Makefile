@@ -135,7 +135,8 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_isdigit.cpp \
 	$(TEST_DIR)/unit/test_memchr.cpp \
 	$(TEST_DIR)/unit/test_memset.cpp \
-	$(TEST_DIR)/unit/test_strchr.cpp
+	$(TEST_DIR)/unit/test_strchr.cpp \
+	$(TEST_DIR)/unit/test_printf.cpp
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))

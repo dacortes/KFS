@@ -613,8 +613,6 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->set_offset = set_offset;
 
 	self->write_prefix(self);
-
-	terminal_draw_title(self, 0);
 }
 
 
