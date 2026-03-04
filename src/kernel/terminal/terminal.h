@@ -92,7 +92,7 @@ typedef struct terminal_s terminal_t;
  * @write_string: Function to write a string
  * @clear: Function to clear the terminal
  * @scroll: Function to scroll view (positive = up, negative = down)
- * @set_color: Function to set text color (not yet implemented)
+ * @set_color: Function to set text color for subsequent output
  * @handle_keyboard_input: Function to handle keyboard input
  * @save_history: Function to save text to history
  * @set_cursor_color: Function to set cursor cell color

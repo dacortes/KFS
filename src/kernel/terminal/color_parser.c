@@ -14,7 +14,19 @@
  *
  * Return: VGA attribute byte for the given ANSI color code.
  */
-static uint8_t ansi_to_display_color(int ansi_number)
+/**
+ * ansi_to_vga_color - Map ANSI color number to VGA attribute
+ * @ansi_number: ANSI SGR color code
+ *
+ * Return: VGA attribute byte for the given ANSI color code.
+ *
+ * Historically the local name was ansi_to_display_color; the parser
+ * API uses "vga" terminology so we keep this name everywhere to
+ * prevent confusion.  The mapping attempts to isolate the foreground
+ * or background component depending on the code so that callers can
+ * combine results if both are specified.
+ */
+static uint8_t ansi_to_vga_color(int ansi_number)
 {
 	switch (ansi_number) {
 	/* Foreground (30-37) */

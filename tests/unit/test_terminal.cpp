@@ -99,6 +99,16 @@ TEST_F(TerminalTest, CursorAppearsAfterInit)
 	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), BLACK_ON_WHITE);
 }
 
+TEST_F(TerminalTest, WriteStringWithEscapeSetsColor)
+{
+	/* verify that an ANSI foreground sequence is stripped and color applied */
+	term.clear(&term);
+	term.curr_color = WHITE_ON_BLACK;
+	term.write_string(&term, "\033[31mA");
+	EXPECT_EQ(term.curr_color, RED_ON_BLACK);
+	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), RED_ON_BLACK);
+}
+
 /* ------------------------------------------------------------------ */
 /*                     Character input tests                          */
 /* ------------------------------------------------------------------ */

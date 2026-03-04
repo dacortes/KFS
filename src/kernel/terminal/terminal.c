@@ -284,15 +284,23 @@ static void write_char(terminal_t *self, char c)
 static int write_string(terminal_t *self, const char *str)
 {
 	unsigned int i;
+	char cleaned[DEVICE_BUFFER_SIZE];
 
 	if (!self || !str)
 		return 0;
 
+	/* remove any ANSI sequences and update parser state */
+	self->color_parser.parser_strip(&self->color_parser, str,
+		cleaned, DEVICE_BUFFER_SIZE);
+	/* apply resulting color to terminal/display */
+	self->set_color(self, color_parser_get_color(&self->color_parser));
+
+	/* history logic preserved from original implementation */
 	if (!*str)
 		self->save_history(self, str);
 	i = 0;
-	while (str[i]) {
-		self->write_char(self, str[i]);
+	while (cleaned[i]) {
+		self->write_char(self, cleaned[i]);
 		i++;
 	}
 	return i;
@@ -319,6 +327,23 @@ static void set_cursor_color(terminal_t *self, uint8_t color)
 		 self->display->char_size;
 	video = self->display->videomemptr + offset;
 	video[1] = color;
+}
+
+/**
+ * set_color - change the current text attribute for subsequent output
+ * @self: Terminal instance
+ * @color: VGA attribute byte (foreground|background<<4)
+ *
+ * The display subsystem uses its own `color` field when rendering
+ * characters, so keep it in sync with the terminal state as well.
+ */
+static void set_color(terminal_t *self, uint8_t color)
+{
+	if (!self)
+		return;
+	self->curr_color = color;
+	if (self->display)
+		self->display->color = color;
 }
 
 /**
@@ -608,9 +633,13 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->handle_keyboard_input = handle_keyboard_input;
 	self->save_history = save_history;
 	self->set_cursor_color = set_cursor_color;
+	self->set_color = set_color;
 	self->move_cursor = move_cursor;
 	self->render = render_view;
 	self->set_offset = set_offset;
+
+	/* initialize ANSI colour parser */
+	color_parser_init(&self->color_parser);
 
 	self->write_prefix(self);
 

@@ -19,6 +19,7 @@ struct color_parser_s
 	char	buffer[COLOR_BUFFER_SIZE];
 	uint8_t buffer_pos;
 
+	/* the most recent decoded components; callers combine them */
 	uint8_t	last_foreground;
 	uint8_t	last_background;
 
@@ -26,6 +27,15 @@ struct color_parser_s
 	const char *(*parser_strip)(color_parser_t *self, const char *input, char *output, int max_len);
 	void (*parser_reset)(color_parser_t *self);
 };
+
+/* helper to compute full VGA attribute from the parser state */
+static inline uint8_t color_parser_get_color(const color_parser_t *self)
+{
+	if (!self)
+		return WHITE_ON_BLACK;
+	/* foreground lives in low nibble, background in high */
+	return (self->last_foreground & 0x0F) | (self->last_background & 0xF0);
+}
 
 void color_parser_init(color_parser_t *parser);
 

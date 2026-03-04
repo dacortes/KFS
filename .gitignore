@@ -63,3 +63,4 @@ test_runner
 coverage_report/
 build/
 *.iso
+.vscode
