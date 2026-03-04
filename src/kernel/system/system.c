@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <system.h>
+#include <kernel/print/print.h>
 
 /**
  * @file system.c
@@ -25,13 +26,25 @@ system_t sys;
 static void switch_terminal(system_t *self, uint32_t id)
 {
 	terminal_t *term;
+	uint32_t prev;
 
 	if (!self || id >= MAX_TERMINAL || id == self->active_terminal)
 		return;
+
+	/* Update title windows: mark previous as inactive and new as active */
+	prev = self->active_terminal;
+	if (prev < MAX_TERMINAL)
+		terminal_draw_title(&self->terminals[prev], 0);
+
 	self->active_terminal = id;
 	term = &self->terminals[id];
+	/* Draw active title */
+	terminal_draw_title(term, 1);
+
 	term->set_offset(term, 0);
 	term->render(term);
+
+	kprintk(KERN_INFO, "Switched to terminal %u\n", id);
 }
 
 /**
@@ -68,7 +81,15 @@ static void create_terminal(void)
 		terminal_init(&sys.terminals[i], &sys.display, i);
 		sys.terminals[i].clear(&sys.terminals[i]);
 	}
+
+	/* Draw title windows for all terminals (inactive), then select 0 */
+	for (int i = 0; i < MAX_TERMINAL; i++)
+		terminal_draw_title(&sys.terminals[i], 0);
+
 	sys.active_terminal = 0;
+	/* highlight active */
+	if (MAX_TERMINAL > 0)
+		terminal_draw_title(&sys.terminals[0], 1);
 }
 
 /**
@@ -119,6 +140,8 @@ void init_system(void)
 {
 	display_init(&sys.display);
 	sys.display.clear(&sys.display);
+
+	system_log_init(&sys.syslog);
 
 	create_terminal();
 

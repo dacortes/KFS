@@ -60,6 +60,10 @@ extern "C" {
 #define CURSOR_RIGHT 1
 #endif
 
+#ifndef TITLE_HEIGHT
+#define TITLE_HEIGHT 1
+#endif
+
 
 typedef struct terminal_s terminal_t;
 
@@ -126,7 +130,7 @@ struct terminal_s {
 	color_parser_t	color_parser;
 
 	void (*write_char)(terminal_t *self, char c);
-	void (*write_string)(terminal_t *self, const char *string);
+	int (*write_string)(terminal_t *self, const char *string);
 	void (*clear)(terminal_t *self);
 
 	void (*scroll)(terminal_t *self, int lines);
@@ -151,6 +155,10 @@ struct terminal_s {
  * @param id Unique identifier for the terminal instance
  */
 void terminal_init(terminal_t	*terminal, display_t *display, uint32_t id);
+
+/* Draw the small title/window in the top-right corner for this terminal.
+ * @active: non-zero for highlighted (selected) state. */
+void terminal_draw_title(terminal_t *self, int active);
 
 #ifdef __cplusplus
 }

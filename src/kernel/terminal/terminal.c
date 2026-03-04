@@ -53,8 +53,22 @@ static void buf_write(terminal_t *self, uint16_t x, uint16_t y,
 {
 	uint16_t base;
 	uint16_t row;
+	int vis_h;
 
-	base = self->scroll_count - self->display->height;
+	if (!self)
+		return;
+
+	/* Ignore writes that fall into the title area */
+	if (y < TITLE_HEIGHT)
+		return;
+
+	vis_h = (int)self->display->height - TITLE_HEIGHT;
+	if (vis_h <= 0)
+		return;
+
+	/* map screen y into scroll buffer relative row */
+	y = y - TITLE_HEIGHT;
+	base = (self->scroll_count > (uint16_t)vis_h) ? (self->scroll_count - vis_h) : 0;
 	row = (self->scroll_first + base + y) % SCROLL_BUFFER_ROWS;
 	self->scroll_buf[row][x] = c;
 }
@@ -89,7 +103,8 @@ static void scroll_line_up(terminal_t *self)
 		self->scroll_buf[row_idx][i] = ' ';
 
 	line_bytes = self->display->width * self->display->char_size;
-	for (y = 0; y < (int)self->display->height - 1; y++) {
+	/* shift only the visible area (below title) up by one */
+	for (y = TITLE_HEIGHT; y < (int)self->display->height - 1; y++) {
 		dst = self->display->videomemptr + y * line_bytes;
 		src = dst + line_bytes;
 		for (i = 0; i < (int)line_bytes; i++)
@@ -97,7 +112,7 @@ static void scroll_line_up(terminal_t *self)
 	}
 
 	dst = self->display->videomemptr +
-	      ((int)self->display->height - 1) * line_bytes;
+		  ((int)self->display->height - 1) * line_bytes;
 	for (i = 0; i < (int)line_bytes; i += self->display->char_size) {
 		dst[i] = ' ';
 		dst[i + 1] = self->display->color;
@@ -123,21 +138,23 @@ static void render_view(terminal_t *self)
 	if (!self)
 		return;
 
-	if (self->scroll_count <= self->display->height)
+	int vis_h = (int)self->display->height - TITLE_HEIGHT;
+
+	if (vis_h <= 0)
+		return;
+
+	if (self->scroll_count <= (uint16_t)vis_h)
 		base = 0;
 	else
-		base = self->scroll_count - self->display->height
-		       - self->view_offset;
+		base = self->scroll_count - (uint16_t)vis_h - self->view_offset;
 
-	for (y = 0; y < (int)self->display->height; y++) {
-		uint16_t row = (self->scroll_first + base + y) %
-		      SCROLL_BUFFER_ROWS;
+	for (y = 0; y < vis_h; y++) {
+		uint16_t row = (self->scroll_first + base + y) % SCROLL_BUFFER_ROWS;
 
 		for (x = 0; x < (int)self->display->width; x++) {
 			char c = self->scroll_buf[row][x];
 
-			self->display->put_at(self->display,
-					      c, x, y);
+			self->display->put_at(self->display, c, x, y + TITLE_HEIGHT);
 		}
 	}
 
@@ -160,10 +177,10 @@ static void scroll_ter(terminal_t *self, int lines)
 	uint16_t max_offset;
 	int i;
 
-	if (!self || self->scroll_count <= self->display->height)
+	if (!self || self->scroll_count <= (uint16_t)(self->display->height - TITLE_HEIGHT))
 		return;
 
-	max_offset = self->scroll_count - self->display->height;
+	max_offset = self->scroll_count - (uint16_t)(self->display->height - TITLE_HEIGHT);
 
 	if (lines > 0) {
 		for (i = 0; i < lines &&
@@ -196,9 +213,9 @@ static void clear_ter(terminal_t *self)
 	self->line_pos = 0;
 	self->line_len = 0;
 	self->cursor_x = 0;
-	self->cursor_y = 0;
+	self->cursor_y = TITLE_HEIGHT;
 	self->scroll_first = 0;
-	self->scroll_count = self->display->height;
+	self->scroll_count = self->display->height - TITLE_HEIGHT;
 	self->view_offset = 0;
 	clear_scroll_buf(self);
 	self->write_prefix(self);
@@ -264,12 +281,12 @@ static void write_char(terminal_t *self, char c)
  *
  * Writes each character in the string and saves it to history.
  */
-static void write_string(terminal_t *self, const char *str)
+static int write_string(terminal_t *self, const char *str)
 {
 	unsigned int i;
 
 	if (!self || !str)
-		return;
+		return 0;
 
 	if (!*str)
 		self->save_history(self, str);
@@ -278,6 +295,7 @@ static void write_string(terminal_t *self, const char *str)
 		self->write_char(self, str[i]);
 		i++;
 	}
+	return i;
 }
 
 /**
@@ -551,7 +569,15 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 		return;
 
 	self->id = id;
-	ft_strcpy(self->name, "virtual Terminal");
+	/* Default name includes terminal id */
+	ft_strcpy(self->name, "tty ");
+	/* append single digit id when small */
+	if (id < 10) {
+		self->name[4] = '0' + (char)id;
+		self->name[5] = '\0';
+	} else {
+		self->name[4] = '\0';
+	}
 	ft_strcpy(self->prefix, TERMINAL_PREFIX);
 	self->prefix_len = TERMINAL_PREFIX_LEN;
 	for (int i = 0; i < TERMINAL_HISTORY_SIZE; i++)
@@ -566,7 +592,7 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->display = display;
 
 	self->scroll_first = 0;
-	self->scroll_count = display->height;
+	self->scroll_count = display->height - TITLE_HEIGHT;
 	self->view_offset = 0;
 	clear_scroll_buf(self);
 
@@ -587,4 +613,25 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->set_offset = set_offset;
 
 	self->write_prefix(self);
+}
+
+
+void terminal_draw_title(terminal_t *self, int active)
+{
+	int x = 0;
+	int y = 0;
+	unsigned char old_color;
+
+	if (!self || !self->display)
+		return;
+
+	old_color = self->display->color;
+	self->display->color = active ? BLACK_ON_WHITE : WHITE_ON_BLACK;
+
+	self->display->put_at(self->display, '\0', x, y);
+	for (int i = 0; i < (int)ft_strlen(self->name); i++)
+		self->display->put_at(self->display, self->name[i], x + 1 + i, y);
+	self->display->put_at(self->display, '\0', x + 1 + (int)ft_strlen(self->name), y);
+
+	self->display->color = old_color;
 }
