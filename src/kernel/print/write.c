@@ -17,11 +17,20 @@ int write(const char *text, unsigned int count)
 
 	terminal_t  *terminal = &sys.terminals[sys.active_terminal];
 
+	/* Ensure ANSI sequences are stripped by always using write_string.
+	 * For single-character writes create a temporary nul-terminated buffer
+	 * so callers that pass non-terminated chars (common in formatting)
+	 * are handled correctly. For multi-char writes assume the provided
+	 * string is nul-terminated (common caller behaviour) and pass it
+	 * through the terminal string path which runs the color parser.
+	 */
 	if (count == 1) {
-		terminal->write_char(terminal, *text);
-		return 1;
+		char tmp[2];
+		tmp[0] = *text;
+		tmp[1] = '\0';
+		return terminal->write_string(terminal, tmp);
 	}
-	terminal->write_char(terminal, *text);
+
 	return terminal->write_string(terminal, text);
 }
 

@@ -183,7 +183,11 @@ static const char *parser_strip(color_parser_t *self,
 
 	in_pos = 0;
 	out_pos = 0;
-	self->parser_reset(self);
+	/* Do not reset parser state here: preserve partial escape
+	 * sequences across multiple write() calls so that printf-style
+	 * code which emits characters one-by-one correctly completes
+	 * sequences and updates colors when the final 'm' arrives.
+	 */
 
 	while (input[in_pos] && out_pos < max_len - 1) {
 		int result = self->parser_process(self, input[in_pos]);

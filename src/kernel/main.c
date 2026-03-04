@@ -11,6 +11,16 @@
 #include <system.h>
 #include <print.h>
 
+#define END	"\033[m"
+#define RED	"\033[1;31m"
+#define GREEN	"\033[1;32m"
+#define YELLOW	"\033[1;33m"
+#define BLUE	"\033[1;34m"
+#define TUR	"\033[1;35m"
+#define CYAN	"\033[1;36m"
+#define ORANGE	"\033[38;5;208m"
+#define PURPLE	"\033[38;5;128m"
+
 /* Helper string builders are intentionally retained as commented-out
  * examples for future reference.
  */
@@ -30,6 +40,8 @@ int kernel_main(void)
 	init_system();
 	printf("Welcome to KFS! Active terminal: %u\n", sys.active_terminal);
 	kprintk(KERN_INFO, "Kernel initialized successfully.\n");
+	sys.terminals[sys.active_terminal].write_string(&sys.terminals[sys.active_terminal],
+		" \033[1;33m Kernel initialized successfully.\033[0m\n");
 	sys.main_loop(&sys);
 	return 0;
 }
