@@ -69,3 +69,27 @@ TEST_F(ColorParserTest, ResetReturnsDefault)
     EXPECT_EQ(parser.last_foreground, WHITE_ON_BLACK);
     EXPECT_EQ(parser.last_background, BLACK_ON_BLACK);
 }
+
+TEST_F(ColorParserTest, AnsiResetCodeZeroResetsForegroundAndBackground)
+{
+    char out[DEVICE_BUFFER_SIZE];
+
+    parser.parser_strip(&parser, "\033[31;46mA", out, sizeof(out));
+    EXPECT_NE(color_parser_get_color(&parser), WHITE_ON_BLACK);
+
+    parser.parser_strip(&parser, "\033[0mB", out, sizeof(out));
+    EXPECT_STREQ(out, "B");
+    EXPECT_EQ(color_parser_get_color(&parser), WHITE_ON_BLACK);
+}
+
+TEST_F(ColorParserTest, EmptyAnsiResetCodeResetsForegroundAndBackground)
+{
+    char out[DEVICE_BUFFER_SIZE];
+
+    parser.parser_strip(&parser, "\033[31;46mA", out, sizeof(out));
+    EXPECT_NE(color_parser_get_color(&parser), WHITE_ON_BLACK);
+
+    parser.parser_strip(&parser, "\033[mB", out, sizeof(out));
+    EXPECT_STREQ(out, "B");
+    EXPECT_EQ(color_parser_get_color(&parser), WHITE_ON_BLACK);
+}

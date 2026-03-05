@@ -85,30 +85,55 @@ static uint8_t ansi_to_vga_color(int ansi_number)
 static void parser_finish(color_parser_t *self)
 {
 	char *buffer;
-	char *sep;
-	int fg_num;
+	int idx;
+	int num;
+	int has_digit;
 
-	if (!self || self->buffer_pos == 0)
+	if (!self)
 		return;
 
-	buffer = self->buffer;
-
-	sep = ft_strchr(buffer, ';');
-	if (sep) {
-		*sep = '\0';
-		fg_num = ft_atoi(buffer);
-		int bg_num = ft_atoi(sep + 1);
-
-		self->last_foreground = ansi_to_vga_color(fg_num);
-		self->last_background = ansi_to_vga_color(bg_num);
-	} else {
-		fg_num = ft_atoi(buffer);
-
-		if (fg_num >= 40 && fg_num <= 49)
-			self->last_background = ansi_to_vga_color(fg_num);
-		else
-			self->last_foreground = ansi_to_vga_color(fg_num);
+	/* \e[m (empty SGR sequence) means full reset. */
+	if (self->buffer_pos == 0) {
+		self->last_foreground = WHITE_ON_BLACK;
+		self->last_background = BLACK_ON_BLACK;
+		self->state = COLOR_STATE_NORMAL;
+		self->buffer_pos = 0;
+		self->buffer[0] = '\0';
+		return;
 	}
+
+	buffer = self->buffer;
+	idx = 0;
+	num = 0;
+	has_digit = 0;
+
+	while (idx <= self->buffer_pos) {
+		char c = buffer[idx];
+
+		if (c >= '0' && c <= '9') {
+			num = (num * 10) + (c - '0');
+			has_digit = 1;
+		} else if (c == ';' || c == '\0') {
+			if (!has_digit)
+				num = 0;
+
+			if (num == 0) {
+				self->last_foreground = WHITE_ON_BLACK;
+				self->last_background = BLACK_ON_BLACK;
+			} else if (num >= 40 && num <= 49) {
+				self->last_background = ansi_to_vga_color(num);
+			} else if (num >= 100 && num <= 107) {
+				self->last_background = ansi_to_vga_color(num);
+			} else {
+				self->last_foreground = ansi_to_vga_color(num);
+			}
+
+			num = 0;
+			has_digit = 0;
+		}
+		idx++;
+	}
+
 	self->state = COLOR_STATE_NORMAL;
 	self->buffer_pos = 0;
 	self->buffer[0] = '\0';
@@ -140,6 +165,10 @@ static int parser_process(color_parser_t *self, char c)
 		self->state = COLOR_STATE_NORMAL;
 		return 2;
 	case COLOR_STATE_BRACKET:
+		if (c == 'm') {
+			parser_finish(self);
+			return 1;
+		}
 		if (c >= '0' && c <= '9') {
 			self->buffer[self->buffer_pos++] = c;
 			self->buffer[self->buffer_pos] = '\0';
