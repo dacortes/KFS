@@ -37,14 +37,11 @@
  */
 int kernel_main(void)
 {
-	char *kernel_init_msg = "Kernel initialized successfully.\n%s";
-	char *another_string = "This is a string that came from an argument.\n";
-
 	init_system();
 	printf("Welcome to KFS! Active terminal: %u\n", sys.active_terminal);
 	kprintk(KERN_INFO, "Kernel initialized successfully.\n");
-	sys.terminals[sys.active_terminal].write_string(&sys.terminals[sys.active_terminal],
-		" \033[1;33m Kernel initialized successfully.\033[0m\n");
+	printf("Test colors: " RED "RED " GREEN "GREEN " YELLOW "YELLOW " BLUE "BLUE "
+	       TUR "TURQUOISE " CYAN "CYAN " ORANGE "ORANGE " PURPLE "PURPLE" END "\n");
 	sys.main_loop(&sys);
 	return 0;
 }
