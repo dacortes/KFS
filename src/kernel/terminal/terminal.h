@@ -119,6 +119,7 @@ struct terminal_s {
 	display_t		*display;
 
 	char			scroll_buf[SCROLL_BUFFER_ROWS][DISPLAY_W];
+	uint8_t		scroll_color_buf[SCROLL_BUFFER_ROWS][DISPLAY_W];
 	uint16_t		scroll_first;
 	uint16_t		scroll_count;
 	uint16_t		view_offset;

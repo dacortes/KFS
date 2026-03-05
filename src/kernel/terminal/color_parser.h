@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #ifndef COLOR_BUFFER_SIZE
-#define COLOR_BUFFER_SIZE 16
+#define COLOR_BUFFER_SIZE 32
 #endif
 
 #define COLOR_STATE_NORMAL      0
@@ -19,8 +19,9 @@ struct color_parser_s
 	char	buffer[COLOR_BUFFER_SIZE];
 	uint8_t buffer_pos;
 
-	uint8_t	last_foreground;
-	uint8_t	last_background;
+	uint8_t	foreground;
+	uint8_t	background;
+	uint8_t	current_color;
 
 	int (*parser_process)(color_parser_t *self, char c);
 	const char *(*parser_strip)(color_parser_t *self, const char *input, char *output, int max_len);
@@ -28,4 +29,3 @@ struct color_parser_s
 };
 
 void color_parser_init(color_parser_t *parser);
-

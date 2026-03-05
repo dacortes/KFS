@@ -91,6 +91,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/wrappers/ft_atoi.c \
 	$(SRC_DIR)/kernel/wrappers/ft_isdigit.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
+	$(SRC_DIR)/kernel/terminal/color_parser.c \
 	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c
@@ -114,6 +115,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
+	$(SRC_DIR)/kernel/terminal/color_parser.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memset.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strchr.c \

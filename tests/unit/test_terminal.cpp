@@ -645,3 +645,31 @@ TEST_F(TerminalTest, InitAssignsSetOffsetPointer)
 {
 	EXPECT_NE(term.set_offset, nullptr);
 }
+/* ------------------------------------------------------------------ */
+/*                     ANSI color parser tests                        */
+/* ------------------------------------------------------------------ */
+
+TEST_F(TerminalTest, WriteStringParsesBasicAnsiForeground)
+{
+	term.write_string(&term, "\033[1;31mR\033[m");
+
+	EXPECT_EQ(char_at(TERMINAL_PREFIX_LEN, 0), 'R');
+	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), LIGHT_RED_ON_BLACK);
+}
+
+TEST_F(TerminalTest, WriteStringParses256ColorAnsiForeground)
+{
+	term.write_string(&term, "\033[38;5;208mO\033[m");
+
+	EXPECT_EQ(char_at(TERMINAL_PREFIX_LEN, 0), 'O');
+	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), BROWN_ON_BLACK);
+}
+
+TEST_F(TerminalTest, WriteStringCanChangeAndResetColor)
+{
+	term.write_string(&term, "\033[1;32mG\033[1;34mB\033[mW");
+
+	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), LIGHT_GREEN_ON_BLACK);
+	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN + 1, 0), LIGHT_BLUE_ON_BLACK);
+	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN + 2, 0), WHITE_ON_BLACK);
+}
