@@ -34,7 +34,7 @@ int str_format(const char *str, int *count)
 
 int	base_number_format(unsigned int n, int *count, int opt, unsigned int bas)
 {
-	char	*base;
+	const char	*base;
 
 	if (opt == 0)
 		base = "0123456789";

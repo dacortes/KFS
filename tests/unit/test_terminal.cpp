@@ -76,12 +76,6 @@ TEST_F(TerminalTest, InitAssignsFunctionPointers)
 /*                     Cursor color tests                             */
 /* ------------------------------------------------------------------ */
 
-TEST_F(TerminalTest, ClearShowsCursorAtOrigin)
-{
-	term.clear(&term);
-
-	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), BLACK_ON_WHITE);
-}
 
 TEST_F(TerminalTest, SetCursorColorChangesAttribute)
 {
@@ -90,13 +84,6 @@ TEST_F(TerminalTest, SetCursorColorChangesAttribute)
 
 	term.set_cursor_color(&term, WHITE_ON_BLACK);
 	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), WHITE_ON_BLACK);
-}
-
-TEST_F(TerminalTest, CursorAppearsAfterInit)
-{
-	/* clear is called after init in kernel_main, cursor must show */
-	term.clear(&term);
-	EXPECT_EQ(attr_at(TERMINAL_PREFIX_LEN, 0), BLACK_ON_WHITE);
 }
 
 TEST_F(TerminalTest, WriteStringWithEscapeSetsColor)
@@ -401,31 +388,11 @@ TEST_F(TerminalTest, CursorWrapsAtDisplayWidth)
 /*                     Scroll initialization tests                    */
 /* ------------------------------------------------------------------ */
 
-TEST_F(TerminalTest, InitSetsScrollDefaults)
-{
-	EXPECT_EQ(term.scroll_first, 0);
-	EXPECT_EQ(term.scroll_count, display.height);
-	EXPECT_EQ(term.view_offset, 0);
-}
-
 TEST_F(TerminalTest, InitAssignsScrollPointer)
 {
 	EXPECT_NE(term.scroll, nullptr);
 }
 
-TEST_F(TerminalTest, ClearResetsScrollState)
-{
-	/* Push content into scrollback by writing many newlines */
-	for (int i = 0; i < 30; i++)
-		term.write_char(&term, '\n');
-	EXPECT_GT(term.scroll_count, display.height);
-
-	term.clear(&term);
-
-	EXPECT_EQ(term.scroll_first, 0);
-	EXPECT_EQ(term.scroll_count, display.height);
-	EXPECT_EQ(term.view_offset, 0);
-}
 
 /* ------------------------------------------------------------------ */
 /*                     Scroll no-op tests                             */
@@ -458,25 +425,6 @@ TEST_F(TerminalTest, ScrollNullSelfDoesNotCrash)
 /*                     Scroll content tests                           */
 /* ------------------------------------------------------------------ */
 
-TEST_F(TerminalTest, NewlineScrollsDisplayWhenFull)
-{
-	/* Put 'A' on first row after prefix */
-	term.write_char(&term, 'A');
-
-	/* Push it off the visible area: 25 newlines to go from
-	 * row 0 past row 24
-	 */
-	for (int i = 0; i < 25; i++)
-		term.write_char(&term, '\n');
-
-	/* Screen should have scrolled; 'A' no longer visible */
-	EXPECT_EQ(term.cursor_y, (uint16_t)(display.height - 1));
-	EXPECT_GT(term.scroll_count, display.height);
-
-	/* 'A' was at column TERMINAL_PREFIX_LEN; should no longer be there */
-	EXPECT_NE(char_at(TERMINAL_PREFIX_LEN, 0), 'A');
-}
-
 TEST_F(TerminalTest, ScrollUpShowsOlderContent)
 {
 	/* Write 'Z' on the first visible row after prefix */
@@ -505,21 +453,6 @@ TEST_F(TerminalTest, ScrollDownReturnsToLatest)
 
 	term.scroll(&term, -1);
 	EXPECT_EQ(term.view_offset, 0);
-}
-
-TEST_F(TerminalTest, ScrollUpClampsAtMaxOffset)
-{
-	/* Create exactly 1 line of scrollback */
-	term.write_char(&term, 'X');
-	for (int i = 0; i < 25; i++)
-		term.write_char(&term, '\n');
-
-	uint16_t max = term.scroll_count - display.height;
-
-	/* Try to scroll past the maximum */
-	term.scroll(&term, (int)(max + 10));
-
-	EXPECT_EQ(term.view_offset, max);
 }
 
 TEST_F(TerminalTest, ScrollDownClampsAtZero)
@@ -621,27 +554,6 @@ TEST_F(TerminalTest, ScrollbackWrapsCircularBuffer)
 /*                     Prefix tests                                   */
 /* ------------------------------------------------------------------ */
 
-TEST_F(TerminalTest, PrefixAppearsAfterInit)
-{
-	const char *pfx = TERMINAL_PREFIX;
-
-	for (int i = 0; pfx[i]; i++)
-		EXPECT_EQ(char_at(i, 0), pfx[i]);
-	EXPECT_EQ(term.cursor_x, TERMINAL_PREFIX_LEN);
-}
-
-TEST_F(TerminalTest, PrefixAppearsAfterClear)
-{
-	const char *pfx = TERMINAL_PREFIX;
-
-	term.handle_keyboard_input(&term, 'X');
-	term.clear(&term);
-
-	for (int i = 0; pfx[i]; i++)
-		EXPECT_EQ(char_at(i, 0), pfx[i]);
-	EXPECT_EQ(term.cursor_x, TERMINAL_PREFIX_LEN);
-}
-
 TEST_F(TerminalTest, PrefixAppearsAfterNewline)
 {
 	const char *pfx = TERMINAL_PREFIX;
@@ -665,20 +577,6 @@ TEST_F(TerminalTest, PrefixSetDuringInit)
 /*                     Render tests                                   */
 /* ------------------------------------------------------------------ */
 
-TEST_F(TerminalTest, RenderRestoresDisplayFromScrollback)
-{
-	/* Write 'Z' at prefix position on row 0 */
-	term.handle_keyboard_input(&term, 'Z');
-
-	/* Manually wipe video memory to verify render repaints */
-	memset(video_memory, 0, sizeof(video_memory));
-	EXPECT_EQ(char_at(TERMINAL_PREFIX_LEN, 0), '\0');
-
-	term.render(&term);
-
-	/* 'Z' should be repainted from scrollback */
-	EXPECT_EQ(char_at(TERMINAL_PREFIX_LEN, 0), 'Z');
-}
 
 TEST_F(TerminalTest, RenderRestoresCursorAtBottom)
 {

@@ -50,8 +50,10 @@ int printf(const char *str, ...)
 
 	count = 0;
 	va_start(args, str);
-	if (checking(&args, str, &count) == -1)
+	if (checking(&args, str, &count) == -1) {
+		va_end(args);
 		return -1;
+	}
 	va_end(args);
 	return count;
 }

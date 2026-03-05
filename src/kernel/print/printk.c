@@ -64,6 +64,7 @@ void kvprintk(uint32_t level, const char *fmt, va_list ap)
 
 		term->write_prefix(term);
 		term->write_string(term, buf);
+		term->set_cursor_color(term, BLACK_ON_WHITE);
 	}
 }
 

@@ -642,8 +642,6 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	color_parser_init(&self->color_parser);
 
 	self->write_prefix(self);
-
-	terminal_draw_title(self, 0);
 }
 
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <system.h>
+#include <kernel/print/print.h>
 
 /**
  * @file system.c
@@ -42,6 +43,8 @@ static void switch_terminal(system_t *self, uint32_t id)
 
 	term->set_offset(term, 0);
 	term->render(term);
+
+	kprintk(KERN_INFO, "Switched to terminal %u\n", id);
 }
 
 /**
