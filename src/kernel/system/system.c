@@ -43,8 +43,6 @@ static void switch_terminal(system_t *self, uint32_t id)
 
 	term->set_offset(term, 0);
 	term->render(term);
-
-	kprintk(KERN_INFO, "Switched to terminal %u\n", id);
 }
 
 /**
