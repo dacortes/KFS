@@ -34,8 +34,10 @@ static void clear_scroll_buf(terminal_t *self)
 	int j;
 
 	for (i = 0; i < SCROLL_BUFFER_ROWS; i++)
-		for (j = 0; j < DISPLAY_W; j++)
+		for (j = 0; j < DISPLAY_W; j++) {
 			self->scroll_buf[i][j] = ' ';
+			self->scroll_color_buf[i][j] = WHITE_ON_BLACK;
+		}
 }
 
 /**
@@ -49,7 +51,7 @@ static void clear_scroll_buf(terminal_t *self)
  * corresponding to the current screen coordinates.
  */
 static void buf_write(terminal_t *self, uint16_t x, uint16_t y,
-		      char c)
+		      char c, uint8_t color)
 {
 	uint16_t base;
 	uint16_t row;
@@ -71,6 +73,7 @@ static void buf_write(terminal_t *self, uint16_t x, uint16_t y,
 	base = (self->scroll_count > (uint16_t)vis_h) ? (self->scroll_count - vis_h) : 0;
 	row = (self->scroll_first + base + y) % SCROLL_BUFFER_ROWS;
 	self->scroll_buf[row][x] = c;
+	self->scroll_color_buf[row][x] = color;
 }
 
 /**
@@ -99,8 +102,10 @@ static void scroll_line_up(terminal_t *self)
 
 	row_idx = (self->scroll_first + self->scroll_count - 1) %
 		  SCROLL_BUFFER_ROWS;
-	for (i = 0; i < (int)self->display->width; i++)
+	for (i = 0; i < (int)self->display->width; i++) {
 		self->scroll_buf[row_idx][i] = ' ';
+		self->scroll_color_buf[row_idx][i] = WHITE_ON_BLACK;
+	}
 
 	line_bytes = self->display->width * self->display->char_size;
 	/* shift only the visible area (below title) up by one */
@@ -153,8 +158,11 @@ static void render_view(terminal_t *self)
 
 		for (x = 0; x < (int)self->display->width; x++) {
 			char c = self->scroll_buf[row][x];
+			unsigned char old_color = self->display->color;
 
+			self->display->color = self->scroll_color_buf[row][x];
 			self->display->put_at(self->display, c, x, y + TITLE_HEIGHT);
+			self->display->color = old_color;
 		}
 	}
 
@@ -218,6 +226,9 @@ static void clear_ter(terminal_t *self)
 	self->scroll_count = self->display->height - TITLE_HEIGHT;
 	self->view_offset = 0;
 	clear_scroll_buf(self);
+	self->color_parser.parser_reset(&self->color_parser);
+	self->curr_color = self->color_parser.current_color;
+	self->display->color = self->curr_color;
 	self->write_prefix(self);
 	self->set_cursor_color(self, BLACK_ON_WHITE);
 }
@@ -261,7 +272,7 @@ static void write_char(terminal_t *self, char c)
 	} else {
 		self->display->put_at(self->display, c, self->cursor_x,
 				      self->cursor_y);
-		buf_write(self, self->cursor_x, self->cursor_y, c);
+		buf_write(self, self->cursor_x, self->cursor_y, c, self->display->color);
 		self->cursor_x++;
 	}
 
@@ -284,6 +295,7 @@ static void write_char(terminal_t *self, char c)
 static int write_string(terminal_t *self, const char *str)
 {
 	unsigned int i;
+	unsigned int printed;
 
 	if (!self || !str)
 		return 0;
@@ -291,11 +303,18 @@ static int write_string(terminal_t *self, const char *str)
 	if (!*str)
 		self->save_history(self, str);
 	i = 0;
+	printed = 0;
 	while (str[i]) {
-		self->write_char(self, str[i]);
+		if (self->color_parser.parser_process(&self->color_parser, str[i]) == 0) {
+			self->display->color = self->color_parser.current_color;
+			self->write_char(self, str[i]);
+			printed++;
+		}
 		i++;
 	}
-	return i;
+	self->curr_color = self->color_parser.current_color;
+	self->display->color = self->curr_color;
+	return printed;
 }
 
 /**
@@ -343,7 +362,7 @@ static void redraw_line_from(terminal_t *self, uint16_t from,
 		if (!c)
 			c = ' ';
 		self->display->put_at(self->display, c, sx, sy);
-		buf_write(self, sx, sy, c);
+		buf_write(self, sx, sy, c, self->display->color);
 		sx++;
 		if (sx >= self->display->width) {
 			sx = 0;
@@ -589,7 +608,9 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 
 	self->curr_color = WHITE_ON_BLACK;
 	self->cursor_char = ' ';
+	color_parser_init(&self->color_parser);
 	self->display = display;
+	self->display->color = self->curr_color;
 
 	self->scroll_first = 0;
 	self->scroll_count = display->height - TITLE_HEIGHT;
@@ -616,6 +637,16 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 }
 
 
+/**
+ * terminal_draw_title - Draw the terminal tab in the title bar row
+ * @self: Terminal instance
+ * @active: Non-zero to render as the selected (highlighted) terminal
+ *
+ * Writes the terminal name into row 0 of the display, surrounded by
+ * null-character delimiters used as box-drawing anchors. The attribute
+ * byte is BLACK_ON_WHITE when @active is non-zero, WHITE_ON_BLACK
+ * otherwise. The display color is restored after drawing.
+ */
 void terminal_draw_title(terminal_t *self, int active)
 {
 	int x = 0;
