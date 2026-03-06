@@ -27,12 +27,8 @@
  */
 int kernel_main(void)
 {
-	char *kernel_init_msg = "Kernel initialized successfully.\n%s";
-	char *another_string = "This is a string that came from an argument.\n";
-
 	init_system();
-	printf("Welcome to KFS! Active terminal: %u\n", sys.active_terminal);
-	kprintk(KERN_INFO, kernel_init_msg, another_string);
+	printf("\033[1;31mRed\033[m \033[1;32mGreen\033[m \033[1;34mBlue\033[m \033[1;33mYellow\033[m\n");
 	sys.main_loop(&sys);
 	return 0;
 }

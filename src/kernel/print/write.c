@@ -17,14 +17,16 @@ int write(const char *text, unsigned int count)
 
 	terminal_t  *terminal = &sys.terminals[sys.active_terminal];
 
-	terminal->set_cursor_color(terminal, WHITE_ON_BLACK);
 	if (count == 1) {
-		terminal->write_char(terminal, *text);
+		char single[2];
+
+		single[0] = *text;
+		single[1] = '\0';
+		terminal->write_string(terminal, single);
 		terminal->set_cursor_color(terminal, BLACK_ON_WHITE);
 		return 1;
 	}
-	int ret = terminal->write_string(terminal, text);
-	return ret;
+	return terminal->write_string(terminal, text);
 }
 
 /* Redirectable writer support: allows printf/format routines to
