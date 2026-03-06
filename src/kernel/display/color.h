@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-// Colores VGA estándar (0-15)
 enum vga_color {
     VGA_BLACK = 0,
     VGA_BLUE = 1,
@@ -22,10 +21,8 @@ enum vga_color {
     VGA_WHITE = 15,
 };
 
-// Macro para crear color VGA (foreground | background << 4)
 #define VGA_COLOR(fg, bg)       ((fg) | ((bg) << 4))
 
-// Definiciones para foreground (texto sobre fondo negro)
 #define BLACK_ON_BLACK      VGA_COLOR(VGA_BLACK, VGA_BLACK)
 #define BLUE_ON_BLACK       VGA_COLOR(VGA_BLUE, VGA_BLACK)
 #define GREEN_ON_BLACK      VGA_COLOR(VGA_GREEN, VGA_BLACK)
@@ -43,7 +40,6 @@ enum vga_color {
 #define YELLOW_ON_BLACK     VGA_COLOR(VGA_YELLOW, VGA_BLACK)
 #define WHITE_ON_BLACK      VGA_COLOR(VGA_WHITE, VGA_BLACK)
 
-// Fondos (texto blanco sobre fondo de color)
 #define WHITE_ON_BLUE       VGA_COLOR(VGA_WHITE, VGA_BLUE)
 #define WHITE_ON_GREEN      VGA_COLOR(VGA_WHITE, VGA_GREEN)
 #define WHITE_ON_CYAN       VGA_COLOR(VGA_WHITE, VGA_CYAN)
@@ -53,17 +49,15 @@ enum vga_color {
 #define WHITE_ON_LIGHT_GRAY VGA_COLOR(VGA_WHITE, VGA_LIGHT_GRAY)
 #define BLACK_ON_LIGHT_GRAY VGA_COLOR(VGA_BLACK, VGA_LIGHT_GRAY)
 
-// Brillantes (en VGA, los colores 8-15 son los brillantes)
-#define BRIGHT_BLACK_ON_BLACK   VGA_COLOR(VGA_DARK_GRAY, VGA_BLACK)   // Gris oscuro
+#define BRIGHT_BLACK_ON_BLACK   VGA_COLOR(VGA_DARK_GRAY, VGA_BLACK)   
 #define BRIGHT_RED_ON_BLACK     VGA_COLOR(VGA_LIGHT_RED, VGA_BLACK)
 #define BRIGHT_GREEN_ON_BLACK   VGA_COLOR(VGA_LIGHT_GREEN, VGA_BLACK)
-#define BRIGHT_YELLOW_ON_BLACK  VGA_COLOR(VGA_YELLOW, VGA_BLACK)      // Yellow ya es brillante
+#define BRIGHT_YELLOW_ON_BLACK  VGA_COLOR(VGA_YELLOW, VGA_BLACK)     
 #define BRIGHT_BLUE_ON_BLACK    VGA_COLOR(VGA_LIGHT_BLUE, VGA_BLACK)
 #define BRIGHT_MAGENTA_ON_BLACK VGA_COLOR(VGA_LIGHT_MAGENTA, VGA_BLACK)
 #define BRIGHT_CYAN_ON_BLACK    VGA_COLOR(VGA_LIGHT_CYAN, VGA_BLACK)
 #define BRIGHT_WHITE_ON_BLACK   VGA_COLOR(VGA_WHITE, VGA_BLACK)
 
-// Fondos brillantes
 #define WHITE_ON_BRIGHT_RED     VGA_COLOR(VGA_WHITE, VGA_LIGHT_RED)
 #define WHITE_ON_BRIGHT_GREEN   VGA_COLOR(VGA_WHITE, VGA_LIGHT_GREEN)
 #define WHITE_ON_BRIGHT_BLUE    VGA_COLOR(VGA_WHITE, VGA_LIGHT_BLUE)
@@ -71,5 +65,4 @@ enum vga_color {
 #define WHITE_ON_BRIGHT_MAGENTA VGA_COLOR(VGA_WHITE, VGA_LIGHT_MAGENTA)
 #define WHITE_ON_BRIGHT_CYAN    VGA_COLOR(VGA_WHITE, VGA_LIGHT_CYAN)
 
-// Reset (color por defecto)
 #define COLOR_DEFAULT           WHITE_ON_BLACK
