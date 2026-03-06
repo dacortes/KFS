@@ -637,6 +637,16 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 }
 
 
+/**
+ * terminal_draw_title - Draw the terminal tab in the title bar row
+ * @self: Terminal instance
+ * @active: Non-zero to render as the selected (highlighted) terminal
+ *
+ * Writes the terminal name into row 0 of the display, surrounded by
+ * null-character delimiters used as box-drawing anchors. The attribute
+ * byte is BLACK_ON_WHITE when @active is non-zero, WHITE_ON_BLACK
+ * otherwise. The display color is restored after drawing.
+ */
 void terminal_draw_title(terminal_t *self, int active)
 {
 	int x = 0;

@@ -99,6 +99,8 @@ typedef struct terminal_s terminal_t;
  * @move_cursor: Function to move cursor left or right
  * @write_prefix: Function to write the terminal prefix/prompt
  * @render: Function to redraw terminal content on display
+ * @set_offset: Function to set the scrollback view offset
+ * @color_parser: Embedded ANSI SGR escape-sequence parser
  */
 struct terminal_s {
 	uint32_t		id;
@@ -157,8 +159,15 @@ struct terminal_s {
  */
 void terminal_init(terminal_t	*terminal, display_t *display, uint32_t id);
 
-/* Draw the small title/window in the top-right corner for this terminal.
- * @active: non-zero for highlighted (selected) state. */
+/**
+ * terminal_draw_title - Draw the terminal tab in the title bar row
+ * @self: Terminal instance
+ * @active: Non-zero to render as the selected (highlighted) terminal
+ *
+ * Writes the terminal name into row 0 of the display surrounded by
+ * null-character box-drawing anchors. Uses BLACK_ON_WHITE when @active
+ * is non-zero, WHITE_ON_BLACK otherwise.
+ */
 void terminal_draw_title(terminal_t *self, int active);
 
 #ifdef __cplusplus
