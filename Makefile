@@ -71,6 +71,7 @@ KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s \
+	$(SRC_DIR)/kernel/assembly/gdt.s \
 	$(SRC_DIR)/kernel/assembly/idt.s \
 	$(SRC_DIR)/kernel/assembly/isr.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
@@ -92,6 +93,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/wrappers/ft_isdigit.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
 	$(SRC_DIR)/kernel/terminal/color_parser.c \
+	$(SRC_DIR)/kernel/interrupts/gdt.c \
 	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c

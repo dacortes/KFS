@@ -6,6 +6,9 @@
  */
 
 #include <kernel/interrupts/idt.h>
+#include <kernel/interrupts/gdt.h>
+
+extern void gp_fault_handler(void);
 
 static struct idt_entry idt[IDT_ENTRIES];
 static struct idt_ptr idtp;
@@ -43,6 +46,10 @@ void idt_init(void)
 
 	for (i = 0; i < IDT_ENTRIES; i++)
 		idt_set_gate(i, 0, 0, 0);
+
+	/* General protection fault handler for the privilege demo */
+	idt_set_gate(0x0D, (unsigned int)gp_fault_handler,
+		     GDT_KERNEL_CODE_SELECTOR, 0x8E);
 
 	idt_load((unsigned int)&idtp);
 }

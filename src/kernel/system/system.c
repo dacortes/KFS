@@ -2,6 +2,7 @@
 
 #include <system.h>
 #include <kernel/print/print.h>
+#include <kernel/interrupts/gdt.h>
 
 /**
  * @file system.c
@@ -58,6 +59,12 @@ static void shortcut_handler(const unsigned char *keys, int count)
 {
 	if (!keys || count < 1)
 		return;
+
+	/* Ctrl+G starts the GDT privilege demonstration. */
+	if (keys[0] == 0x22) {
+		gdt_run_privilege_demo();
+		return;
+	}
 
 	/* Scancodes 0x02..0x0B correspond to keys '1'..'0' */
 	if (keys[0] >= 0x02 && keys[0] <= 0x0B) {
@@ -143,11 +150,21 @@ void init_system(void)
 
 	create_terminal();
 
+	gdt_init();
+
+	printf("[GDT] Initialized with %d entries\n", GDT_ENTRIES);
+	if (gdt_verify())
+		printf("[GDT] Verification: PASS - GDTR correctly loaded\n");
+	else
+		printf("[GDT] Verification: FAIL - GDTR mismatch\n");
+	gdt_log_descriptors();
+
 	idt_init();
 	pic_init();
 
 	/* Register keyboard IRQ handler (IRQ1) */
-	idt_set_gate(0x21, (unsigned int)irq1_handler, 0x10, 0x8E);
+	idt_set_gate(0x21, (unsigned int)irq1_handler,
+		     GDT_KERNEL_CODE_SELECTOR, 0x8E);
 
 	keyboard_init(&sys.keyboard);
 	sys.keyboard.set_shortcut_handler(&sys.keyboard, shortcut_handler);

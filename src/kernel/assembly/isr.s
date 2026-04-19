@@ -9,7 +9,9 @@
 
 section .text
 	global irq1_handler
+	global gp_fault_handler
 	extern keyboard_interrupt
+	extern gdt_handle_gp_fault
 
 ;**
 ; * IRQ1 handler stub (Keyboard interrupt)
@@ -25,3 +27,16 @@ irq1_handler:
 	call keyboard_interrupt		; Call C handler
 	popa				; Restore all registers
 	iret				; Return from interrupt
+
+;**
+; * General protection fault handler stub
+; *
+; * Dispatches to the C-level GDT proof handler. The handler does not
+; * return.
+;**
+gp_fault_handler:
+	pusha
+	call gdt_handle_gp_fault
+	popa
+	add esp, 4
+	iret

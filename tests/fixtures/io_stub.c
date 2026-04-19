@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include <kernel/interrupts/gdt.h>
 
 /**
  * Stub for inb - not used in keyboard unit tests
@@ -44,6 +45,44 @@ void pic_send_eoi(unsigned char irq)
  * Stub for idt_init - not used in unit tests
  */
 void idt_init(void)
+{
+}
+
+/**
+ * Stub for gdt_init - not used in unit tests
+ */
+void gdt_init(void)
+{
+}
+
+/**
+ * Stub for gdt_get_gdtr - not used in unit tests
+ */
+struct gdt_ptr gdt_get_gdtr(void)
+{
+	struct gdt_ptr result = {0, 0};
+	return result;
+}
+
+/**
+ * Stub for gdt_verify - not used in unit tests
+ */
+int gdt_verify(void)
+{
+	return 0;
+}
+
+/**
+ * Stub for gdt_log_descriptors - not used in unit tests
+ */
+void gdt_log_descriptors(void)
+{
+}
+
+/**
+ * Stub for gdt_run_privilege_demo - not used in unit tests
+ */
+void gdt_run_privilege_demo(void)
 {
 }
 
