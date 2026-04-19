@@ -11,13 +11,15 @@
 extern "C" {
 #endif
 
-#define GDT_ENTRIES 6
+#define GDT_ENTRIES 8
 
 #define GDT_KERNEL_CODE_SELECTOR 0x08
 #define GDT_KERNEL_DATA_SELECTOR 0x10
-#define GDT_USER_CODE_SELECTOR 0x1B
-#define GDT_USER_DATA_SELECTOR 0x23
-#define GDT_TSS_SELECTOR 0x28
+#define GDT_KERNEL_STACK_SELECTOR 0x18
+#define GDT_USER_CODE_SELECTOR 0x23
+#define GDT_USER_DATA_SELECTOR 0x2B
+#define GDT_USER_STACK_SELECTOR 0x33
+#define GDT_TSS_SELECTOR 0x38
 
 /**
  * @brief Single GDT descriptor (8 bytes).
@@ -80,12 +82,15 @@ extern char stack_top;
 /**
  * @brief Initialize and load a flat kernel GDT.
  *
- * Installs five entries:
+ * Installs eight entries:
  *  - null descriptor
  *  - kernel code segment (selector 0x08, DPL=0)
  *  - kernel data segment (selector 0x10, DPL=0)
- *  - user code segment (selector 0x1B, DPL=3)
- *  - user data segment (selector 0x23, DPL=3)
+ *  - kernel stack segment (selector 0x18, DPL=0)
+ *  - user code segment (selector 0x23, DPL=3)
+ *  - user data segment (selector 0x2B, DPL=3)
+ *  - user stack segment (selector 0x33, DPL=3)
+ *  - task state segment (selector 0x38, DPL=0)
  */
 void gdt_init(void);
 
@@ -142,6 +147,58 @@ extern unsigned char gdt_user_demo_buffer[16];
  * Prints a diagnostic message and halts.
  */
 void gdt_handle_gp_fault(void);
+
+/**
+ * @brief Structure to hold stack pointer and segment information.
+ */
+struct gdt_stack_info {
+	unsigned int esp;
+	unsigned int ss;
+	unsigned int ebp;
+	const char *label;
+};
+
+/**
+ * @brief Capture current stack pointer, segment, and frame pointer.
+ *
+ * Reads ESP, SS, and EBP registers via inline assembly.
+ *
+ * @return struct gdt_stack_info with current stack state.
+ */
+struct gdt_stack_info gdt_get_stack_info(const char *label);
+
+/**
+ * @brief Print kernel stack information in human-friendly format.
+ *
+ * Displays kernel stack pointer (ESP0 from TSS), kernel stack segment,
+ * and frame pointer to show the kernel stack state.
+ */
+void gdt_print_kernel_stack(void);
+
+/**
+ * @brief Print user stack information in human-friendly format.
+ *
+ * Displays user stack pointer and stack segment for comparison.
+ */
+void gdt_print_user_stack(void);
+
+/**
+ * @brief Demonstrate kernel vs user stacks by capturing both contexts.
+ *
+ * Prints kernel stack info, transitions to ring 3 where stack information
+ * is captured to globals, then displays both kernel and user stack info
+ * for comparison to show they use different stacks and segment selectors.
+ */
+void gdt_run_stack_demo(void);
+
+/**
+ * @brief Globals storing captured user stack state from ring 3.
+ *
+ * Populated by gdt_user_stack_demo_entry when running in ring 3.
+ */
+extern unsigned int gdt_user_stack_esp;
+extern unsigned int gdt_user_stack_ss;
+extern unsigned int gdt_user_stack_ebp;
 
 /**
  * @brief Enter ring 3 using the supplied entry point and user stack top.

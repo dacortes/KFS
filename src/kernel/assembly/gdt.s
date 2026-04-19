@@ -14,8 +14,12 @@ section .text
 	global gdt_enter_user_mode
 	global gdt_user_mode_entry
 	global gdt_kernel_data_access_attempt
+	global gdt_user_stack_demo_entry
 	extern gdt_user_demo_state
 	extern gdt_user_demo_buffer
+	extern gdt_user_stack_esp
+	extern gdt_user_stack_ss
+	extern gdt_user_stack_ebp
 
 gdt_load:
 	push ebp
@@ -70,3 +74,18 @@ gdt_user_mode_entry:
 	mov ds, ax
 	hlt
 	jmp gdt_user_mode_entry
+
+gdt_user_stack_demo_entry:
+	; Ring 3: capture ESP, SS, and EBP and store in globals
+	mov eax, esp
+	mov [gdt_user_stack_esp], eax
+	
+	mov eax, ss
+	mov [gdt_user_stack_ss], eax
+	
+	mov eax, ebp
+	mov [gdt_user_stack_ebp], eax
+	
+	; All done, halt
+	hlt
+	jmp gdt_user_stack_demo_entry

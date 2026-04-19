@@ -13,8 +13,29 @@ static struct gdt_ptr gdtp;
 static struct tss_entry tss;
 static unsigned char user_demo_stack[4096];
 
+/* Globals for user stack capture in ring 3 demo */
+unsigned int gdt_user_stack_esp;
+unsigned int gdt_user_stack_ss;
+unsigned int gdt_user_stack_ebp;
+
 unsigned char gdt_user_demo_state;
 unsigned char gdt_user_demo_buffer[16];
+
+
+struct gdt_ptr gp;
+
+struct s_gdt {
+	unsigned int base;
+	unsigned int limit;
+	unsigned char access;
+	unsigned char flags;
+};
+
+#define CREATE_SOURCE_GDT(dst, g_base, g_limit, g_access, g_flags) \
+	(dst).base = (g_base); \
+	(dst).limit = (g_limit); \
+	(dst).access = (g_access); \
+	(dst).flags = (g_flags); \
 
 /**
  * @brief Configure a GDT entry.
@@ -25,18 +46,16 @@ unsigned char gdt_user_demo_buffer[16];
  * @param access Descriptor access byte.
  * @param gran Granularity flags.
  */
-static void gdt_set_gate(unsigned int num, unsigned int base,
-			 unsigned int limit, unsigned char access,
-			 unsigned char gran)
+static void gdt_set_gate(int num, struct s_gdt source)
 {
-	gdt[num].base_low = (base & 0xFFFF);
-	gdt[num].base_middle = (base >> 16) & 0xFF;
-	gdt[num].base_high = (base >> 24) & 0xFF;
+	gdt[num].base_low = (source.base & 0xFFFF);
+	gdt[num].base_middle = (source.base >> 16) & 0xFF;
+	gdt[num].base_high = (source.base >> 24) & 0xFF;
 
-	gdt[num].limit_low = (limit & 0xFFFF);
-	gdt[num].granularity = (limit >> 16) & 0x0F;
-	gdt[num].granularity |= gran & 0xF0;
-	gdt[num].access = access;
+	gdt[num].limit_low = (source.limit & 0xFFFF);
+	gdt[num].granularity = ((source.limit >> 16) & 0x0F) |
+				   (source.flags << 4);
+	gdt[num].access = source.access;
 }
 
 /**
@@ -56,25 +75,41 @@ static void gdt_load_tss(void)
 void gdt_init(void)
 {
 	unsigned int tss_base;
+	struct s_gdt source;
 
 	gdtp.limit = (sizeof(struct gdt_entry) * GDT_ENTRIES) - 1;
 	gdtp.base = (unsigned int)&gdt;
 
-	gdt_set_gate(0, 0, 0, 0, 0);
+	/* Descriptor 1: Kernel Code (base=0, limit=4GB, 32 bits) */
+	CREATE_SOURCE_GDT(source, 0, 0xFFFFF, 0x9A, 0xC);
 
-	gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);
+	gdt_set_gate(1, source);
+	/* Descriptor 2: Kernel Data */
+	CREATE_SOURCE_GDT(source, 0, 0xFFFFF, 0x92, 0xC);
+	gdt_set_gate(2, source);
+	/* Descriptor 3: Kernel Stack (same as data) */
+	CREATE_SOURCE_GDT(source, 0, 0xFFFFF, 0x92, 0xC);
+	gdt_set_gate(3, source);
+	/* Descriptor 4: User Code (DPL=3) */
+	CREATE_SOURCE_GDT(source, 0, 0xFFFFF, 0xFA, 0xC);
+	gdt_set_gate(4, source);
+	/* Descriptor 5: User Data (DPL=3) */
+	CREATE_SOURCE_GDT(source, 0, 0xFFFFF, 0xF2, 0xC);
+	gdt_set_gate(5, source);
+	/* Descriptor 6: User Stack (DPL=3) */
+	CREATE_SOURCE_GDT(source, 0, 0xFFFFF, 0xF2, 0xC);
+	gdt_set_gate(6, source);
 
-	gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
-
-	gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);
-
-	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
-
+	/* Slot 7: Task State Segment */
 	tss_base = (unsigned int)&tss;
 	tss.esp0 = (unsigned int)&stack_top;
 	tss.ss0 = GDT_KERNEL_DATA_SELECTOR;
 	tss.iomap_base = sizeof(struct tss_entry);
-	gdt_set_gate(5, tss_base, sizeof(struct tss_entry) - 1, 0x89, 0x00);
+	CREATE_SOURCE_GDT(source, tss_base,
+			  sizeof(struct tss_entry) - 1,
+			  0x89,
+			  0x00);
+	gdt_set_gate(7, source);
 
 	gdt_load((unsigned int)&gdtp);
 	gdt_load_tss();
@@ -200,6 +235,76 @@ void gdt_handle_gp_fault(void)
 }
 
 /**
+ * @brief Capture current stack pointer, segment, and frame pointer.
+ *
+ * Uses inline assembly to read ESP (stack pointer), SS (stack segment),
+ * and EBP (frame pointer) registers.
+ *
+ * @param label Descriptive label for this stack capture.
+ * @return struct gdt_stack_info with register values.
+ */
+struct gdt_stack_info gdt_get_stack_info(const char *label)
+{
+	struct gdt_stack_info info;
+	unsigned int esp_val, ss_val, ebp_val;
+
+	info.label = label;
+	__asm__ volatile(
+		"mov %%esp, %0\n\t"
+		"mov %%ss, %1\n\t"
+		"mov %%ebp, %2\n\t"
+		: "=r"(esp_val), "=r"(ss_val), "=r"(ebp_val)
+	);
+	info.esp = esp_val;
+	info.ss = ss_val;
+	info.ebp = ebp_val;
+	return info;
+}
+
+/**
+ * @brief Print kernel stack information in human-friendly format.
+ *
+ * Displays kernel stack pointer from TSS, kernel stack segment selector,
+ * and frame pointer.
+ */
+void gdt_print_kernel_stack(void)
+{
+	struct gdt_stack_info kernel_stack;
+
+	kernel_stack = gdt_get_stack_info("Kernel Stack");
+	printf("\n[STACK] === Kernel Stack Information ===");
+	printf("\n[STACK] Label: %s\n", kernel_stack.label);
+	printf("[STACK] ESP (Stack Pointer): 0x%x\n", kernel_stack.esp);
+	printf("[STACK] SS  (Stack Segment): 0x%x (Kernel: 0x%x)\n",
+	       kernel_stack.ss, GDT_KERNEL_DATA_SELECTOR);
+	printf("[STACK] EBP (Frame Pointer): 0x%x\n", kernel_stack.ebp);
+	printf("[STACK] TSS.esp0 (Ring 0 Stack): 0x%x\n",
+	       (unsigned int)&stack_top);
+	printf("[STACK] Stack Direction: decreasing (esp grows downward)\n");
+}
+
+/**
+ * @brief Print user stack information in human-friendly format.
+ *
+ * Displays user stack pointer and user stack segment selector.
+ */
+void gdt_print_user_stack(void)
+{
+	struct gdt_stack_info user_stack;
+
+	user_stack = gdt_get_stack_info("User Stack");
+	printf("\n[STACK] === User Stack Information ===");
+	printf("\n[STACK] Label: %s\n", user_stack.label);
+	printf("[STACK] ESP (Stack Pointer): 0x%x\n", user_stack.esp);
+	printf("[STACK] SS  (Stack Segment): 0x%x (User: 0x%x)\n",
+	       user_stack.ss, GDT_USER_DATA_SELECTOR);
+	printf("[STACK] EBP (Frame Pointer): 0x%x\n", user_stack.ebp);
+	printf("[STACK] User demo stack top: 0x%x\n",
+	       (unsigned int)&user_demo_stack[sizeof(user_demo_stack)]);
+	printf("[STACK] Stack Direction: decreasing (esp grows downward)\n");
+}
+
+/**
  * @brief Start a ring-3 demo that intentionally triggers a GP fault.
  */
 void gdt_run_privilege_demo(void)
@@ -213,4 +318,68 @@ void gdt_run_privilege_demo(void)
 	user_stack_top = (unsigned int)&user_demo_stack[sizeof(user_demo_stack)];
 	printf("[GDT] Entering ring 3 demo; user data should work first\n");
 	gdt_enter_user_mode((unsigned int)gdt_user_mode_entry, user_stack_top);
+}
+
+/**
+ * @brief User-mode code that captures stack info and halts.
+ *
+ * This function (implemented in assembly) is called in ring 3.
+ * Captures ESP, SS, EBP registers and stores them in globals.
+ */
+void gdt_user_stack_demo_entry(void);
+
+/**
+ * @brief Demonstrate kernel vs user stacks by capturing both contexts.
+ *
+ * Prints kernel stack before switching to ring 3, transitions to user
+ * mode where stack info is captured to global variables, then displays
+ * the captured user stack for comparison.
+ */
+void gdt_run_stack_demo(void)
+{
+	unsigned int user_stack_top;
+	unsigned int kernel_esp_before;
+
+	/* Capture kernel stack esp at this point */
+	__asm__ volatile("mov %%esp, %0" : "=r"(kernel_esp_before));
+
+	printf("\n\n========================================");
+	printf("\n[STACK] KERNEL vs USER STACK DEMO\n");
+	printf("========================================\n");
+
+	/* Show kernel stack before privilege change */
+	gdt_print_kernel_stack();
+
+	/* Initialize capture variables */
+	gdt_user_stack_esp = 0;
+	gdt_user_stack_ss = 0;
+	gdt_user_stack_ebp = 0;
+
+	/* Prepare and enter user mode */
+	user_stack_top = (unsigned int)&user_demo_stack[sizeof(user_demo_stack)];
+	printf("\n[STACK] Transitioning from RING 0 to RING 3...\n");
+	printf("[STACK] User stack will be initialized at: 0x%x\n",
+	       user_stack_top);
+	gdt_enter_user_mode((unsigned int)gdt_user_stack_demo_entry,
+	                    user_stack_top);
+
+	/* If we get here, display the captured user stack info */
+	if (gdt_user_stack_esp != 0) {
+		printf("\n[STACK] === User Stack Information (Captured) ===");
+		printf("\n[STACK] ESP (Stack Pointer): 0x%x\n",
+		       gdt_user_stack_esp);
+		printf("[STACK] SS  (Stack Segment): 0x%x (User: 0x%x)\n",
+		       gdt_user_stack_ss, GDT_USER_DATA_SELECTOR);
+		printf("[STACK] EBP (Frame Pointer): 0x%x\n",
+		       gdt_user_stack_ebp);
+	}
+
+	printf("\n[STACK] COMPARISON:\n");
+	printf("[STACK] Kernel ESP was:  0x%x\n", kernel_esp_before);
+	printf("[STACK] User   ESP was:  0x%x\n", gdt_user_stack_esp);
+	printf("[STACK] Kernel SS:       0x%x vs User SS: 0x%x\n",
+	       GDT_KERNEL_DATA_SELECTOR, GDT_USER_DATA_SELECTOR);
+	printf("[STACK] -> DIFFERENT stacks AND segment selectors!\n");
+	printf("\n[STACK] END DEMO\n");
+	printf("==========================================\n\n");
 }
