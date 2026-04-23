@@ -96,7 +96,9 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/interrupts/gdt.c \
 	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
-	$(SRC_DIR)/kernel/keyboard/keyboard.c
+	$(SRC_DIR)/kernel/keyboard/keyboard.c \
+	$(SRC_DIR)/shell/readline/ft_readline.c
+
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
 INCLUDES += $(addprefix -I, ./inc/stdbool)
@@ -107,6 +109,7 @@ INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode
@@ -164,7 +167,8 @@ REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 # Subdirectories to create
 KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers \
 	kernel/terminal kernel/system kernel/print \
-	kernel/interrupts kernel/keyboard
+	kernel/interrupts kernel/keyboard \
+	shell/readline
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
 	kernel/keyboard kernel/terminal fixtures
 
