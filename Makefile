@@ -88,6 +88,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strlcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memset.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strchr.c \
