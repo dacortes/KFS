@@ -1,15 +1,49 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <shell.h>
 
+static uint32_t word_size(char *line)
+{
+	if (!line || !*line)
+		return false;
+
+	int size = 0;
+
+	while(line[size] && !ft_isblank(line[size]))
+		size++;
+	return size;
+}
+
+static uint16_t cut_blanks(uint32_t *i, char *line)
+{
+	if (!line || !*line)
+		return false;
+	while(line[*i] && ft_isblank(line[*i]))
+		(*i)++;
+	return true;
+}
+
 uint16_t create_tokens(t_shell *self, char *line)
 {
-	int i = 0;
+	uint32_t i = 0;
+	uint32_t tk = 0;
+
 	if (!line || !*line)
 		return false;
 	while(line[i]) {
+		cut_blanks(&i, line);
 		
+		if (!line[i])
+			break ;
+
+		uint32_t size = word_size(&line[i]);
+
+		if (size > 0 && size < MAX_WORD) {
+			ft_strlcpy(self->tokens[tk].word, &line[i], size + 1);
+			tk++;
+		}
+		i += size;
 	}
-	return true;
+	return (tk > 0);
 }
 
 uint16_t shell_clear(t_shell *self)
