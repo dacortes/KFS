@@ -22,10 +22,18 @@ static uint16_t cut_blanks(uint32_t *i, char *line)
 	return true;
 }
 
+static void add_token(t_token *token, char *word, uint32_t *tk, uint32_t word_size)
+{
+	if (word_size > 0 && word_size < MAX_WORD) {
+		ft_strlcpy(tokens->word, word, word_size + 1);
+		(*tk)++;
+	}
+}
+
 uint16_t create_tokens(t_shell *self, char *line)
 {
-	uint32_t i = 0;
-	uint32_t tk = 0;
+	uint32_t i = 0, tk = 0;
+	uint32_t size;
 
 	if (!line || !*line)
 		return false;
@@ -35,12 +43,9 @@ uint16_t create_tokens(t_shell *self, char *line)
 		if (!line[i])
 			break ;
 
-		uint32_t size = word_size(&line[i]);
+		size = word_size(&line[i]);
 
-		if (size > 0 && size < MAX_WORD) {
-			ft_strlcpy(self->tokens[tk].word, &line[i], size + 1);
-			tk++;
-		}
+		add_token(&self->tokens[tk], &line[i], &tk, size);
 		i += size;
 	}
 	return (tk > 0);
@@ -74,5 +79,5 @@ void	shell_init(t_shell *self)
 	ft_memset(self->commands, '\0', sizeof(self->commands));
 	init_commands(self, def_commands);
 	self->create_tokens = create_tokens;
-	self->shell_clear = shell_clear; 
+	self->clear = shell_clear; 
 }

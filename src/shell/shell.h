@@ -32,7 +32,8 @@ typedef struct s_shell {
 	t_token		tokens[MAX_WORD];
 	char		commands[NUM_COMMANDS][MAX_WORD];
 	uint16_t	(*create_tokens)(t_shell *self, char *line);
-	uint16_t	(*shell_clear)(t_shell *self);
+	uint16_t	(*clear)(t_shell *self);
+	uint16_t	(*execute)(t_shell *self);
 } t_shell;
 
 void	shell_init(t_shell *self);
