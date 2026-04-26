@@ -73,7 +73,9 @@ KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s \
 	$(SRC_DIR)/kernel/assembly/gdt.s \
 	$(SRC_DIR)/kernel/assembly/idt.s \
-	$(SRC_DIR)/kernel/assembly/isr.s
+	$(SRC_DIR)/kernel/assembly/isr.s \
+	$(SRC_DIR)/kernel/assembly/commands/halt.s \
+	$(SRC_DIR)/kernel/assembly/commands/reboot.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/print/printk.c \
@@ -165,7 +167,7 @@ GTEST_LIBS = -lgtest -lgtest_main
 REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
-KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers \
+KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
 	kernel/terminal kernel/system kernel/print \
 	kernel/interrupts kernel/keyboard \
 	shell/readline

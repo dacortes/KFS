@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0
+
 #include <ft_readline.h>
 
 void set_prompt(const char *prompt)
