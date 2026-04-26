@@ -13,4 +13,4 @@ reboot_system:
 
 	mov al, 0xFE
 	out 0x64, al
-	jmp $ 
+	jmp $
