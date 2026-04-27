@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <shell.h>
+#include <print.h>
 
 static uint32_t word_size(char *line)
 {
@@ -33,11 +34,12 @@ static void add_token(t_token *token, char *word, uint32_t *tk, uint32_t word_si
 
 uint16_t create_tokens(t_shell *self, char *line)
 {
-	uint32_t i = 0, tk = 0;
+	uint32_t i = 0;
 	uint32_t size;
 
 	if (!line || !*line)
 		return false;
+	self->num_tk = 0;
 	while(line[i]) {
 		cut_blanks(&i, line);
 		
@@ -46,15 +48,27 @@ uint16_t create_tokens(t_shell *self, char *line)
 
 		size = word_size(&line[i]);
 
-		add_token(&self->token[tk], &line[i], &tk, size);
+		add_token(&self->token[self->num_tk], &line[i], &self->num_tk, size);
 		i += size;
 	}
-	return (tk > 0);
+	return (self->num_tk > 0);
+}
+
+void	print_tokens(t_shell *self)
+{
+	uint32_t nill;
+
+	for(uint32_t i = 0; i < self->num_tk; i++) {
+		nill = i == 0 && printf("\n[%sCOMMAND%s] %s\n", BLUE, END, self->token[i].word);
+		nill = i != 0 && printf("  [%d] arg: %s\n", i, self->token[i].word);
+	}
+	nill = true;
 }
 
 void shell_clear(t_shell *self)
 {
 	// cuando se tenga malloc remplazar por clears con free
+	self->num_tk = 0;
 	ft_memchr(self->line, '\0', sizeof(self->line));
 	ft_memchr(self->token, 0, sizeof(self->token));
 	ft_memchr(self->commands, '\0', sizeof(self->commands));
@@ -72,6 +86,7 @@ void	shell_init(t_shell *self)
 	terminal_t *term = &sys.terminals[active];
 	const char *def_commands[NUM_COMMANDS] = {"reboot", "half", "printf", "", ""};
 
+	self->num_tk = 0;
 	self->lv = 0;
 	//Verificar el historial, si esta apuntando correctamnete
 	self->history = (char ***)&term->history;
@@ -79,4 +94,5 @@ void	shell_init(t_shell *self)
 	init_commands(self, def_commands);
 	self->create_tokens = create_tokens;
 	self->clear = shell_clear; 
+	self->print = print_tokens;
 }

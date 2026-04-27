@@ -6,6 +6,7 @@
 #include <pic.h>
 #include <idt.h>
 #include <helper.h>
+#include <shell.h>
 
 #ifndef MAX_TERMINAL
 #define MAX_TERMINAL 2

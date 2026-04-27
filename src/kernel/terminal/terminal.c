@@ -22,6 +22,11 @@ static void clear_buffer(char *buff)
 		buff[i] = '\0';
 }
 
+static void clear_line(terminal_t *self)
+{
+	clear_buffer(self->line);
+}
+
 /**
  * clear_scroll_buf - Fill the scrollback buffer with spaces
  * @self: Terminal instance
@@ -218,6 +223,7 @@ static void clear_ter(terminal_t *self)
 		return;
 	self->display->clear(self->display);
 	clear_buffer(self->line);
+	self->line_ready = 0;
 	self->line_pos = 0;
 	self->line_len = 0;
 	self->cursor_x = 0;
@@ -419,8 +425,9 @@ static void handle_newline(terminal_t *self)
 	self->write_char(self, '\n');
 	self->line_pos = 0;
 	self->line_len = 0;
-	clear_buffer(self->line);
+	// clear_buffer(self->line);
 	self->write_prefix(self);
+	self->line_ready = 1;
 }
 
 /**
@@ -632,7 +639,7 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->move_cursor = move_cursor;
 	self->render = render_view;
 	self->set_offset = set_offset;
-
+	self->clear_line = clear_line;
 	self->write_prefix(self);
 }
 

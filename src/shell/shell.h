@@ -29,14 +29,16 @@ struct s_token {
 };
 
 struct s_shell {
+	uint32_t	num_tk;
 	uint32_t	lv;
 	char		***history;
 	char		line[MAX_LINE];
 	t_token		token[MAX_WORD];
 	char		commands[NUM_COMMANDS][MAX_WORD];
 	uint16_t	(*create_tokens)(t_shell *self, char *line);
-	void		(*clear)(t_shell *self);
 	uint16_t	(*execute)(t_shell *self);
+	void		(*print)(t_shell *self);
+	void		(*clear)(t_shell *self);
 };
 
 void	shell_init(t_shell *self);

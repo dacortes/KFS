@@ -3,6 +3,7 @@
 #include <system.h>
 #include <kernel/print/print.h>
 #include <kernel/interrupts/gdt.h>
+#include <ft_readline.h>
 
 /**
  * @file system.c
@@ -118,9 +119,19 @@ static void main_loop(system_t *self)
 		unsigned char *ascii = &self->keyboard.input;
 		uint32_t active = self->active_terminal;
 		terminal_t *term = &sys.terminals[active];
+		t_shell	shell;
+		char	line[256];
 
-		if (*ascii)
+		shell_init(&shell);
+		if (*ascii) {
 			term->handle_keyboard_input(term, *ascii);
+			readline(line);
+			if (shell.create_tokens(&shell, line)) {
+				shell.print(&shell);
+			}
+			shell.clear(&shell);
+				
+		}
 		self->keyboard.input = 0;
 		__asm__ volatile("hlt");
 	}

@@ -12,23 +12,19 @@ void set_prompt(const char *prompt)
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
 
-	ft_strncpy(term->prefix, prompt, ft_strlen(prompt));
+	ft_strlcpy(term->prefix, prompt, ft_strlen(prompt) + 1);
 }
 
-char *readline(void)
+char *readline(char *line)
 {
-	// remplazar por un puntero
-	static char	line[MAX_LINE_LEN];
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
 	unsigned int	len = ft_strlen(term->line);
-	
-	if (len >= MAX_LINE_LEN)
-        return NULL;
 
-	// Remplazar por memoria dinamica cuando se tenga
-	ft_strncpy(line, term->line, len);
-	line[len] = '\0';
-
+	if (!term->line_ready)
+		return NULL;
+	ft_strlcpy(line, term->line, len + 1);
+	term->line_ready = 0;
+	term->clear_line(term);
 	return line;
 }
