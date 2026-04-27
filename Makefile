@@ -101,7 +101,9 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
-	$(SRC_DIR)/shell/readline/ft_readline.c
+	$(SRC_DIR)/shell/readline/ft_readline.c \
+	$(SRC_DIR)/shell/shell.c
+
 
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
@@ -114,6 +116,7 @@ INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode

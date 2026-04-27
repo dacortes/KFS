@@ -19,21 +19,24 @@
 #define MAX_LINE 256
 #endif
 
+typedef struct s_shell t_shell;
+typedef struct s_token t_token;
+
 // cambiar el max_word por memoria dinamica una vez se haga
-typedef struct s_token {
+struct s_token {
 	char		word[MAX_WORD];
 	uint16_t	type;
-}	t_token;
+};
 
-typedef struct s_shell {
+struct s_shell {
 	uint32_t	lv;
 	char		***history;
 	char		line[MAX_LINE];
-	t_token		tokens[MAX_WORD];
+	t_token		token[MAX_WORD];
 	char		commands[NUM_COMMANDS][MAX_WORD];
 	uint16_t	(*create_tokens)(t_shell *self, char *line);
-	uint16_t	(*clear)(t_shell *self);
+	void		(*clear)(t_shell *self);
 	uint16_t	(*execute)(t_shell *self);
-} t_shell;
+};
 
 void	shell_init(t_shell *self);

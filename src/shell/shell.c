@@ -13,19 +13,20 @@ static uint32_t word_size(char *line)
 	return size;
 }
 
-static uint16_t cut_blanks(uint32_t *i, char *line)
+static void cut_blanks(uint32_t *i, char *line)
 {
 	if (!line || !*line)
-		return false;
+		return ;
+
 	while(line[*i] && ft_isblank(line[*i]))
 		(*i)++;
-	return true;
+	return ;
 }
 
 static void add_token(t_token *token, char *word, uint32_t *tk, uint32_t word_size)
 {
 	if (word_size > 0 && word_size < MAX_WORD) {
-		ft_strlcpy(tokens->word, word, word_size + 1);
+		ft_strlcpy(token->word, word, word_size + 1);
 		(*tk)++;
 	}
 }
@@ -45,18 +46,18 @@ uint16_t create_tokens(t_shell *self, char *line)
 
 		size = word_size(&line[i]);
 
-		add_token(&self->tokens[tk], &line[i], &tk, size);
+		add_token(&self->token[tk], &line[i], &tk, size);
 		i += size;
 	}
 	return (tk > 0);
 }
 
-uint16_t shell_clear(t_shell *self)
+void shell_clear(t_shell *self)
 {
 	// cuando se tenga malloc remplazar por clears con free
-	ft_memset(self->line, '\0', sizeof(self->line));
-	ft_memset(self->tokens, 0, sizeof(self->tokens));
-	ft_memset(self->commands, '\0', sizeof(self->commands));
+	ft_memchr(self->line, '\0', sizeof(self->line));
+	ft_memchr(self->token, 0, sizeof(self->token));
+	ft_memchr(self->commands, '\0', sizeof(self->commands));
 }
 
 static void init_commands(t_shell *self, const char **def_commands)
@@ -73,10 +74,8 @@ void	shell_init(t_shell *self)
 
 	self->lv = 0;
 	//Verificar el historial, si esta apuntando correctamnete
-	self->history = &term->history;
-	ft_memset(self->line, '\0', sizeof(self->line));
-	ft_memset(self->tokens, 0, sizeof(self->tokens));
-	ft_memset(self->commands, '\0', sizeof(self->commands));
+	self->history = (char ***)&term->history;
+	shell_clear(self);
 	init_commands(self, def_commands);
 	self->create_tokens = create_tokens;
 	self->clear = shell_clear; 
