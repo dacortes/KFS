@@ -71,6 +71,18 @@ char *ft_strncpy(char *dst, const char *src, unsigned int len);
  * called directly - use the wrapper functions above instead.
  */
 unsigned int ft_strlen_asm(const char *s);
+
+
+/**
+ * @file ft_memset.c
+ * @brief Custom implementation of memset for kernel use
+ *
+ * Provides a simple byte-wise memory set function to initialize buffers.
+ * This is used in place of the standard library's memset to avoid
+ * dependencies on external libraries in the kernel.
+ */
+void	    *ft_memset(void *b, int c, unsigned int len);
+
 int			ft_strcmp_asm(const char *s1, const char *s2);
 char		*ft_strcpy_asm(char *dst, const char *src);
 

@@ -31,11 +31,11 @@ struct s_gdt {
 	unsigned char flags;
 };
 
-#define CREATE_SOURCE_GDT(dst, g_base, g_limit, g_access, g_flags) \
-	(dst).base = (g_base); \
-	(dst).limit = (g_limit); \
-	(dst).access = (g_access); \
-	(dst).flags = (g_flags); \
+#define CREATE_SOURCE_GDT(dst, g_base, g_limit, g_access, g_flags)\
+	(dst).base = (g_base);\
+	(dst).limit = (g_limit);\
+	(dst).access = (g_access);\
+	(dst).flags = (g_flags)
 
 /**
  * @brief Configure a GDT entry.
@@ -361,7 +361,7 @@ void gdt_run_stack_demo(void)
 	printf("[STACK] User stack will be initialized at: 0x%x\n",
 	       user_stack_top);
 	gdt_enter_user_mode((unsigned int)gdt_user_stack_demo_entry,
-	                    user_stack_top);
+						user_stack_top);
 
 	/* If we get here, display the captured user stack info */
 	if (gdt_user_stack_esp != 0) {

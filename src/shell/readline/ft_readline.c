@@ -6,9 +6,8 @@ void set_prompt(const char *prompt)
 {
 	if (!prompt) {
 		printf("%s", ERROR_NULL_PROMPT);
-		return ;
+		return;
 	}
-	
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
 
@@ -22,7 +21,7 @@ char *readline(char *line)
 	unsigned int	len = ft_strlen(term->line);
 
 	if (!term->line_ready)
-		return NULL;
+		return ft_memset(line, 0, sizeof(line));
 	ft_strlcpy(line, term->line, len + 1);
 	term->line_ready = 0;
 	term->clear_line(term);

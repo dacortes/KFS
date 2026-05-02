@@ -47,6 +47,9 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline/)
+
 
 TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
 TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
@@ -125,6 +128,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strlcpy.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
 	$(SRC_DIR)/kernel/terminal/color_parser.c \
@@ -132,7 +136,11 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_isdigit.c \
-	$(SRC_DIR)/kernel/wrappers/ft_atoi.c
+	$(SRC_DIR)/kernel/wrappers/ft_isblank.c \
+	$(SRC_DIR)/kernel/wrappers/ft_atoi.c \
+	$(SRC_DIR)/shell/shell.c \
+	$(SRC_DIR)/shell/readline/ft_readline.c \
+	
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
@@ -177,7 +185,7 @@ KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/comm
 	kernel/interrupts kernel/keyboard \
 	shell/readline
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
-	kernel/keyboard kernel/terminal fixtures
+	kernel/keyboard kernel/terminal shell shell/readline fixtures
 
 ################################################################################
 #                               PHONY TARGETS                                  #

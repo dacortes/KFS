@@ -119,18 +119,18 @@ static void main_loop(system_t *self)
 		unsigned char *ascii = &self->keyboard.input;
 		uint32_t active = self->active_terminal;
 		terminal_t *term = &sys.terminals[active];
-		t_shell	shell;
-		char	line[256];
+		shell_t	shell;
 
 		shell_init(&shell);
 		if (*ascii) {
+			char	line[256];
+
 			term->handle_keyboard_input(term, *ascii);
 			readline(line);
 			if (shell.create_tokens(&shell, line)) {
 				shell.print(&shell);
+				shell.clear(&shell);
 			}
-			shell.clear(&shell);
-				
 		}
 		self->keyboard.input = 0;
 		__asm__ volatile("hlt");

@@ -425,7 +425,6 @@ static void handle_newline(terminal_t *self)
 	self->write_char(self, '\n');
 	self->line_pos = 0;
 	self->line_len = 0;
-	// clear_buffer(self->line);
 	self->write_prefix(self);
 	self->line_ready = 1;
 }

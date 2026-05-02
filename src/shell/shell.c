@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <shell.h>
 #include <print.h>
+#include <helper.h>
 
 static uint32_t word_size(char *line)
 {
@@ -9,7 +10,7 @@ static uint32_t word_size(char *line)
 
 	int size = 0;
 
-	while(line[size] && !ft_isblank(line[size]))
+	while (line[size] && !ft_isblank(line[size]))
 		size++;
 	return size;
 }
@@ -17,14 +18,13 @@ static uint32_t word_size(char *line)
 static void cut_blanks(uint32_t *i, char *line)
 {
 	if (!line || !*line)
-		return ;
+		return;
 
-	while(line[*i] && ft_isblank(line[*i]))
+	while (line[*i] && ft_isblank(line[*i]))
 		(*i)++;
-	return ;
 }
 
-static void add_token(t_token *token, char *word, uint32_t *tk, uint32_t word_size)
+static void add_token(token_t *token, char *word, uint32_t *tk, uint32_t word_size)
 {
 	if (word_size > 0 && word_size < MAX_WORD) {
 		ft_strlcpy(token->word, word, word_size + 1);
@@ -32,19 +32,19 @@ static void add_token(t_token *token, char *word, uint32_t *tk, uint32_t word_si
 	}
 }
 
-uint16_t create_tokens(t_shell *self, char *line)
+uint16_t create_tokens(shell_t *self, char *line)
 {
 	uint32_t i = 0;
-	uint32_t size;
 
 	if (!line || !*line)
 		return false;
 	self->num_tk = 0;
-	while(line[i]) {
+	while (line[i]) {
+		uint32_t size;
+
 		cut_blanks(&i, line);
-		
 		if (!line[i])
-			break ;
+			break;
 
 		size = word_size(&line[i]);
 
@@ -54,33 +54,61 @@ uint16_t create_tokens(t_shell *self, char *line)
 	return (self->num_tk > 0);
 }
 
-void	print_tokens(t_shell *self)
+void	printoken_ts(shell_t *self)
 {
-	uint32_t nill;
-
-	for(uint32_t i = 0; i < self->num_tk; i++) {
-		nill = i == 0 && printf("\n[%sCOMMAND%s] %s\n", BLUE, END, self->token[i].word);
-		nill = i != 0 && printf("  [%d] arg: %s\n", i, self->token[i].word);
+	for (uint32_t i = 0; i < self->num_tk; i++) {
+		if (i == 0)
+			printf("\n[%sCOMMAND%s] %s\n", BLUE, END, self->token[i].word);
+		else
+			printf("  [%u] arg: %s\n", i, self->token[i].word);
 	}
-	nill = true;
 }
 
-void shell_clear(t_shell *self)
+void token_clear(token_t *self)
+{
+	if (!self)
+		return;
+	if (self->word[0] == '\0')
+		return;
+	ft_memset(self->word, '\0', sizeof(self->word));
+	self->type = 0;
+}
+
+static void initoken_t(token_t *token)
+{
+	token->clear = token_clear;
+	token->clear(token);
+}
+
+static void shell_clear_tokens(shell_t *self)
+{
+	for (int i = 0; i < MAX_WORD; i++)
+		self->token[i].clear(&self->token[i]);
+}
+
+static void shell_clear_commands(shell_t *self)
+{
+	for (int i = 0; i < NUM_COMMANDS; i++)
+		ft_memset(self->commands[i], '\0', sizeof(self->commands[i]));
+}
+
+void shell_clear(shell_t *self)
 {
 	// cuando se tenga malloc remplazar por clears con free
 	self->num_tk = 0;
-	ft_memchr(self->line, '\0', sizeof(self->line));
-	ft_memchr(self->token, 0, sizeof(self->token));
-	ft_memchr(self->commands, '\0', sizeof(self->commands));
+	ft_memset(self->line, '\0', sizeof(self->line));
+	shell_clear_tokens(self);
+	shell_clear_commands(self);
 }
 
-static void init_commands(t_shell *self, const char **def_commands)
+static void init_commands(shell_t *self, const char **def_commands)
 {
 	for (int i = 0; i < NUM_COMMANDS; i++)
 		ft_strlcpy(self->commands[i], def_commands[i], MAX_WORD);
 }
 
-void	shell_init(t_shell *self)
+
+void	shell_init(shell_t *self)
 {
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
@@ -88,11 +116,13 @@ void	shell_init(t_shell *self)
 
 	self->num_tk = 0;
 	self->lv = 0;
+	for (int i = 0; i < MAX_WORD; i++)
+		initoken_t(&self->token[i]);
 	//Verificar el historial, si esta apuntando correctamnete
 	self->history = (char ***)&term->history;
 	shell_clear(self);
 	init_commands(self, def_commands);
 	self->create_tokens = create_tokens;
-	self->clear = shell_clear; 
-	self->print = print_tokens;
+	self->clear = shell_clear;
+	self->print = printoken_ts;
 }
