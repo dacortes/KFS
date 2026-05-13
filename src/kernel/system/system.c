@@ -128,7 +128,8 @@ static void main_loop(system_t *self)
 			term->handle_keyboard_input(term, *ascii);
 			readline(line);
 			if (shell.create_tokens(&shell, line)) {
-				shell.print(&shell);
+				shell.execute(&shell);
+				// shell.print(&shell);
 				shell.clear(&shell);
 			}
 		}

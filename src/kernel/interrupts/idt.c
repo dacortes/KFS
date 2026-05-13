@@ -53,3 +53,16 @@ void idt_init(void)
 
 	idt_load((unsigned int)&idtp);
 }
+
+/**
+ * Load the IDT into the CPU
+ *
+ * Uses the lidt instruction to load the IDT pointer.
+ *
+ * @param idt_ptr Address of the idt_ptr structure containing base and limit
+ */
+int handle_syscall(void)
+{
+	printf("[KERNEL] Syscall called from Ring %d\n", get_current_privilege_level());
+	return 0;
+}

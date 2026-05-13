@@ -108,11 +108,25 @@ static int cmd_half(shell_t *self)
 	return 0;
 }
 
-static int execute(shell_t *self)
+static int cmd_echo(shell_t *self)
+{
+	for(size_t word = 1; word < self->num_tk; word++) {
+		char blank = word == 1 ? '\0': ' ';
+		char *str = self->token[word].word;
+		if (printf("%c%s", blank, str) == -1)
+			return -1;
+	}
+	if (printf("\n") == -1)
+		return -1;
+	return 0;
+}
+
+static uint16_t execute(shell_t *self)
 {
 	char *cmd = self->token[0].word;
 
 	for(size_t num = 0; num < NUM_COMMANDS; num++) {
+		// printf("%s %s\n", cmd,  self->builtins[num].name);
 		if (!ft_strcmp(cmd, self->builtins[num].name))
 			return self->builtins[num].func(self);
 	}
@@ -124,10 +138,10 @@ void	shell_init(shell_t *self)
 {
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
-	const builtin_t builtins[] = {
+	static const builtin_t builtins[] = {
 		{"reboot", cmd_reboot, "Reboot the system"},
 		{"half",   cmd_half,   "Halt the CPU"},
-		// {"printf", cmd_printf, "Print arguments"},
+		{"echo", cmd_echo, "Print arguments"},
 		{NULL, NULL, NULL}
 	};
 	self->num_tk = 0;
@@ -138,6 +152,7 @@ void	shell_init(shell_t *self)
 	//Verificar el historial, si esta apuntando correctamnete
 	self->history = (char ***)&term->history;
 	shell_clear(self);
+	self->execute = execute;
 	self->create_tokens = create_tokens;
 	self->clear = shell_clear;
 	self->print = printoken_ts;
