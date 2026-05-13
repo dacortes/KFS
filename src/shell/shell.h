@@ -5,6 +5,7 @@
 #include <system.h>
 #include <helper.h>
 #include <stdbool.h>
+#include <commands.h>
 
 #ifndef MAX_WORD
 #define MAX_WORD 256
@@ -12,7 +13,7 @@
 
 // esto se debe cambiar una vez se tengan los archivos(entrys) programados
 #ifndef NUM_COMMANDS
-#define NUM_COMMANDS 5
+#define NUM_COMMANDS 2
 #endif
 
 #ifndef MAX_LINE
@@ -22,6 +23,12 @@
 typedef struct shell_s shell_t;
 typedef struct token_s token_t;
 
+typedef struct {
+    const char *name;
+    int (*func)(shell_t *obj);
+    const char *help;
+} builtin_t;
+
 // cambiar el max_word por memoria dinamica una vez se haga
 struct token_s {
 	char		word[MAX_WORD];
@@ -30,12 +37,12 @@ struct token_s {
 };
 
 struct shell_s {
-	uint32_t	num_tk;
-	uint32_t	lv;
-	char		***history;
-	char		line[MAX_LINE];
-	token_t		token[MAX_WORD];
-	char		commands[NUM_COMMANDS][MAX_WORD];
+	uint32_t		num_tk;
+	uint32_t		lv;
+	char			***history;
+	char			line[MAX_LINE];
+	token_t			token[MAX_WORD];
+	const builtin_t *builtins;
 	uint16_t	(*create_tokens)(shell_t *self, char *line);
 	uint16_t	(*execute)(shell_t *self);
 	void		(*print)(shell_t *self);

@@ -86,42 +86,58 @@ static void shell_clear_tokens(shell_t *self)
 		self->token[i].clear(&self->token[i]);
 }
 
-static void shell_clear_commands(shell_t *self)
-{
-	for (int i = 0; i < NUM_COMMANDS; i++)
-		ft_memset(self->commands[i], '\0', sizeof(self->commands[i]));
-}
-
 void shell_clear(shell_t *self)
 {
 	// cuando se tenga malloc remplazar por clears con free
 	self->num_tk = 0;
 	ft_memset(self->line, '\0', sizeof(self->line));
 	shell_clear_tokens(self);
-	shell_clear_commands(self);
 }
 
-static void init_commands(shell_t *self, const char **def_commands)
+static int cmd_reboot(shell_t *self)
 {
-	for (int i = 0; i < NUM_COMMANDS; i++)
-		ft_strlcpy(self->commands[i], def_commands[i], MAX_WORD);
+	(void)self;
+	reboot_system();
+	return 0;
 }
 
+static int cmd_half(shell_t *self)
+{
+	(void)self;
+	halt_system();
+	return 0;
+}
+
+static int execute(shell_t *self)
+{
+	char *cmd = self->token[0].word;
+
+	for(size_t num = 0; num < NUM_COMMANDS; num++) {
+		if (!ft_strcmp(cmd, self->builtins[num].name))
+			return self->builtins[num].func(self);
+	}
+	printf("%s[ERROR]%s: %s: command not found\n", RED, END, cmd);
+	return 127;
+}
 
 void	shell_init(shell_t *self)
 {
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
-	const char *def_commands[NUM_COMMANDS] = {"reboot", "half", "printf", "", ""};
-
+	const builtin_t builtins[] = {
+		{"reboot", cmd_reboot, "Reboot the system"},
+		{"half",   cmd_half,   "Halt the CPU"},
+		// {"printf", cmd_printf, "Print arguments"},
+		{NULL, NULL, NULL}
+	};
 	self->num_tk = 0;
 	self->lv = 0;
+	self->builtins = builtins;
 	for (int i = 0; i < MAX_WORD; i++)
 		initoken_t(&self->token[i]);
 	//Verificar el historial, si esta apuntando correctamnete
 	self->history = (char ***)&term->history;
 	shell_clear(self);
-	init_commands(self, def_commands);
 	self->create_tokens = create_tokens;
 	self->clear = shell_clear;
 	self->print = printoken_ts;
