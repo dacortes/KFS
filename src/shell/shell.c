@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
+#include <builtins.h>
 #include <shell.h>
-#include <print.h>
-#include <helper.h>
 
 static uint32_t word_size(char *line)
 {
@@ -94,39 +93,12 @@ void shell_clear(shell_t *self)
 	shell_clear_tokens(self);
 }
 
-static int cmd_reboot(shell_t *self)
-{
-	(void)self;
-	reboot_system();
-	return 0;
-}
-
-static int cmd_half(shell_t *self)
-{
-	(void)self;
-	halt_system();
-	return 0;
-}
-
-static int cmd_echo(shell_t *self)
-{
-	for(size_t word = 1; word < self->num_tk; word++) {
-		char blank = word == 1 ? '\0': ' ';
-		char *str = self->token[word].word;
-		if (printf("%c%s", blank, str) == -1)
-			return -1;
-	}
-	if (printf("\n") == -1)
-		return -1;
-	return 0;
-}
-
 static uint16_t execute(shell_t *self)
 {
 	char *cmd = self->token[0].word;
 
 	for(size_t num = 0; num < NUM_COMMANDS; num++) {
-		// printf("%s %s\n", cmd,  self->builtins[num].name);
+		//printf("Comparing '%s' with '%s'\n", cmd, self->builtins[num].name);
 		if (!ft_strcmp(cmd, self->builtins[num].name))
 			return self->builtins[num].func(self);
 	}
@@ -142,6 +114,8 @@ void	shell_init(shell_t *self)
 		{"reboot", cmd_reboot, "Reboot the system"},
 		{"half",   cmd_half,   "Halt the CPU"},
 		{"echo", cmd_echo, "Print arguments"},
+		{"user_mode", cmd_user_mode, "Switch to user mode"},
+		{"user_show", cmd_show_mode, "Show current privilege level"},
 		{NULL, NULL, NULL}
 	};
 	self->num_tk = 0;

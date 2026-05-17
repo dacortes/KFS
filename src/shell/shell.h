@@ -6,6 +6,10 @@
 #include <helper.h>
 #include <stdbool.h>
 #include <commands.h>
+#include <shell.h>
+#include <print.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifndef MAX_WORD
 #define MAX_WORD 256
@@ -13,7 +17,7 @@
 
 // esto se debe cambiar una vez se tengan los archivos(entrys) programados
 #ifndef NUM_COMMANDS
-#define NUM_COMMANDS 3
+#define NUM_COMMANDS 5
 #endif
 
 #ifndef MAX_LINE

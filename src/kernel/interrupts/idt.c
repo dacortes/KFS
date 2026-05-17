@@ -7,6 +7,8 @@
 
 #include <kernel/interrupts/idt.h>
 #include <kernel/interrupts/gdt.h>
+#include <kernel/wrappers/commands.h>
+#include <print.h>
 
 extern void gp_fault_handler(void);
 

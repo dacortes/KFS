@@ -49,6 +49,7 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
 
 
 TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
@@ -78,7 +79,9 @@ KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/idt.s \
 	$(SRC_DIR)/kernel/assembly/isr.s \
 	$(SRC_DIR)/kernel/assembly/commands/halt.s \
-	$(SRC_DIR)/kernel/assembly/commands/reboot.s
+	$(SRC_DIR)/kernel/assembly/commands/reboot.s \
+	$(SRC_DIR)/kernel/assembly/commands/user_mode.s \
+	$(SRC_DIR)/kernel/assembly/commands/kernel_mode.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/print/printk.c \
@@ -105,6 +108,10 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
 	$(SRC_DIR)/shell/readline/ft_readline.c \
+	$(SRC_DIR)/shell/builtins/echo.c \
+	$(SRC_DIR)/shell/builtins/reboot.c \
+	$(SRC_DIR)/shell/builtins/halt.c \
+	$(SRC_DIR)/shell/builtins/mode_switch.c \
 	$(SRC_DIR)/shell/shell.c
 
 
@@ -119,6 +126,7 @@ INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 
 # Test source files (kernel lib without main.c for testing)
@@ -140,7 +148,10 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_atoi.c \
 	$(SRC_DIR)/shell/shell.c \
 	$(SRC_DIR)/shell/readline/ft_readline.c \
-	
+	$(SRC_DIR)/shell/builtins/echo.c \
+	$(SRC_DIR)/shell/builtins/reboot.c \
+	$(SRC_DIR)/shell/builtins/halt.c \
+	$(SRC_DIR)/shell/builtins/mode_switch.c \
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
@@ -183,7 +194,7 @@ REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
 	kernel/terminal kernel/system kernel/print \
 	kernel/interrupts kernel/keyboard \
-	shell/readline
+	shell/readline shell/builtins
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
 	kernel/keyboard kernel/terminal shell shell/readline fixtures
 
