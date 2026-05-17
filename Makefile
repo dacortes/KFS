@@ -151,7 +151,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
-	$(SRC_DIR)/shell/builtins/mode_switch.c \
+	$(SRC_DIR)/shell/builtins/mode_switch.c
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
@@ -196,7 +196,8 @@ KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/comm
 	kernel/interrupts kernel/keyboard \
 	shell/readline shell/builtins
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
-	kernel/keyboard kernel/terminal shell shell/readline fixtures
+	kernel/keyboard kernel/terminal shell shell/readline shell/builtins \
+	fixtures
 
 ################################################################################
 #                               PHONY TARGETS                                  #
@@ -352,7 +353,7 @@ $(ISO): $(KERNEL_BIN) $(GRUBCFG)
 run: $(ISO)
 	@printf "$(INFO) Starting QEMU with kernel ...\n"
 	@printf "$(INFO) Press Ctrl-A then X to exit QEMU\n"
-	@qemu-system-x86_64 -cdrom $(ISO) -no-reboot -no-shutdown
+	@qemu-system-x86_64 -cdrom $(ISO) -no-shutdown
 
 debug: $(ISO)
 	@printf "$(INFO) Starting QEMU with GDB support ...\n"
