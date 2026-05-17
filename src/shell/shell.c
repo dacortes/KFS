@@ -115,7 +115,7 @@ void	shell_init(shell_t *self)
 		{"half",   cmd_half,   "Halt the CPU"},
 		{"echo", cmd_echo, "Print arguments"},
 		{"user_mode", cmd_user_mode, "Switch to user mode"},
-		{"user_show", cmd_show_mode, "Show current privilege level"},
+		{"show_mode", cmd_show_mode, "Show current privilege level"},
 		{NULL, NULL, NULL}
 	};
 	self->num_tk = 0;

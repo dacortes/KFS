@@ -230,8 +230,7 @@ void gdt_handle_gp_fault(void)
 	       gdt_user_demo_state, gdt_user_demo_buffer[0]);
 	printf("[GDT] Fault occurred at gdt_kernel_data_access_attempt\n");
 	printf("[GDT] Instruction: mov ds, 0x10 in ring 3\n");
-	for (;;)
-		__asm__ volatile("hlt");
+
 }
 
 /**
@@ -278,8 +277,10 @@ void gdt_print_kernel_stack(void)
 	printf("[STACK] SS  (Stack Segment): 0x%x (Kernel: 0x%x)\n",
 	       kernel_stack.ss, GDT_KERNEL_DATA_SELECTOR);
 	printf("[STACK] EBP (Frame Pointer): 0x%x\n", kernel_stack.ebp);
-	printf("[STACK] TSS.esp0 (Ring 0 Stack): 0x%x\n",
-	       (unsigned int)&stack_top);
+	    printf("[STACK] TSS.esp0 (Ring 0 Stack): 0x%x\n",
+		    (unsigned int)tss.esp0);
+	    printf("[STACK] TSS.ss0 (Ring 0 SS): 0x%x\n",
+		    (unsigned int)tss.ss0);
 	printf("[STACK] Stack Direction: decreasing (esp grows downward)\n");
 }
 

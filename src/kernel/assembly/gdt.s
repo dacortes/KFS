@@ -48,11 +48,11 @@ gdt_enter_user_mode:
 	mov eax, [ebp + 8]
 	mov edx, [ebp + 12]
 
-	push dword 0x23
+	push dword 0x2B
 	push dword edx
 	pushfd
 	or dword [esp], 0x200
-	push dword 0x1B
+	push dword 0x23
 	push dword eax
 	iretd
 
@@ -70,9 +70,9 @@ gdt_user_mode_entry:
 
 	gdt_kernel_data_access_attempt:
 	; Ring 3: this is the exact instruction that should fault.
-	mov ax, 0x10
-	mov ds, ax
-	hlt
+	;mov ax, 0x10
+	;mov ds, ax
+	;hlt
 	jmp gdt_user_mode_entry
 
 gdt_user_stack_demo_entry:
