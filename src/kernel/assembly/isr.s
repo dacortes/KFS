@@ -37,6 +37,8 @@ irq1_handler:
 gp_fault_handler:
 	pusha
 	call gdt_handle_gp_fault
-	popa
-	add esp, 4
-	iret
+
+.hang:
+	cli
+	hlt
+	jmp .hang
