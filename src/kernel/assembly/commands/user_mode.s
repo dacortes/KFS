@@ -13,6 +13,9 @@ section .text
 switch_to_user_mode:
 	push ebp
 	mov ebp, esp
+	push ebx
+	push esi
+	push edi
 
 	mov eax, [ebp + 8]  ; user code entry point (in eax)
 	mov edx, [ebp + 12] ; user stack pointer (in edx)
@@ -45,6 +48,9 @@ switch_to_user_mode:
 
 	iret                ; switch to user mode
 .already_user:
+	pop edi
+	pop esi
+	pop ebx
 	pop ebp
 	ret
 

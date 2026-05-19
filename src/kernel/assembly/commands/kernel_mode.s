@@ -43,6 +43,9 @@ syscall_handler:
 	; We are done with the user->kernel return request.
 	; Do not unwind the interrupt frame here: restore original kernel call stack directly.
 	mov esp, [kernel_return_esp]
+	pop edi
+	pop esi
+	pop ebx
 	pop ebp
 	cld
 	mov ax, 0x10

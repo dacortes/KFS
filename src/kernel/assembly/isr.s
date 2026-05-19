@@ -43,6 +43,9 @@ gp_fault_handler:
 
 	; User-mode fault path: resume kernel caller saved by switch_to_user_mode.
 	mov esp, [kernel_return_esp]
+	pop edi
+	pop esi
+	pop ebx
 	pop ebp
 	mov ax, 0x10
 	mov ds, ax
