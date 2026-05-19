@@ -18,24 +18,14 @@ void print()
 }
 
 /**
- * User mode test function - runs in Ring 3
- * This function must NOT call printf or other kernel functions
- * It can only call the syscall (int 0x80) to interact with kernel
+ * User mode test function - runs in Ring 3.
+ * Avoid calling kernel C helpers (printf, etc.) directly from here.
  */
 static void user_mode(void)
 {
-	int current_mode;
-
-	/* This stays in Ring 3 so we can verify the transition path. */
-	current_mode = get_current_privilege_level();
-	printf("[USER MODE] After switch - Current privilege level: %d\n", current_mode);
-
 	asm volatile("movl $0, %%eax\n\t"
 	             "int $0x80"
 	             : : : "eax");
-
-	current_mode = get_current_privilege_level();
-	printf("[USER MODE] After syscall - Current privilege level: %d\n", current_mode);
 }
 
 int cmd_user_mode(shell_t *self)
