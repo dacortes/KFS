@@ -18,6 +18,9 @@ syscall_handler:
 	push fs
 	push gs
 
+	; Ensure forward string direction for kernel C/asm helpers.
+	cld
+
 	; Always switch data segments to kernel selectors before touching kernel code/data.
 	mov ax, 0x10
 	mov ds, ax
@@ -41,6 +44,7 @@ syscall_handler:
 	; Do not unwind the interrupt frame here: restore original kernel call stack directly.
 	mov esp, [kernel_return_esp]
 	pop ebp
+	cld
 	mov ax, 0x10
 	mov ds, ax
 	mov es, ax
