@@ -42,15 +42,15 @@ syscall_handler:
 	call printf
 	add esp, 4
 
-	pop gs
-	pop fs
-	pop es
-	pop ds
-	popad
-
-	; Restore original kernel stack saved before iret-to-user and resume caller.
+	; We are done with the user->kernel return request.
+	; Do not unwind the interrupt frame here: restore original kernel call stack directly.
 	mov esp, [kernel_return_esp]
 	pop ebp
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
 	sti			; re-enable IRQs: int gate cleared IF on syscall entry
 	ret
 
