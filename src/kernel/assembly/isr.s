@@ -31,12 +31,17 @@ irq1_handler:
 ;**
 ; * General protection fault handler stub
 ; *
-; * Dispatches to the C-level GDT proof handler. The handler does not
-; * return.
+; * For faults coming from ring 3, recover to the saved kernel frame used by
+; * the user-mode switch demo. For kernel faults, halt to avoid undefined state.
 ;**
 gp_fault_handler:
-	; Recover from ring-3 GP faults by restoring saved kernel frame.
-	; Stack contains CPU-pushed fault frame (+ error code), do not iret to faulting EIP.
+	; #GP pushes an error code; saved CS is at [esp + 8]
+	mov eax, [esp + 8]
+	and eax, 0x3
+	cmp eax, 0x3
+	jne .kernel_fault
+
+	; User-mode fault path: resume kernel caller saved by switch_to_user_mode.
 	mov esp, [kernel_return_esp]
 	pop ebp
 	mov ax, 0x10
@@ -44,5 +49,11 @@ gp_fault_handler:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
+	cld
 	sti
 	ret
+
+.kernel_fault:
+	cli
+	hlt
+	jmp .kernel_fault
