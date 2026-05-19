@@ -11,7 +11,7 @@ section .text
 	global irq1_handler
 	global gp_fault_handler
 	extern keyboard_interrupt
-	extern gdt_handle_gp_fault
+	extern kernel_return_esp
 
 ;**
 ; * IRQ1 handler stub (Keyboard interrupt)
@@ -35,10 +35,14 @@ irq1_handler:
 ; * return.
 ;**
 gp_fault_handler:
-	pusha
-	call gdt_handle_gp_fault
-
-.hang:
-	cli
-	hlt
-	jmp .hang
+	; Recover from ring-3 GP faults by restoring saved kernel frame.
+	; Stack contains CPU-pushed fault frame (+ error code), do not iret to faulting EIP.
+	mov esp, [kernel_return_esp]
+	pop ebp
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	sti
+	ret
