@@ -1,7 +1,6 @@
 global return_to_kernel_mode
 global syscall_handler
 
-extern printf
 extern kernel_return_esp
 
 section .text
@@ -38,10 +37,6 @@ syscall_handler:
 	iret
 
 .exit_user_mode:
-	push dword syscall_zero_msg
-	call printf
-	add esp, 4
-
 	; We are done with the user->kernel return request.
 	; Do not unwind the interrupt frame here: restore original kernel call stack directly.
 	mov esp, [kernel_return_esp]
@@ -54,5 +49,3 @@ syscall_handler:
 	sti			; re-enable IRQs: int gate cleared IF on syscall entry
 	ret
 
-section .rodata
-	syscall_zero_msg db "[SYSCALL] Returning from user mode to kernel", 10, 0
