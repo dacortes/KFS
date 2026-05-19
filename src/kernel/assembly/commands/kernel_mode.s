@@ -1,7 +1,7 @@
 global return_to_kernel_mode
 global syscall_handler
 
-extern print
+extern printf
 extern kernel_return_esp
 
 section .text
@@ -39,7 +39,7 @@ syscall_handler:
 
 .exit_user_mode:
 	push dword syscall_zero_msg
-	call print
+	call printf
 	add esp, 4
 
 	pop gs
