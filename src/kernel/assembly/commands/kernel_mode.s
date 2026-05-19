@@ -51,6 +51,7 @@ syscall_handler:
 	; Restore original kernel stack saved before iret-to-user and resume caller.
 	mov esp, [kernel_return_esp]
 	pop ebp
+	sti			; re-enable IRQs: int gate cleared IF on syscall entry
 	ret
 
 section .rodata
