@@ -49,7 +49,7 @@ struct shell_s {
 	const builtin_t *builtins;
 	uint16_t	(*create_tokens)(shell_t *self, char *line);
 	uint16_t	(*execute)(shell_t *self);
-	void		(*print)(shell_t *self);
+	void		(*print)(const shell_t *self);
 	void		(*clear)(shell_t *self);
 };
 

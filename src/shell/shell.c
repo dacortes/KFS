@@ -53,7 +53,7 @@ uint16_t create_tokens(shell_t *self, char *line)
 	return (self->num_tk > 0);
 }
 
-void	printoken_ts(shell_t *self)
+void	printoken_ts(const shell_t *self)
 {
 	for (uint32_t i = 0; i < self->num_tk; i++) {
 		if (i == 0)
