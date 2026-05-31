@@ -97,7 +97,7 @@ static uint16_t execute(shell_t *self)
 {
 	char *cmd = self->token[0].word;
 
-	for(size_t num = 0; num < NUM_COMMANDS; num++) {
+	for (size_t num = 0; num < NUM_COMMANDS; num++) {
 		//printf("Comparing '%s' with '%s'\n", cmd, self->builtins[num].name);
 		if (!ft_strcmp(cmd, self->builtins[num].name))
 			return self->builtins[num].func(self);

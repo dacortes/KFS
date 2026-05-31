@@ -157,6 +157,7 @@ KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
 TEST_FIXTURE_SOURCES = $(TEST_DIR)/fixtures/io_stub.c
 TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
+	$(TEST_DIR)/unit/test_builtins.cpp \
 	$(TEST_DIR)/unit/test_strlen.cpp \
 	$(TEST_DIR)/unit/test_strcmp.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \
@@ -169,7 +170,8 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_memchr.cpp \
 	$(TEST_DIR)/unit/test_memset.cpp \
 	$(TEST_DIR)/unit/test_strchr.cpp \
-	$(TEST_DIR)/unit/test_printf.cpp
+	$(TEST_DIR)/unit/test_printf.cpp \
+	$(TEST_DIR)/unit/test_readline_shell.cpp
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))

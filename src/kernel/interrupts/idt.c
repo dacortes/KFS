@@ -10,9 +10,6 @@
 #include <kernel/wrappers/commands.h>
 #include <print.h>
 
-extern void gp_fault_handler(void);
-extern void syscall_handler(void);
-
 static struct idt_entry idt[IDT_ENTRIES];
 static struct idt_ptr idtp;
 
@@ -55,7 +52,8 @@ void idt_init(void)
 		     GDT_KERNEL_CODE_SELECTOR, 0x8E);
 
 	/* Syscall handler - interrupt 0x80, callable from Ring 3 (user mode)
-	   0xEE = Present | Ring 3 | 32-bit interrupt gate */
+	 * 0xEE = Present | Ring 3 | 32-bit interrupt gate
+	 */
 	idt_set_gate(0x80, (unsigned int)syscall_handler,
 		     GDT_KERNEL_CODE_SELECTOR, 0xEE);
 

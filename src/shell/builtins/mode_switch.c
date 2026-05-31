@@ -8,16 +8,15 @@ static uint8_t user_stack[4096];
  * User mode test function - runs in Ring 3.
  * Avoid calling kernel C helpers (printf, etc.) directly from here.
  */
-static void __attribute__((noreturn)) user_mode(void)
+static void user_mode(void)
 {
 	asm volatile("xorl %%eax, %%eax\n\t"
-	             "int $0x80\n\t"
-	             : : : "eax", "memory");
+		"int $0x80\n\t"
+		: : : "eax", "memory");
 
 	/* Must never continue in ring 3 without a valid return frame. */
-	for (;;) {
+	for (;;)
 		asm volatile("hlt");
-	}
 }
 
 int cmd_user_mode(shell_t *self)

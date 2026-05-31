@@ -70,3 +70,6 @@ void idt_load(unsigned int idt_ptr_addr);
  * This function is called when a system call is received from user mode.
  */
 int handle_syscall(void);
+
+extern void gp_fault_handler(void);
+extern void syscall_handler(void);
