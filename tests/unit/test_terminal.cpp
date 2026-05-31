@@ -175,15 +175,17 @@ TEST_F(TerminalTest, BackspaceMidLineShiftsChars)
 /*                     Newline / enter tests                          */
 /* ------------------------------------------------------------------ */
 
-TEST_F(TerminalTest, NewlineResetsLineBuffer)
+TEST_F(TerminalTest, NewlineDoesntResetBuffer)
 {
 	term.handle_keyboard_input(&term, 'H');
 	term.handle_keyboard_input(&term, 'i');
 	term.handle_keyboard_input(&term, '\n');
 
-	EXPECT_EQ(term.line_pos, 0u);
-	EXPECT_EQ(term.line_len, 0u);
-	EXPECT_EQ(term.line[0], '\0');
+	EXPECT_EQ(term.line_pos, 0);
+	EXPECT_EQ(term.line_len, 0);
+	EXPECT_EQ(term.line[0], 'H');
+	EXPECT_EQ(term.line[1], 'i');
+	EXPECT_EQ(term.line[2], '\0');
 }
 
 TEST_F(TerminalTest, NewlineMovesToNextLineWithPrefix)

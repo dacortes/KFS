@@ -71,13 +71,27 @@ char *ft_strncpy(char *dst, const char *src, unsigned int len);
  * called directly - use the wrapper functions above instead.
  */
 unsigned int ft_strlen_asm(const char *s);
-int ft_strcmp_asm(const char *s1, const char *s2);
-char *ft_strcpy_asm(char *dst, const char *src);
 
-void *ft_memchr(const void *s, int c, unsigned int n);
-char *ft_strchr(const char *s, int c);
-int	ft_isdigit(int c);
-int	ft_atoi(const char *str);
+
+/**
+ * @file ft_memset.c
+ * @brief Custom implementation of memset for kernel use
+ *
+ * Provides a simple byte-wise memory set function to initialize buffers.
+ * This is used in place of the standard library's memset to avoid
+ * dependencies on external libraries in the kernel.
+ */
+void	    *ft_memset(void *b, int c, unsigned int len);
+
+int			ft_strcmp_asm(const char *s1, const char *s2);
+char		*ft_strcpy_asm(char *dst, const char *src);
+
+void		*ft_memchr(const void *s, int c, unsigned int n);
+char		*ft_strchr(const char *s, int c);
+size_t		ft_strlcpy(char *dst, const char *src, size_t dstsize);
+int			ft_isdigit(int c);
+int			ft_atoi(const char *str);
+uint16_t	ft_isblank(char c);
 
 #ifdef __cplusplus
 }

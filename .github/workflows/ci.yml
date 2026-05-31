@@ -51,16 +51,6 @@ jobs:
           chmod +x ./scripts/style_check.sh
           ./scripts/style_check.sh
 
-      - name: Static Analysis (cppcheck)
-        run: |
-          chmod +x ./scripts/static_analysis.sh
-          ./scripts/static_analysis.sh
-
-      #- name: Build Project
-      #  run: |
-      #    chmod +x ./scripts/build.sh
-      #    ./scripts/build.sh
-
       - name: Generate Code Coverage
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}

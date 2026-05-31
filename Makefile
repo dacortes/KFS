@@ -47,6 +47,10 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
+
 
 TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
 TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
@@ -71,8 +75,13 @@ KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s \
+	$(SRC_DIR)/kernel/assembly/gdt.s \
 	$(SRC_DIR)/kernel/assembly/idt.s \
-	$(SRC_DIR)/kernel/assembly/isr.s
+	$(SRC_DIR)/kernel/assembly/isr.s \
+	$(SRC_DIR)/kernel/assembly/commands/halt.s \
+	$(SRC_DIR)/kernel/assembly/commands/reboot.s \
+	$(SRC_DIR)/kernel/assembly/commands/user_mode.s \
+	$(SRC_DIR)/kernel/assembly/commands/kernel_mode.s
 KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/print/printk.c \
@@ -85,16 +94,27 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strlcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memset.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_atoi.c \
+	$(SRC_DIR)/kernel/wrappers/ft_isblank.c \
 	$(SRC_DIR)/kernel/wrappers/ft_isdigit.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
 	$(SRC_DIR)/kernel/terminal/color_parser.c \
+	$(SRC_DIR)/kernel/interrupts/gdt.c \
 	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
-	$(SRC_DIR)/kernel/keyboard/keyboard.c
+	$(SRC_DIR)/kernel/keyboard/keyboard.c \
+	$(SRC_DIR)/shell/readline/ft_readline.c \
+	$(SRC_DIR)/shell/builtins/echo.c \
+	$(SRC_DIR)/shell/builtins/reboot.c \
+	$(SRC_DIR)/shell/builtins/halt.c \
+	$(SRC_DIR)/shell/builtins/mode_switch.c \
+	$(SRC_DIR)/shell/shell.c
+
+
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
 INCLUDES += $(addprefix -I, ./inc/stdbool)
@@ -105,6 +125,9 @@ INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode
@@ -113,6 +136,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strlcpy.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
 	$(SRC_DIR)/kernel/terminal/color_parser.c \
@@ -120,12 +144,20 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_isdigit.c \
-	$(SRC_DIR)/kernel/wrappers/ft_atoi.c
+	$(SRC_DIR)/kernel/wrappers/ft_isblank.c \
+	$(SRC_DIR)/kernel/wrappers/ft_atoi.c \
+	$(SRC_DIR)/shell/shell.c \
+	$(SRC_DIR)/shell/readline/ft_readline.c \
+	$(SRC_DIR)/shell/builtins/echo.c \
+	$(SRC_DIR)/shell/builtins/reboot.c \
+	$(SRC_DIR)/shell/builtins/halt.c \
+	$(SRC_DIR)/shell/builtins/mode_switch.c
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
 TEST_FIXTURE_SOURCES = $(TEST_DIR)/fixtures/io_stub.c
 TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
+	$(TEST_DIR)/unit/test_builtins.cpp \
 	$(TEST_DIR)/unit/test_strlen.cpp \
 	$(TEST_DIR)/unit/test_strcmp.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \
@@ -138,7 +170,8 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_memchr.cpp \
 	$(TEST_DIR)/unit/test_memset.cpp \
 	$(TEST_DIR)/unit/test_strchr.cpp \
-	$(TEST_DIR)/unit/test_printf.cpp
+	$(TEST_DIR)/unit/test_printf.cpp \
+	$(TEST_DIR)/unit/test_readline_shell.cpp
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))
@@ -160,11 +193,13 @@ GTEST_LIBS = -lgtest -lgtest_main
 REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
-KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/wrappers \
+KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
 	kernel/terminal kernel/system kernel/print \
-	kernel/interrupts kernel/keyboard
+	kernel/interrupts kernel/keyboard \
+	shell/readline shell/builtins
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
-	kernel/keyboard kernel/terminal fixtures
+	kernel/keyboard kernel/terminal shell shell/readline shell/builtins \
+	fixtures
 
 ################################################################################
 #                               PHONY TARGETS                                  #
@@ -320,7 +355,7 @@ $(ISO): $(KERNEL_BIN) $(GRUBCFG)
 run: $(ISO)
 	@printf "$(INFO) Starting QEMU with kernel ...\n"
 	@printf "$(INFO) Press Ctrl-A then X to exit QEMU\n"
-	@qemu-system-x86_64 -cdrom $(ISO) -no-reboot -no-shutdown
+	@qemu-system-x86_64 -cdrom $(ISO) -no-shutdown
 
 debug: $(ISO)
 	@printf "$(INFO) Starting QEMU with GDB support ...\n"

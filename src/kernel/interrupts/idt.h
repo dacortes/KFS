@@ -63,3 +63,13 @@ void idt_set_gate(unsigned char num, unsigned int base,
  * @param idt_ptr_addr Address of the idt_ptr structure
  */
 void idt_load(unsigned int idt_ptr_addr);
+
+/**
+ * Handle a system call
+ *
+ * This function is called when a system call is received from user mode.
+ */
+int handle_syscall(void);
+
+extern void gp_fault_handler(void);
+extern void syscall_handler(void);

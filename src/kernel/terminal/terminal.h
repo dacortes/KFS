@@ -129,6 +129,7 @@ struct terminal_s {
 	char			line[DEVICE_BUFFER_SIZE];
 	uint32_t		line_pos;
 	uint32_t		line_len;
+	uint32_t		line_ready;
 
 	color_parser_t	color_parser;
 
@@ -148,6 +149,7 @@ struct terminal_s {
 	void (*write_prefix)(terminal_t *self);
 	void (*render)(terminal_t *self);
 	void (*set_offset)(terminal_t *self, uint16_t offset);
+	void (*clear_line)(terminal_t *self);
 };
 
 /**

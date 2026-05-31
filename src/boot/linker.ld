@@ -3,6 +3,14 @@ ENTRY(_start)
 
 SECTIONS
 {
+
+    /* Init section GDT*/
+    . = 0x800;
+    
+    /* section GDT */
+    .gdt : {
+        *(.gdt)
+    }
     /* Kernel loaded at 1MB */
     . = 1M;
 

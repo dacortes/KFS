@@ -6,6 +6,9 @@
  */
 
 #include <kernel/interrupts/idt.h>
+#include <kernel/interrupts/gdt.h>
+#include <kernel/wrappers/commands.h>
+#include <print.h>
 
 static struct idt_entry idt[IDT_ENTRIES];
 static struct idt_ptr idtp;
@@ -44,5 +47,28 @@ void idt_init(void)
 	for (i = 0; i < IDT_ENTRIES; i++)
 		idt_set_gate(i, 0, 0, 0);
 
+	/* General protection fault handler (#GP, vector 13). */
+	idt_set_gate(13, (unsigned int)gp_fault_handler,
+		     GDT_KERNEL_CODE_SELECTOR, 0x8E);
+
+	/* Syscall handler - interrupt 0x80, callable from Ring 3 (user mode)
+	 * 0xEE = Present | Ring 3 | 32-bit interrupt gate
+	 */
+	idt_set_gate(0x80, (unsigned int)syscall_handler,
+		     GDT_KERNEL_CODE_SELECTOR, 0xEE);
+
 	idt_load((unsigned int)&idtp);
+}
+
+/**
+ * Load the IDT into the CPU
+ *
+ * Uses the lidt instruction to load the IDT pointer.
+ *
+ * @param idt_ptr Address of the idt_ptr structure containing base and limit
+ */
+int handle_syscall(void)
+{
+	printf("[KERNEL] Syscall called from Ring %d\n", get_current_privilege_level());
+	return 0;
 }
