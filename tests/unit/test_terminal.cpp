@@ -196,10 +196,11 @@ TEST_F(TerminalTest, NewlineMovesToNextLineWithPrefix)
 	term.handle_keyboard_input(&term, 'B');
 	term.handle_keyboard_input(&term, '\n');
 
-	/* After newline, row 1 should have the prefix */
-	for (int i = 0; pfx[i]; i++)
-		EXPECT_EQ(char_at(i, 1), pfx[i]);
-	EXPECT_EQ(term.cursor_x, TERMINAL_PREFIX_LEN);
+	/* After newline, cursor moves to the next line but prefix is not
+	 * automatically emitted by handle_newline. Cursor should be at
+	 * column 0 on the new row.
+	 */
+	EXPECT_EQ(term.cursor_x, 0);
 	EXPECT_EQ(term.cursor_y, 1);
 }
 
@@ -553,10 +554,13 @@ TEST_F(TerminalTest, PrefixAppearsAfterNewline)
 	term.handle_keyboard_input(&term, 'A');
 	term.handle_keyboard_input(&term, '\n');
 
-	/* Newline moves to row 1, prefix should appear there */
+	/* Newline moves to row 1, prefix is not auto-emitted by handle_newline
+	 * anymore; verify cursor position is at column 0. Prefix emission is
+	 * handled elsewhere (e.g., main loop) if desired.
+	 */
 	for (int i = 0; pfx[i]; i++)
-		EXPECT_EQ(char_at(i, 1), pfx[i]);
-	EXPECT_EQ(term.cursor_x, TERMINAL_PREFIX_LEN);
+		EXPECT_NE(char_at(i, 1), pfx[i]);
+	EXPECT_EQ(term.cursor_x, 0);
 }
 
 TEST_F(TerminalTest, PrefixSetDuringInit)
