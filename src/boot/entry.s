@@ -7,8 +7,8 @@
 section .multiboot
 align 4
     dd 0x1BADB002              ; magic number (Multiboot v1)
-    dd 0x0                     ; flags (no memory map required)
-    dd -(0x1BADB002 + 0x0)     ; checksum
+    dd 0x2                     ; flags (request extended memory map)
+    dd -(0x1BADB002 + 0x2)     ; checksum
 
 ; =========================
 ; Code section

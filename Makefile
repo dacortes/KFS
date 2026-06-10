@@ -118,6 +118,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
 INCLUDES += $(addprefix -I, ./inc/stdbool)
+INCLUDES += $(addprefix -I, ./inc/boot)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/keyboard/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
