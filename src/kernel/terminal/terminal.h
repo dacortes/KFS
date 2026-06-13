@@ -112,6 +112,8 @@ struct terminal_s {
 
 	uint16_t		cursor_x;
 	uint16_t		cursor_y;
+	uint16_t		cursor_prev_x;
+	uint16_t		cursor_prev_y;
 	uint8_t			curr_color;
 	char			cursor_char;
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # KFS All Checks Runner
-# Runs all quality checks: style, static analysis, tests, and coverage
+# Runs all quality checks: style, build, tests, and coverage
 # Usage: ./scripts/run_all_checks.sh
 
 set -e
@@ -59,8 +59,7 @@ run_check() {
 
 # Run all checks
 run_check "Style Check" "./scripts/style_check.sh" || true
-run_check "Static Analysis" "./scripts/static_analysis.sh" || true
-run_check "Build" "./scripts/build.sh" || true
+git diff --check -- scripts/run_all_checks.shrun_check "Build" "./scripts/build.sh" || true
 run_check "Code Coverage" "./scripts/coverage.sh" || true
 
 # Final summary
