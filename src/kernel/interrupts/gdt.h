@@ -116,14 +116,6 @@ struct gdt_ptr gdt_get_gdtr(void);
 int gdt_verify(void);
 
 /**
- * @brief Log GDT descriptor table contents for diagnostic purposes.
- *
- * Prints each descriptor's access byte and key flags (Present, DPL, type).
- * Useful for verifying GDT structure at boot time.
- */
-void gdt_log_descriptors(void);
-
-/**
  * @brief Start a small user-mode demo that intentionally triggers a GP fault.
  *
  * The demo transitions to ring 3 and tries to load a kernel data selector,

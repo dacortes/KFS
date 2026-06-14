@@ -335,15 +335,24 @@ static int write_string(terminal_t *self, const char *str)
 static void set_cursor_color(terminal_t *self, uint8_t color)
 {
 	uint16_t offset;
+	uint16_t prev_offset;
 	char *video;
 
 	if (!self || !self->display)
 		return;
 
+	prev_offset = (self->cursor_prev_y * self->display->width +
+		       self->cursor_prev_x) * self->display->char_size;
+	video = self->display->videomemptr + prev_offset;
+	video[1] = self->display->color;
+
 	offset = (self->cursor_y * self->display->width + self->cursor_x) *
 		 self->display->char_size;
 	video = self->display->videomemptr + offset;
 	video[1] = color;
+
+	self->cursor_prev_x = self->cursor_x;
+	self->cursor_prev_y = self->cursor_y;
 }
 
 /**
@@ -425,7 +434,6 @@ static void handle_newline(terminal_t *self)
 	self->write_char(self, '\n');
 	self->line_pos = 0;
 	self->line_len = 0;
-	self->write_prefix(self);
 	self->line_ready = 1;
 }
 
@@ -611,6 +619,8 @@ void terminal_init(terminal_t *self, display_t *display, uint32_t id)
 	self->his_head = 0;
 	self->cursor_x = 0;
 	self->cursor_y = 0;
+	self->cursor_prev_x = 0;
+	self->cursor_prev_y = 0;
 
 	self->curr_color = WHITE_ON_BLACK;
 	self->cursor_char = ' ';
