@@ -53,8 +53,9 @@ void print_multiboot_info(multiboot_info_t *info)
 
 	multiboot_map_entry_t *mmap = (multiboot_map_entry_t *)info->mmap_addr;
 	uint32_t mmap_end = info->mmap_addr + info->mmap_length;
-	for (; (uint32_t)mmap < mmap_end; mmap = (multiboot_map_entry_t *)((uint32_t)mmap \
-		+ mmap->size + sizeof(mmap->size))) {
+
+	for (; (uint32_t)mmap < mmap_end; 
+	mmap = (multiboot_map_entry_t *)((uint32_t)mmap + mmap->size + sizeof(mmap->size))) {
 		uint32_t base_lo = (uint32_t)mmap->base_addr;
 		uint32_t length_lo = (uint32_t)mmap->length;
 		uint32_t length_kb = length_lo / 1024;
@@ -97,12 +98,10 @@ void print_multiboot_info(multiboot_info_t *info)
 int kernel_main(uint32_t magic, multiboot_info_t *info)
 {
 	if (magic != 0x2BADB002) {
-		printf("Invalid multiboot magic number: 0x%08X\n", magic);
 		return -1;
 	}
 
 	if (!info || !info->mmap_addr || !info->mmap_length) {
-		printf("Multiboot info does not contain memory map.\n");
 		return -1;
 	}
 
