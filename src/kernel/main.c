@@ -20,8 +20,10 @@
 static void print_spaces(int n)
 {
 	char buf[64];
+
 	while (n > 0) {
 		int take = n > (int)(sizeof(buf) - 1) ? (int)(sizeof(buf) - 1) : n;
+
 		for (int i = 0; i < take; i++)
 			buf[i] = ' ';
 		buf[take] = '\0';
@@ -36,6 +38,7 @@ static void print_spaces(int n)
 static void print_pad_right(const char *s, int width)
 {
 	int len = ft_strlen(s);
+
 	printf("%s", s);
 	if (len < width)
 		print_spaces(width - len);
@@ -54,7 +57,7 @@ void print_multiboot_info(multiboot_info_t *info)
 	multiboot_map_entry_t *mmap = (multiboot_map_entry_t *)info->mmap_addr;
 	uint32_t mmap_end = info->mmap_addr + info->mmap_length;
 
-	for (; (uint32_t)mmap < mmap_end; 
+	for ( ; (uint32_t)mmap < mmap_end;
 	mmap = (multiboot_map_entry_t *)((uint32_t)mmap + mmap->size + sizeof(mmap->size))) {
 		uint32_t base_lo = (uint32_t)mmap->base_addr;
 		uint32_t length_lo = (uint32_t)mmap->length;
@@ -74,9 +77,11 @@ void print_multiboot_info(multiboot_info_t *info)
 		}
 
 		int num_base = printf("0x%X", base_lo);
+
 		if (num_base < 16)
 			print_spaces(16 - num_base);
 		int num_length = printf("%u", length_kb);
+
 		if (num_length < 16)
 			print_spaces(16 - num_length);
 		print_pad_right(type_str, 16);
@@ -97,13 +102,11 @@ void print_multiboot_info(multiboot_info_t *info)
  */
 int kernel_main(uint32_t magic, multiboot_info_t *info)
 {
-	if (magic != 0x2BADB002) {
+	if (magic != 0x2BADB002)
 		return -1;
-	}
 
-	if (!info || !info->mmap_addr || !info->mmap_length) {
+	if (!info || !info->mmap_addr || !info->mmap_length)
 		return -1;
-	}
 
 	init_system();
 	print_multiboot_info(info);
