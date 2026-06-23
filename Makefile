@@ -90,6 +90,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/print/formats.c \
 	$(SRC_DIR)/kernel/system/system.c \
 	$(SRC_DIR)/kernel/system/system_log.c \
+	$(SRC_DIR)/kernel/system/stack_kernel/print_stack.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
@@ -122,6 +123,7 @@ INCLUDES += $(addprefix -I, ./inc/boot)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/keyboard/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/stack_kernel/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
@@ -195,7 +197,7 @@ REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
 KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
-	kernel/terminal kernel/system kernel/print \
+	kernel/terminal kernel/system kernel/system/stack_kernel kernel/print \
 	kernel/interrupts kernel/keyboard \
 	shell/readline shell/builtins
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
