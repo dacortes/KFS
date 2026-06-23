@@ -109,7 +109,7 @@ static void create_terminal(void)
  * @param self Pointer to the kernel `system_t` instance. Function
  *             returns immediately if `self` is NULL.
  */
-static void main_loop(system_t *self)
+static void main_loop(system_t *self, multiboot_info_t **info)
 {
 
 	if (!self)
@@ -121,7 +121,7 @@ static void main_loop(system_t *self)
 		terminal_t *term = &sys.terminals[active];
 		shell_t	shell;
 
-		shell_init(&shell);
+		shell_init(&shell, info);
 		if (*ascii) {
 			char	line[256];
 			int	completed;

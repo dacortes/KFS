@@ -112,6 +112,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
+	$(SRC_DIR)/shell/builtins/stack_kernel.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
 	$(SRC_DIR)/shell/shell.c
 

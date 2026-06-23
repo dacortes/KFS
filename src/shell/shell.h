@@ -10,14 +10,20 @@
 #include <print.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stack_kernel.h>
 
 #ifndef MAX_WORD
 #define MAX_WORD 256
 #endif
 
+
+#ifndef MAX_TOKEN
+#define MAX_TOKEN 32
+#endif
+
 // esto se debe cambiar una vez se tengan los archivos(entrys) programados
 #ifndef NUM_COMMANDS
-#define NUM_COMMANDS 5
+#define NUM_COMMANDS 6
 #endif
 
 #ifndef MAX_LINE
@@ -45,12 +51,14 @@ struct shell_s {
 	uint32_t		lv;
 	char			***history;
 	char			line[MAX_LINE];
-	token_t			token[MAX_WORD];
+	token_t			token[MAX_TOKEN];
 	const builtin_t *builtins;
+	// token_t			*token2;
+	multiboot_info_t *info;
 	uint16_t	(*create_tokens)(shell_t *self, char *line);
 	uint16_t	(*execute)(shell_t *self);
 	void		(*print)(const shell_t *self);
 	void		(*clear)(shell_t *self);
 };
 
-void	shell_init(shell_t *self);
+void	shell_init(shell_t *self, multiboot_info_t **info);

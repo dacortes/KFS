@@ -81,7 +81,7 @@ static void initoken_t(token_t *token)
 
 static void shell_clear_tokens(shell_t *self)
 {
-	for (int i = 0; i < MAX_WORD; i++)
+	for (int i = 0; i < MAX_TOKEN; i++)
 		self->token[i].clear(&self->token[i]);
 }
 
@@ -106,7 +106,7 @@ static uint16_t execute(shell_t *self)
 	return 127;
 }
 
-void	shell_init(shell_t *self)
+void	shell_init(shell_t *self, multiboot_info_t **info)
 {
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
@@ -116,12 +116,14 @@ void	shell_init(shell_t *self)
 		{"echo", cmd_echo, "Print arguments"},
 		{"user_mode", cmd_user_mode, "Switch to user mode"},
 		{"show_mode", cmd_show_mode, "Show current privilege level"},
+		{"stack_kernel", cmd_info_stack_kernel, "Show stack kernel information"},
 		{NULL, NULL, NULL}
 	};
 	self->num_tk = 0;
 	self->lv = 0;
 	self->builtins = builtins;
-	for (int i = 0; i < MAX_WORD; i++)
+	self->info = *info;
+	for (int i = 0; i < MAX_TOKEN; i++)
 		initoken_t(&self->token[i]);
 	//Verificar el historial, si esta apuntando correctamnete
 	self->history = (char ***)&term->history;

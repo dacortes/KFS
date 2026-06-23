@@ -31,7 +31,6 @@ int kernel_main(uint32_t magic, multiboot_info_t *info)
 		return -1;
 
 	init_system();
-//	print_multiboot_info(info);
-	sys.main_loop(&sys);
+	sys.main_loop(&sys, &info);
 	return 0;
 }
