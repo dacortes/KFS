@@ -26,7 +26,9 @@ int write(const char *text, unsigned int count)
 		terminal->set_cursor_color(terminal, BLACK_ON_WHITE);
 		return 1;
 	}
-	return terminal->write_string(terminal, text);
+	count = terminal->write_string(terminal, text);
+	terminal->set_cursor_color(terminal, BLACK_ON_WHITE);
+	return count;
 }
 
 /* Redirectable writer support: allows printf/format routines to

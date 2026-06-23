@@ -124,13 +124,18 @@ static void main_loop(system_t *self)
 		shell_init(&shell);
 		if (*ascii) {
 			char	line[256];
+			int	completed;
 
 			term->handle_keyboard_input(term, *ascii);
+			completed = term->line_ready;
 			readline(line);
-			if (shell.create_tokens(&shell, line)) {
-				shell.execute(&shell);
-				// shell.print(&shell);
-				shell.clear(&shell);
+			if (completed) {
+				if (shell.create_tokens(&shell, line)) {
+					shell.execute(&shell);
+					shell.clear(&shell);
+				}
+				term->write_prefix(term);
+				term->set_cursor_color(term, BLACK_ON_WHITE);
 			}
 		}
 		self->keyboard.input = 0;
@@ -163,13 +168,6 @@ void init_system(void)
 	create_terminal();
 
 	gdt_init();
-
-	printf("[GDT] Initialized with %d entries\n", GDT_ENTRIES);
-	if (gdt_verify())
-		printf("[GDT] Verification: PASS - GDTR correctly loaded\n");
-	else
-		printf("[GDT] Verification: FAIL - GDTR mismatch\n");
-	gdt_log_descriptors();
 
 	idt_init();
 	pic_init();

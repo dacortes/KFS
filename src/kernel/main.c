@@ -31,8 +31,7 @@ int kernel_main(uint32_t magic, multiboot_info_t *info)
 		return -1;
 
 	init_system();
-	print_multiboot_info(info);
-	printf("\033[1;31mRed\033[m \033[1;32mGreen\033[m \033[1;34mBlue\033[m \033[1;33mYellow\033[m\n");
+//	print_multiboot_info(info);
 	sys.main_loop(&sys);
 	return 0;
 }
