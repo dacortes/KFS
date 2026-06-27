@@ -4,7 +4,7 @@
 /**
  * @brief Print `n` spaces efficiently.
  */
-static void print_spaces(int n)
+void print_spaces(int n)
 {
 	char buf[64];
 
@@ -22,7 +22,7 @@ static void print_spaces(int n)
 /**
  * @brief Print string then pad to `width` with spaces (right-pad).
  */
-static void print_pad_right(const char *s, int width)
+void print_pad_right(const char *s, int width)
 {
 	int len = ft_strlen(s);
 
@@ -41,46 +41,65 @@ static void print_pad_right(const char *s, int width)
  */
 void print_multiboot_info(multiboot_info_t *info)
 {
+	multiboot_map_entry_t *entry = (multiboot_map_entry_t*)info->mmap_addr;
+	uint64_t total_usable = 0;
+	uint64_t total_reserved = 0;
+	
+	printf("\n=== Memory Map (from GRUB) ===\n");
+	print_pad_right("Type", 8);
+	print_pad_right("| Start", 11);
+	print_pad_right("| End", 11);
+	print_pad_right("| Size", 11);
 	printf("\n");
-	printf("================================================================================");
-	print_pad_right("Base Address", 16);
-	print_pad_right("Length (KB)", 16);
-	print_pad_right("Type", 16);
-	printf("Status\n");
-	printf("================================================================================\n");
+	printf("==================================================\n");
 
-	multiboot_map_entry_t *mmap = (multiboot_map_entry_t *)info->mmap_addr;
-	uint32_t mmap_end = info->mmap_addr + info->mmap_length;
-
-	for ( ; (uint32_t)mmap < mmap_end;
-	mmap = (multiboot_map_entry_t *)((uint32_t)mmap + mmap->size + sizeof(mmap->size))) {
-		uint32_t base_lo = (uint32_t)mmap->base_addr;
-		uint32_t length_lo = (uint32_t)mmap->length;
-		uint32_t length_kb = length_lo / 1024;
+	
+	for (; (uint32_t)entry < info->mmap_addr + info->mmap_length;
+		entry = (multiboot_map_entry_t*)((uint32_t)entry + entry->size + 4)) {
+		
+		uint64_t base = entry->base_addr;
+		uint64_t length = entry->length;
+		uint64_t end = base + length;
+		
 		const char *type_str;
-		const char *status_str;
 		const char *color;
 
-		if (mmap->type == 1) {
+		if (entry->type == 1) {
 			type_str = "Usable";
-			status_str = "Free";
-			color = "\033[1;32m";
-		} else {
+			color = "\033[32m";  // Green
+			total_usable += length;
+		} else if (entry->type == 2) {
 			type_str = "Reserved";
-			status_str = "Used";
-			color = "\033[1;31m";
+			color = "\033[33m";  // Yellow
+			total_reserved += length;
+		} else if (entry->type == 3) {
+			type_str = "ACPI Recl.";
+			color = "\033[34m";  // Blue
+			total_reserved += length;
+		} else if (entry->type == 4) {
+			type_str = "ACPI NVS";
+			color = "\033[35m";  // Magenta
+			total_reserved += length;
+		} else {
+			type_str = "Unknown";
+			color = "\033[31m";  // Red
+			total_reserved += length;
 		}
+		int bytes_p = printf("%s%s\033[m", color, type_str);
 
-		int num_base = printf("0x%X", base_lo);
-
-		if (num_base < 16)
-			print_spaces(16 - num_base);
-		int num_length = printf("%u", length_kb);
-
-		if (num_length < 16)
-			print_spaces(16 - num_length);
-		print_pad_right(type_str, 16);
-		printf("%s%s\033[m\n", color, status_str);
+		print_spaces(17 - bytes_p);
+		bytes_p = printf("%x", (uint32_t)base);
+		print_spaces(11 - bytes_p);
+		bytes_p = printf("%x", (uint32_t)end);
+		print_spaces(11 - bytes_p);
+		bytes_p = printf("%d KB", (uint32_t)(length / (1024 * 1024)));
+		print_spaces(11 - bytes_p);
+		printf("%s\n", (entry->type == 1) ? "\033[32mFree\033[m" : "\033[31mReserved\033[m");
 	}
-	printf("================================================================================\n\n");
+	
+	printf("==================================================\n");
+	printf("Total usable:    %d MB\n", (uint32_t)(total_usable / (1024 * 1024)));
+	printf("Total reserved:  %d MB\n", (uint32_t)(total_reserved / (1024 * 1024)));
+	printf("Total RAM:       %d MB\n", (uint32_t)((total_usable + total_reserved) / (1024 * 1024)));
+	printf("==================================================\n");
 }

@@ -2,6 +2,9 @@
 
 #include <print.h>
 #include <multiboot.h>
+
+void print_spaces(int n);
+void print_pad_right(const char *s, int width);
 /**
  * @brief Print multiboot information.
  *
