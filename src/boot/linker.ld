@@ -59,6 +59,6 @@ SECTIONS
 
 	kernel_start = 1M;
     kernel_end = endkernel;
-    kernel_size = endkernel - 1M;
+    kernel_size = endkernel - kernel_start;
 }
 

@@ -327,6 +327,7 @@ void pmm_print_bitmap(void) {
 	for (uint32_t i = 0; i < 64 && i < total_pages; i++) {
 		printf("%d", bitmap_test_bit(i));
 		if ((i + 1) % 8 == 0) printf(" ");
+		printf("\n");
 	}
 	printf("\n");
 	
@@ -334,6 +335,7 @@ void pmm_print_bitmap(void) {
 	for (uint32_t i = 0; i < 16 && i < total_pages; i++) {
 		printf("0x%x ", memory_base + (i * PAGE_SIZE));
 		printf("[%s] ", bitmap_test_bit(i) ? "U" : "F");
+		printf("\n");
 	}
 	printf("\n");
 }
