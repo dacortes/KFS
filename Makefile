@@ -50,6 +50,7 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/mm/)
 
 
 TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
@@ -114,7 +115,8 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
 	$(SRC_DIR)/shell/builtins/stack_kernel.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
-	$(SRC_DIR)/shell/shell.c
+	$(SRC_DIR)/shell/shell.c \
+	$(SRC_DIR)/mm/pmm.c
 
 
 INCLUDES = $(addprefix -I, ./inc)
@@ -132,6 +134,7 @@ INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/mm/)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode
@@ -200,10 +203,10 @@ REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
 	kernel/terminal kernel/system kernel/system/stack_kernel kernel/print \
 	kernel/interrupts kernel/keyboard \
-	shell/readline shell/builtins
+	shell/readline shell/builtins mm
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
 	kernel/keyboard kernel/terminal shell shell/readline shell/builtins \
-	fixtures
+	fixtures mm
 
 ################################################################################
 #                               PHONY TARGETS                                  #

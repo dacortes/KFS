@@ -24,3 +24,7 @@ typedef struct {
 	uint32_t size;
 	uint32_t addr;
 } __attribute__((packed)) multiboot_info_t;
+
+#define MULTIBOOT_MAGIC 0x2BADB002
+
+#define MULTIBOOT_INFO_MEMORY (1 << 0)
