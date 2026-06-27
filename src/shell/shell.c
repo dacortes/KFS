@@ -116,6 +116,8 @@ void	shell_init(shell_t *self)
 		{"echo", cmd_echo, "Print arguments"},
 		{"user_mode", cmd_user_mode, "Switch to user mode"},
 		{"show_mode", cmd_show_mode, "Show current privilege level"},
+		{"memstat", cmd_memstat, "Print current memory state"},
+		{"mempage", cmd_mempage, "Allocate or free a page by index"},
 		{NULL, NULL, NULL}
 	};
 	self->num_tk = 0;

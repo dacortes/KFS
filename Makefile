@@ -47,6 +47,7 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/../inc/boot)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
@@ -107,11 +108,14 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/interrupts/pic.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
+	$(SRC_DIR)/kernel/memory/memory.c \
 	$(SRC_DIR)/shell/readline/ft_readline.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
+	$(SRC_DIR)/shell/builtins/memstat.c \
+	$(SRC_DIR)/shell/builtins/mempage.c \
 	$(SRC_DIR)/shell/shell.c
 
 
@@ -121,6 +125,7 @@ INCLUDES += $(addprefix -I, ./inc/stdbool)
 INCLUDES += $(addprefix -I, ./inc/boot)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/keyboard/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/memory/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
@@ -139,6 +144,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strncpy.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlcpy.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
+	$(SRC_DIR)/kernel/memory/memory.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
 	$(SRC_DIR)/kernel/terminal/color_parser.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memset.c \
@@ -152,7 +158,9 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
-	$(SRC_DIR)/shell/builtins/mode_switch.c
+	$(SRC_DIR)/shell/builtins/mode_switch.c \
+	$(SRC_DIR)/shell/builtins/memstat.c \
+	$(SRC_DIR)/shell/builtins/mempage.c
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
@@ -164,6 +172,7 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \
 	$(TEST_DIR)/unit/test_strncpy.cpp \
 	$(TEST_DIR)/unit/test_keyboard.cpp \
+	$(TEST_DIR)/unit/test_memory.cpp \
 	$(TEST_DIR)/unit/test_terminal.cpp \
 	$(TEST_DIR)/unit/test_system.cpp \
 	$(TEST_DIR)/unit/test_atoi.cpp \
@@ -195,11 +204,11 @@ REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
 KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
-	kernel/terminal kernel/system kernel/print \
+	kernel/memory kernel/terminal kernel/system kernel/print \
 	kernel/interrupts kernel/keyboard \
 	shell/readline shell/builtins
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
-	kernel/keyboard kernel/terminal shell shell/readline shell/builtins \
+	kernel/keyboard kernel/memory kernel/terminal shell shell/readline shell/builtins \
 	fixtures
 
 ################################################################################

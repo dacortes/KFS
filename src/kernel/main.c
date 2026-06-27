@@ -11,6 +11,7 @@
 #include <system.h>
 #include <print.h>
 #include <multiboot.h>
+#include <kernel/memory/memory.h>
 
 /* Multiboot information structures and definitions. */
 
@@ -102,6 +103,10 @@ int kernel_main(uint32_t magic, multiboot_info_t *info)
 	}
 
 	if (!info || !info->mmap_addr || !info->mmap_length) {
+		return -1;
+	}
+
+	if (memory_init(info) < 0) {
 		return -1;
 	}
 

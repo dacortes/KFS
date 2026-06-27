@@ -9,6 +9,7 @@
 
 #define write kfs_write
 extern "C" {
+	#include <kernel/memory/memory.h>
 #include <builtins.h>
 }
 #undef write
@@ -33,10 +34,31 @@ int install_reboot_jmp(void);
 
 class BuiltinTest : public ::testing::Test {
 protected:
+	multiboot_map_entry_t mmap_entries[2];
+	multiboot_info_t info;
+
 	void SetUp() override
 	{
 		reset_builtin_stub_state();
 		g_write_redirectable_calls = 0;
+		memset(&info, 0, sizeof(info));
+		memset(mmap_entries, 0, sizeof(mmap_entries));
+
+		mmap_entries[0].size = sizeof(multiboot_map_entry_t) -
+			sizeof(uint32_t);
+		mmap_entries[0].base_addr = 0x00100000U;
+		mmap_entries[0].length = 0x00300000U;
+		mmap_entries[0].type = 1;
+
+		mmap_entries[1].size = sizeof(multiboot_map_entry_t) -
+			sizeof(uint32_t);
+		mmap_entries[1].base_addr = 0x00400000U;
+		mmap_entries[1].length = 0x00400000U;
+		mmap_entries[1].type = 2;
+
+		info.mmap_addr = (uint32_t)mmap_entries;
+		info.mmap_length = sizeof(mmap_entries);
+		ASSERT_EQ(0, memory_init(&info));
 	}
 	void TearDown() override
 	{
@@ -120,4 +142,37 @@ TEST_F(BuiltinTest, ShowModeReportsUnknownPrivilege)
 	g_current_privilege_level_value = 1;
 
 	EXPECT_EQ(cmd_show_mode(&shell), 0);
+}
+
+TEST_F(BuiltinTest, MemstatPrintsMemoryState)
+{
+	shell_t shell = {};
+
+	EXPECT_EQ(cmd_memstat(&shell), 0);
+}
+
+TEST_F(BuiltinTest, MempageAllocatesAndFreesByIndex)
+{
+	shell_t shell = {};
+
+	shell.num_tk = 3;
+	strncpy(shell.token[1].word, "alloc", MAX_WORD - 1);
+	strncpy(shell.token[2].word, "512", MAX_WORD - 1);
+	EXPECT_EQ(cmd_mempage(&shell), 0);
+
+	strncpy(shell.token[1].word, "show", MAX_WORD - 1);
+	EXPECT_EQ(cmd_mempage(&shell), 0);
+
+	strncpy(shell.token[1].word, "free", MAX_WORD - 1);
+	EXPECT_EQ(cmd_mempage(&shell), 0);
+}
+
+TEST_F(BuiltinTest, MempageFallsBackToNextFreePage)
+{
+	shell_t shell = {};
+
+	shell.num_tk = 3;
+	strncpy(shell.token[1].word, "alloc", MAX_WORD - 1);
+	strncpy(shell.token[2].word, "0", MAX_WORD - 1);
+	EXPECT_EQ(cmd_mempage(&shell), 0);
 }

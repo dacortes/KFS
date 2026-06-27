@@ -10,3 +10,5 @@ int cmd_reboot(shell_t *self);
 int cmd_half(shell_t *self);
 int cmd_user_mode(shell_t *self);
 int cmd_show_mode(shell_t *self);
+int cmd_memstat(shell_t *self);
+int cmd_mempage(shell_t *self);

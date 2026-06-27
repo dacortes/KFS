@@ -46,5 +46,7 @@ SECTIONS
     stack_bottom = .;
     . += 16K;
     stack_top = .;
+
+    kernel_end = .;
 }
 
