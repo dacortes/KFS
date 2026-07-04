@@ -114,6 +114,7 @@ void	shell_init(shell_t *self, multiboot_info_t **info)
 		{"reboot", cmd_reboot, "Reboot the system"},
 		{"half",   cmd_half,   "Halt the CPU"},
 		{"echo", cmd_echo, "Print arguments"},
+		{"memory", cmd_memory, "Inspect and test memory helpers"},
 		{"user_mode", cmd_user_mode, "Switch to user mode"},
 		{"show_mode", cmd_show_mode, "Show current privilege level"},
 		{"stack_kernel", cmd_info_stack_kernel, "Show stack kernel information"},

@@ -12,6 +12,7 @@
 #include <print.h>
 #include <multiboot.h>
 #include <pmm.h>
+#include <memory.h>
 
 /**
  * @brief Kernel entry point.
@@ -44,6 +45,8 @@ int kernel_main(uint32_t magic, multiboot_info_t *info)
 
 	init_system();
 	pmm_init(info);
+	memory_init();
+	printf("[BOOT] memory helpers ready\n");
 	// printf("=== Testeando Page Frame Allocator ===\n");
 	
 	// // Asignar 10 páginas

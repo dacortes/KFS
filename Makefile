@@ -47,14 +47,17 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/stack_kernel/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/mm/)
 
 
-TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
-TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
+TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+	-I./inc/boot $(MODULE_INCLUDES)
+TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+	-I./inc/boot $(MODULE_INCLUDES)
 TEST_LDFLAGS = -m32
 
 # Add coverage flags if COVERAGE is set
@@ -114,9 +117,12 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
 	$(SRC_DIR)/shell/builtins/stack_kernel.c \
+	$(SRC_DIR)/shell/builtins/memory.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
 	$(SRC_DIR)/shell/shell.c \
-	$(SRC_DIR)/mm/pmm.c
+	$(SRC_DIR)/mm/pmm.c \
+	$(SRC_DIR)/mm/paging.c \
+	$(SRC_DIR)/mm/memory.c
 
 
 INCLUDES = $(addprefix -I, ./inc)
@@ -158,13 +164,15 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
-	$(SRC_DIR)/shell/builtins/mode_switch.c
+	$(SRC_DIR)/shell/builtins/mode_switch.c \
+	$(SRC_DIR)/shell/builtins/memory.c
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
 TEST_FIXTURE_SOURCES = $(TEST_DIR)/fixtures/io_stub.c
 TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_builtins.cpp \
+	$(TEST_DIR)/unit/test_memory.cpp \
 	$(TEST_DIR)/unit/test_strlen.cpp \
 	$(TEST_DIR)/unit/test_strcmp.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \

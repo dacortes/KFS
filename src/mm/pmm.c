@@ -81,6 +81,28 @@ static int bitmap_find_first_free(uint32_t start) {
 	return -1;
 }
 
+static int bitmap_find_first_free_range(uint32_t start, size_t count)
+{
+	if (!count)
+		return -1;
+
+	for (uint32_t page = start; page + count <= total_pages; page++) {
+		size_t free_count = 0;
+
+		while (free_count < count &&
+			!bitmap_test_bit(page + free_count)) {
+			free_count++;
+		}
+
+		if (free_count == count)
+			return (int)page;
+
+		page += free_count;
+	}
+
+	return -1;
+}
+
 void pmm_init(multiboot_info_t *info) {
 
 	printf("Initializing Page Frame Allocator (Bitmap)...\n");
@@ -239,6 +261,34 @@ uint32_t pmm_alloc_frame(void) {
 	// Return physical address
 	uint32_t phys_addr = memory_base + (page_num * PAGE_SIZE);
 	return phys_addr;
+}
+
+/**
+ * @brief Allocate a contiguous range of physical page frames.
+ *
+ * @param count Number of contiguous pages to allocate.
+ * @return Physical address of the first page, or 0 if no range is available.
+ */
+uint32_t pmm_alloc_frame_range(size_t count) {
+	int page_num;
+
+	if (!count)
+		return 0;
+
+	page_num = bitmap_find_first_free_range(first_free_hint, count);
+	if (page_num == -1) {
+		page_num = bitmap_find_first_free_range(0, count);
+		if (page_num == -1)
+			return 0;
+	}
+
+	for (size_t i = 0; i < count; i++) {
+		bitmap_set_bit((uint32_t)page_num + i);
+		used_pages++;
+	}
+
+	first_free_hint = (uint32_t)page_num + (uint32_t)count;
+	return memory_base + ((uint32_t)page_num * PAGE_SIZE);
 }
 
 /**

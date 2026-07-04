@@ -191,6 +191,7 @@ TEST_F(TerminalTest, NewlineDoesntResetBuffer)
 TEST_F(TerminalTest, NewlineMovesToNextLineWithPrefix)
 {
 	const char *pfx = TERMINAL_PREFIX;
+	(void *)pfx; /* suppress unused warning */
 
 	term.handle_keyboard_input(&term, 'A');
 	term.handle_keyboard_input(&term, 'B');

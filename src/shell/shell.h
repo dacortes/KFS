@@ -23,7 +23,7 @@
 
 // esto se debe cambiar una vez se tengan los archivos(entrys) programados
 #ifndef NUM_COMMANDS
-#define NUM_COMMANDS 6
+#define NUM_COMMANDS 7
 #endif
 
 #ifndef MAX_LINE

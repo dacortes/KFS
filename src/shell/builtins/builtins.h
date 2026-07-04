@@ -11,3 +11,4 @@ int cmd_half(shell_t *self);
 int cmd_user_mode(shell_t *self);
 int cmd_show_mode(shell_t *self);
 int cmd_info_stack_kernel(shell_t *self);
+int cmd_memory(shell_t *self);

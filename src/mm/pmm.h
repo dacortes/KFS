@@ -13,6 +13,7 @@
 
 void pmm_init(multiboot_info_t *info);
 uint32_t pmm_alloc_frame(void);
+uint32_t pmm_alloc_frame_range(size_t count);
 void pmm_free_frame(uint32_t phys_addr);
 void pmm_free_frame_range(uint32_t phys_addr, size_t count);
 
