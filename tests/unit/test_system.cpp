@@ -328,5 +328,5 @@ TEST_F(SystemTest, InitSystemKeyboardIsConfigured)
 TEST_F(SystemTest, MainLoopNullSelfReturnsImmediately)
 {
 	/* main_loop(NULL) should just return without crashing */
-	main_loop(NULL);
+	main_loop(NULL, NULL);
 }

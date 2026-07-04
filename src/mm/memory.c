@@ -8,6 +8,8 @@
 
 typedef struct memory_header {
 	uint32_t magic;
+	uint8_t owner;
+	uint8_t reserved[3];
 	size_t size;
 	size_t page_count;
 } memory_header_t;
@@ -17,7 +19,8 @@ static size_t round_up_pages(size_t size)
 	return (size + PAGE_SIZE - 1) / PAGE_SIZE;
 }
 
-static void *memory_alloc(size_t size, uint32_t magic)
+static void *memory_alloc(size_t size, uint32_t magic,
+	memory_space_t owner)
 {
 	memory_header_t *header;
 	size_t page_count;
@@ -33,24 +36,33 @@ static void *memory_alloc(size_t size, uint32_t magic)
 
 	header = (memory_header_t *)phys_addr;
 	header->magic = magic;
+	header->owner = (uint8_t)owner;
+	header->reserved[0] = 0;
+	header->reserved[1] = 0;
+	header->reserved[2] = 0;
 	header->size = size;
 	header->page_count = page_count;
 	return (void *)(header + 1);
 }
 
-static void memory_free(void *ptr, uint32_t magic)
+static int memory_free_checked(void *ptr, uint32_t magic,
+	memory_space_t requester)
 {
 	memory_header_t *header;
 
 	if (!ptr)
-		return;
+		return -1;
 
 	header = ((memory_header_t *)ptr) - 1;
 	if (header->magic != magic)
-		return;
+		return -1;
+	if (header->owner != (uint8_t)requester)
+		return -1;
 
 	header->magic = 0;
+	header->owner = 0;
 	pmm_free_frame_range((uint32_t)header, header->page_count);
+	return 0;
 }
 
 static size_t memory_size(const void *ptr, uint32_t magic)
@@ -74,17 +86,48 @@ void memory_init(void)
 
 void *kmalloc(size_t size)
 {
-	return memory_alloc(size, MEMORY_MAGIC_KERNEL);
+	return memory_alloc(size, MEMORY_MAGIC_KERNEL, MEMORY_SPACE_KERNEL);
 }
 
 void kfree(void *ptr)
 {
-	memory_free(ptr, MEMORY_MAGIC_KERNEL);
+	(void)memory_free_checked(ptr, MEMORY_MAGIC_KERNEL,
+		MEMORY_SPACE_KERNEL);
+}
+
+int memory_free_as(void *ptr, memory_space_t requester)
+{
+	memory_header_t *header;
+
+	if (!ptr)
+		return -1;
+
+	header = ((memory_header_t *)ptr) - 1;
+	if (header->magic == MEMORY_MAGIC_KERNEL)
+		return memory_free_checked(ptr, MEMORY_MAGIC_KERNEL, requester);
+	if (header->magic == MEMORY_MAGIC_VIRTUAL)
+		return memory_free_checked(ptr, MEMORY_MAGIC_VIRTUAL, requester);
+	return -1;
 }
 
 size_t ksize(const void *ptr)
 {
 	return memory_size(ptr, MEMORY_MAGIC_KERNEL);
+}
+
+memory_space_t memory_owner(const void *ptr)
+{
+	const memory_header_t *header;
+
+	if (!ptr)
+		return 0;
+
+	header = ((const memory_header_t *)ptr) - 1;
+	if (header->magic == MEMORY_MAGIC_KERNEL)
+		return (memory_space_t)header->owner;
+	if (header->magic == MEMORY_MAGIC_VIRTUAL)
+		return (memory_space_t)header->owner;
+	return 0;
 }
 
 void *kbrk(size_t size)
@@ -94,12 +137,13 @@ void *kbrk(size_t size)
 
 void *vmalloc(size_t size)
 {
-	return memory_alloc(size, MEMORY_MAGIC_VIRTUAL);
+	return memory_alloc(size, MEMORY_MAGIC_VIRTUAL, MEMORY_SPACE_USER);
 }
 
 void vfree(void *ptr)
 {
-	memory_free(ptr, MEMORY_MAGIC_VIRTUAL);
+	(void)memory_free_checked(ptr, MEMORY_MAGIC_VIRTUAL,
+		MEMORY_SPACE_USER);
 }
 
 size_t vsize(const void *ptr)

@@ -24,6 +24,8 @@ void *vmalloc(size_t size);
 void vfree(void *ptr);
 size_t vsize(const void *ptr);
 void *vbrk(size_t size);
+int memory_free_as(void *ptr, memory_space_t requester);
+memory_space_t memory_owner(const void *ptr);
 }
 #undef write
 
@@ -82,7 +84,7 @@ protected:
 };
 
 static shell_t make_memory_shell(const char *arg1, const char *arg2,
-	const char *arg3)
+	const char *arg3, const char *arg4 = NULL)
 {
 	shell_t shell = {};
 
@@ -93,7 +95,9 @@ static shell_t make_memory_shell(const char *arg1, const char *arg2,
 		strncpy(shell.token[2].word, arg2, MAX_WORD - 1);
 	if (arg3)
 		strncpy(shell.token[3].word, arg3, MAX_WORD - 1);
-	shell.num_tk = arg3 ? 4 : (arg2 ? 3 : 2);
+	if (arg4)
+		strncpy(shell.token[4].word, arg4, MAX_WORD - 1);
+	shell.num_tk = arg4 ? 5 : (arg3 ? 4 : (arg2 ? 3 : 2));
 	return shell;
 }
 
@@ -141,8 +145,24 @@ TEST_F(MemoryTest, KernelAndVirtualAllocationsStaySeparate)
 
 	ASSERT_NE(kernel_ptr, nullptr);
 	ASSERT_NE(virtual_ptr, nullptr);
+	EXPECT_EQ(memory_owner(kernel_ptr), MEMORY_SPACE_KERNEL);
+	EXPECT_EQ(memory_owner(virtual_ptr), MEMORY_SPACE_USER);
 	EXPECT_EQ(ksize(virtual_ptr), 0u);
 	EXPECT_EQ(vsize(kernel_ptr), 0u);
+}
+
+TEST_F(MemoryTest, WrongSpaceFreeIsRejected)
+{
+	void *kernel_ptr = kmalloc(64);
+	void *virtual_ptr = vmalloc(64);
+
+	ASSERT_NE(kernel_ptr, nullptr);
+	ASSERT_NE(virtual_ptr, nullptr);
+	EXPECT_EQ(memory_free_as(kernel_ptr, MEMORY_SPACE_USER), -1);
+	EXPECT_EQ(memory_free_as(virtual_ptr, MEMORY_SPACE_KERNEL), -1);
+	EXPECT_EQ(g_free_calls, 0u);
+	kfree(kernel_ptr);
+	vfree(virtual_ptr);
 }
 
 TEST_F(MemoryTest, MemoryBuiltinAllocFreeAndTestCommands)
@@ -153,6 +173,12 @@ TEST_F(MemoryTest, MemoryBuiltinAllocFreeAndTestCommands)
 	EXPECT_NE(g_next_page, 0u);
 
 	shell = make_memory_shell("v", "alloc", "96");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+
+	shell = make_memory_shell("k", "freeas", "v", "0");
+	EXPECT_EQ(cmd_memory(&shell), -1);
+
+	shell = make_memory_shell("k", "free", "0");
 	EXPECT_EQ(cmd_memory(&shell), 0);
 
 	shell = make_memory_shell("test", NULL, NULL);
