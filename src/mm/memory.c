@@ -2,9 +2,11 @@
 
 #include <memory.h>
 #include <pmm.h>
+#include <print.h>
 
 #define MEMORY_MAGIC_KERNEL	0x4b4d454d
 #define MEMORY_MAGIC_VIRTUAL	0x564d454d
+#define MEMORY_MAGIC_FREED	0x46524545
 
 typedef struct memory_header {
 	uint32_t magic;
@@ -50,16 +52,28 @@ static int memory_free_checked(void *ptr, uint32_t magic,
 {
 	memory_header_t *header;
 
-	if (!ptr)
+	if (!ptr) {
+		printf("ERROR: attempt to free a NULL pointer\n");
 		return -1;
+	}
 
 	header = ((memory_header_t *)ptr) - 1;
-	if (header->magic != magic)
+	if (header->magic == MEMORY_MAGIC_FREED) {
+		printf("ERROR: double free detected at 0x%x\n", (uint32_t)ptr);
 		return -1;
-	if (header->owner != (uint8_t)requester)
+	}
+	if (header->magic != magic) {
+		printf("ERROR: invalid free at 0x%x (magic=0x%x)\n",
+			(uint32_t)ptr, header->magic);
 		return -1;
+	}
+	if (header->owner != (uint8_t)requester) {
+		printf("ERROR: memory owner mismatch at 0x%x\n",
+			(uint32_t)ptr);
+		return -1;
+	}
 
-	header->magic = 0;
+	header->magic = MEMORY_MAGIC_FREED;
 	header->owner = 0;
 	pmm_free_frame_range((uint32_t)header, header->page_count);
 	return 0;
@@ -99,14 +113,21 @@ int memory_free_as(void *ptr, memory_space_t requester)
 {
 	memory_header_t *header;
 
-	if (!ptr)
+	if (!ptr) {
+		printf("ERROR: attempt to free a NULL pointer\n");
 		return -1;
+	}
 
 	header = ((memory_header_t *)ptr) - 1;
 	if (header->magic == MEMORY_MAGIC_KERNEL)
 		return memory_free_checked(ptr, MEMORY_MAGIC_KERNEL, requester);
 	if (header->magic == MEMORY_MAGIC_VIRTUAL)
 		return memory_free_checked(ptr, MEMORY_MAGIC_VIRTUAL, requester);
+	if (header->magic == MEMORY_MAGIC_FREED)
+		printf("ERROR: double free detected at 0x%x\n", (uint32_t)ptr);
+	else
+		printf("ERROR: invalid free at 0x%x (magic=0x%x)\n",
+			(uint32_t)ptr, header->magic);
 	return -1;
 }
 
@@ -127,6 +148,8 @@ memory_space_t memory_owner(const void *ptr)
 		return (memory_space_t)header->owner;
 	if (header->magic == MEMORY_MAGIC_VIRTUAL)
 		return (memory_space_t)header->owner;
+	if (header->magic == MEMORY_MAGIC_FREED)
+		return 0;
 	return 0;
 }
 

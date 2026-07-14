@@ -127,6 +127,28 @@ TEST_F(MemoryTest, VmallocVfreeAndVsizeWork)
 	EXPECT_EQ(vsize(ptr), 0u);
 }
 
+TEST_F(MemoryTest, DoubleFreeIsRejectedWithoutFreeingAgain)
+{
+	void *ptr = kmalloc(64);
+
+	ASSERT_NE(ptr, nullptr);
+	EXPECT_EQ(memory_free_as(ptr, MEMORY_SPACE_KERNEL), 0);
+	EXPECT_EQ(g_free_calls, 1u);
+	EXPECT_EQ(memory_free_as(ptr, MEMORY_SPACE_KERNEL), -1);
+	EXPECT_EQ(g_free_calls, 1u);
+}
+
+TEST_F(MemoryTest, FreedAllocationsLoseTheirReportedSize)
+{
+	void *ptr = vmalloc(128);
+
+	ASSERT_NE(ptr, nullptr);
+	EXPECT_EQ(vsize(ptr), 128u);
+	vfree(ptr);
+	EXPECT_EQ(vsize(ptr), 0u);
+	EXPECT_EQ(memory_owner(ptr), (memory_space_t)0);
+}
+
 TEST_F(MemoryTest, KbrkAndVbrkProxyToTheirAllocators)
 {
 	void *kernel_ptr = kbrk(32);
