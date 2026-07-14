@@ -6,11 +6,6 @@
 
 #define MEMORY_SLOTS 16
 
-typedef struct memory_slot {
-	void *ptr;
-	size_t size;
-	memory_space_t space;
-} memory_slot_t;
 
 static memory_slot_t kernel_slots[MEMORY_SLOTS];
 static memory_slot_t virtual_slots[MEMORY_SLOTS];
@@ -168,10 +163,8 @@ static int do_test(void)
 		(uint32_t)ksize(kptr));
 	printf("  virtual ptr: 0x%x size=%u\n", (uint32_t)vptr,
 		(uint32_t)vsize(vptr));
-	if (kptr)
-		kfree(kptr);
-	if (vptr)
-		vfree(vptr);
+	kfree(kptr);
+	vfree(vptr);
 	vfree(vptr);
 	printf("memory test complete\n");
 	return 0;

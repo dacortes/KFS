@@ -25,7 +25,7 @@ system_t sys;
  * @param self System instance
  * @param id Terminal index to switch to (must be < MAX_TERMINAL)
  */
-static void switch_terminal(system_t *self, uint32_t id)
+void switch_terminal(system_t *self, uint32_t id)
 {
 	terminal_t *term;
 	uint32_t prev;
@@ -56,7 +56,7 @@ static void switch_terminal(system_t *self, uint32_t id)
  * @param keys Array of scancodes pressed during Ctrl hold
  * @param count Number of scancodes
  */
-static void shortcut_handler(const unsigned char *keys, int count)
+void shortcut_handler(const unsigned char *keys, int count)
 {
 	if (!keys || count < 1)
 		return;
@@ -81,7 +81,7 @@ static void shortcut_handler(const unsigned char *keys, int count)
  * Calls `terminal_init()` for each terminal and clears its state.
  * Sets `sys.active_terminal` to zero.
  */
-static void create_terminal(void)
+void create_terminal(void)
 {
 	for (int i = 0; i < MAX_TERMINAL; i++) {
 		terminal_init(&sys.terminals[i], &sys.display, i);
@@ -109,10 +109,10 @@ static void create_terminal(void)
  * @param self Pointer to the kernel `system_t` instance. Function
  *             returns immediately if `self` is NULL.
  */
-static void main_loop(system_t *self, multiboot_info_t **info)
+void main_loop(system_t *self, multiboot_info_t **info)
 {
 
-	if (!self)
+	if (!self || !info || !*info)
 		return;
 
 	while (1) {

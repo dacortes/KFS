@@ -187,3 +187,5 @@ void idt_set_gate(unsigned char num, unsigned int base,
 void irq1_handler(void)
 {
 }
+
+uint32_t endkernel = 0x100000; 

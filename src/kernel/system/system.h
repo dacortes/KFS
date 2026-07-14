@@ -15,6 +15,9 @@
 #endif
 // SPDX-License-Identifier: GPL-2.0
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * @file system.h
  * @brief Global kernel system context and public system API.
@@ -67,3 +70,12 @@ void init_system(void);
 
 /* Keyboard IRQ1 handler is defined in the interrupt assembly/handler code. */
 void irq1_handler(void);
+
+void shortcut_handler(const unsigned char *keys, int count);
+void switch_terminal(system_t *self, uint32_t id);
+void create_terminal(void);
+void main_loop(system_t *self, multiboot_info_t **info);
+
+#ifdef __cplusplus
+}
+#endif

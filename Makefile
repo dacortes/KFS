@@ -54,9 +54,9 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/mm/)
 
 
-TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+TEST_CFLAGS = -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
 	-I./inc/boot $(MODULE_INCLUDES)
-TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+TEST_CXXFLAGS = -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
 	-I./inc/boot $(MODULE_INCLUDES)
 TEST_LDFLAGS = -m32
 
@@ -165,7 +165,13 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
-	$(SRC_DIR)/shell/builtins/memory.c
+	$(SRC_DIR)/shell/builtins/memory.c \
+	$(SRC_DIR)/shell/builtins/stack_kernel.c \
+	$(SRC_DIR)/kernel/system/system.c \
+	$(SRC_DIR)/kernel/system/system_log.c \
+	$(SRC_DIR)/kernel/system/stack_kernel/print_stack.c \
+	$(SRC_DIR)/mm/memory.c
+
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
@@ -213,8 +219,8 @@ KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/comm
 	kernel/interrupts kernel/keyboard \
 	shell/readline shell/builtins mm
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
-	kernel/keyboard kernel/terminal shell shell/readline shell/builtins \
-	fixtures mm
+	kernel/keyboard kernel/terminal kernel/system kernel/system/stack_kernel \
+	shell shell/readline shell/builtins fixtures mm
 
 ################################################################################
 #                               PHONY TARGETS                                  #

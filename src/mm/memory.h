@@ -3,11 +3,33 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 typedef enum memory_space {
 	MEMORY_SPACE_KERNEL = 0x4b,
 	MEMORY_SPACE_USER = 0x55,
 } memory_space_t;
+
+typedef struct memory_header {
+	uint32_t magic;
+	uint8_t owner;
+	uint8_t reserved[3];
+	size_t size;
+	size_t page_count;
+} memory_header_t;
+
+
+extern uint32_t text_start;
+extern uint32_t rodata_start;
+extern uint32_t data_start;
+extern uint32_t bss_start;
+extern uint32_t endkernel;
+extern uint32_t kernel_start;
+extern uint32_t kernel_size;
+extern uint32_t stack_top;
+extern uint32_t stack_bottom;
+
+
 
 /**
  * @brief Initialize the kernel and virtual memory helper arenas.

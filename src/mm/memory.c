@@ -8,14 +8,6 @@
 #define MEMORY_MAGIC_VIRTUAL	0x564d454d
 #define MEMORY_MAGIC_FREED	0x46524545
 
-typedef struct memory_header {
-	uint32_t magic;
-	uint8_t owner;
-	uint8_t reserved[3];
-	size_t size;
-	size_t page_count;
-} memory_header_t;
-
 static size_t round_up_pages(size_t size)
 {
 	return (size + PAGE_SIZE - 1) / PAGE_SIZE;

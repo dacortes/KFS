@@ -11,6 +11,8 @@
 #define PAGE_SIZE 4096
 #define PAGE_SHIFT 12
 
+extern uint32_t endkernel;
+
 void pmm_init(multiboot_info_t *info);
 uint32_t pmm_alloc_frame(void);
 uint32_t pmm_alloc_frame_range(size_t count);
@@ -24,3 +26,4 @@ void pmm_print_stats(void);
 
 void pmm_print_bitmap(void);
 void pmm_print_memory_map(multiboot_info_t *info);
+

@@ -41,10 +41,10 @@ void print_pad_right(const char *s, int width)
  */
 void print_multiboot_info(multiboot_info_t *info)
 {
-	multiboot_map_entry_t *entry = (multiboot_map_entry_t*)info->mmap_addr;
+	multiboot_map_entry_t *entry = (multiboot_map_entry_t *)info->mmap_addr;
 	uint64_t total_usable = 0;
 	uint64_t total_reserved = 0;
-	
+
 	printf("\n=== Memory Map (from GRUB) ===\n");
 	print_pad_right("Type", 8);
 	print_pad_right("| Start", 11);
@@ -53,14 +53,14 @@ void print_multiboot_info(multiboot_info_t *info)
 	printf("\n");
 	printf("==================================================\n");
 
-	
+
 	for (; (uint32_t)entry < info->mmap_addr + info->mmap_length;
-		entry = (multiboot_map_entry_t*)((uint32_t)entry + entry->size + 4)) {
-		
+		entry = (multiboot_map_entry_t *)((uint32_t)entry + entry->size + 4)) {
+
 		uint64_t base = entry->base_addr;
 		uint64_t length = entry->length;
 		uint64_t end = base + length;
-		
+
 		const char *type_str;
 		const char *color;
 
@@ -96,7 +96,7 @@ void print_multiboot_info(multiboot_info_t *info)
 		print_spaces(11 - bytes_p);
 		printf("%s\n", (entry->type == 1) ? "\033[32mFree\033[m" : "\033[31mReserved\033[m");
 	}
-	
+
 	printf("==================================================\n");
 	printf("Total usable:    %d MB\n", (uint32_t)(total_usable / (1024 * 1024)));
 	printf("Total reserved:  %d MB\n", (uint32_t)(total_reserved / (1024 * 1024)));

@@ -60,7 +60,9 @@ TEST_F(ReadlineShellTest, ReadlineReturnsLineWhenReady)
 TEST_F(ReadlineShellTest, CreateTokensAndExecuteBuiltin)
 {
     shell_t shell;
-    shell_init(&shell);
+    multiboot_info_t* dummy_info = {};
+
+    shell_init(&shell,  &dummy_info);
 
     char line[] = "  echo  arg1 arg2";
     EXPECT_TRUE(shell.create_tokens(&shell, line));
@@ -74,7 +76,9 @@ TEST_F(ReadlineShellTest, CreateTokensAndExecuteBuiltin)
 TEST_F(ReadlineShellTest, ExecuteUnknownCommandReturns127)
 {
     shell_t shell;
-    shell_init(&shell);
+    multiboot_info_t* dummy_info = {};
+
+    shell_init(&shell,  &dummy_info);
 
     char line[] = "foobar";
     EXPECT_TRUE(shell.create_tokens(&shell, line));

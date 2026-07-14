@@ -7,9 +7,9 @@
 #define PAGE_FRAME_MASK	0xFFFFF000
 #define PAGE_BOOTSTRAP_LIMIT	0x01000000
 
-static uint32_t page_directory[PAGE_DIRECTORY_ENTRIES]
-	__attribute__((aligned(PAGE_SIZE)));
-static int paging_active = 0;
+
+static uint32_t page_directory[PAGE_DIRECTORY_ENTRIES]__aligned(PAGE_SIZE);
+static int paging_active;
 
 static inline uint32_t page_directory_index(uint32_t addr)
 {
@@ -23,9 +23,8 @@ static inline uint32_t page_table_index(uint32_t addr)
 
 static inline void paging_flush_page(uint32_t addr)
 {
-	if (paging_active) {
+	if (paging_active)
 		asm volatile ("invlpg (%0)" : : "r" (addr) : "memory");
-	}
 }
 
 static uint32_t *paging_get_table(uint32_t virt_addr, int create)
@@ -139,7 +138,6 @@ void paging_unmap_range(uint32_t virt_addr, size_t count)
 {
 	size_t index;
 
-	for (index = 0; index < count; index++) {
+	for (index = 0; index < count; index++)
 		paging_unmap_single(virt_addr + (index * PAGE_SIZE));
-	}
 }
