@@ -10,10 +10,9 @@
 
 #include <system.h>
 #include <print.h>
-
-/* Helper string builders are intentionally retained as commented-out
- * examples for future reference.
- */
+#include <multiboot.h>
+#include <pmm.h>
+#include <memory.h>
 
 /**
  * @brief Kernel entry point.
@@ -25,9 +24,19 @@
  *
  * @return Zero on unexpected return (function generally does not return).
  */
-int kernel_main(void)
+
+int kernel_main(uint32_t magic, multiboot_info_t *info)
 {
+	if (magic != MULTIBOOT_MAGIC)
+		return -1;
+
+	if (!info || !info->mmap_addr || !info->mmap_length)
+		return -1;
+
 	init_system();
-	sys.main_loop(&sys);
+	pmm_init(info);
+	memory_init();
+	printf("[BOOT] memory helpers ready\n");
+	sys.main_loop(&sys, &info);
 	return 0;
 }

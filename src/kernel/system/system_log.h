@@ -16,6 +16,7 @@
 #define KERN_INFO    6
 #define KERN_DEBUG   7
 
+
 typedef struct system_log_s system_log_t;
 
 struct system_log_s {

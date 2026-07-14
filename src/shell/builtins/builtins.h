@@ -4,9 +4,18 @@
 
 #include <shell.h>
 #include <print.h>
+#include <memory.h>
 
 int cmd_echo(shell_t *self);
 int cmd_reboot(shell_t *self);
 int cmd_half(shell_t *self);
 int cmd_user_mode(shell_t *self);
 int cmd_show_mode(shell_t *self);
+int cmd_info_stack_kernel(shell_t *self);
+int cmd_memory(shell_t *self);
+
+typedef struct memory_slot {
+	void *ptr;
+	size_t size;
+	memory_space_t space;
+} memory_slot_t;

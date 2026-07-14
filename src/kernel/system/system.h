@@ -7,12 +7,17 @@
 #include <idt.h>
 #include <helper.h>
 #include <shell.h>
+#include <system_log.h>
+#include <stack_kernel.h>
 
 #ifndef MAX_TERMINAL
-#define MAX_TERMINAL 3
+#define MAX_TERMINAL 2
 #endif
 // SPDX-License-Identifier: GPL-2.0
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * @file system.h
  * @brief Global kernel system context and public system API.
@@ -20,22 +25,6 @@
  * Declares the `system_t` singleton which aggregates core subsystems
  * (display, keyboard, terminals) and exposes lifecycle entry points.
  */
-
-#pragma once
-
-#include <terminal.h>
-#include <display.h>
-#include <keyboard.h>
-#include <pic.h>
-#include <idt.h>
-#include <helper.h>
-
-#ifndef MAX_TERMINAL
-#define MAX_TERMINAL 2
-#endif
-
-#include <system_log.h>
-
 typedef struct system_s system_t;
 
 /**
@@ -63,7 +52,7 @@ struct system_s {
 	system_log_t	syslog;
 
     void (*init)(system_t *self);
-	void (*main_loop)(system_t *self);
+	void (*main_loop)(system_t *self, multiboot_info_t **info);
 	void (*switch_terminal)(system_t *self, uint32_t id);
 };
 
@@ -81,3 +70,12 @@ void init_system(void);
 
 /* Keyboard IRQ1 handler is defined in the interrupt assembly/handler code. */
 void irq1_handler(void);
+
+void shortcut_handler(const unsigned char *keys, int count);
+void switch_terminal(system_t *self, uint32_t id);
+void create_terminal(void);
+void main_loop(system_t *self, multiboot_info_t **info);
+
+#ifdef __cplusplus
+}
+#endif

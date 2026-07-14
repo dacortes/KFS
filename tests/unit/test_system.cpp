@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <cstring>
+#include <system.h>	
 
 /*
  * Stub out inline assembly that cannot execute in user-space tests.
@@ -23,25 +24,11 @@
 #define printf kfs_printf
 
 /*
- * Stub system_log_init – system.c references it in init_system(),
- * which is never called in tests, but the linker still needs the
- * symbol.
- */
-extern "C" {
-#include <system_log.h>
-void system_log_init(system_log_t *log) { (void)log; }
-void kprintk(uint32_t level, const char *fmt, ...) { (void)level; (void)fmt; }
-}
-
-/*
  * Include system.c directly so static functions (switch_terminal,
  * shortcut_handler, create_terminal) are visible to the tests.
  * system.c is intentionally NOT in KERNEL_LIB_SOURCES to avoid
  * duplicate symbols.
  */
-extern "C" {
-#include <kernel/system/system.c>
-}
 
 #undef write
 #undef printf
@@ -328,5 +315,5 @@ TEST_F(SystemTest, InitSystemKeyboardIsConfigured)
 TEST_F(SystemTest, MainLoopNullSelfReturnsImmediately)
 {
 	/* main_loop(NULL) should just return without crashing */
-	main_loop(NULL);
+	main_loop(NULL, NULL);
 }

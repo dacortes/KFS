@@ -47,13 +47,17 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/stack_kernel/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
+MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/mm/)
 
 
-TEST_CFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
-TEST_CXXFLAGS = -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) $(MODULE_INCLUDES)
+TEST_CFLAGS = -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+	-I./inc/boot $(MODULE_INCLUDES)
+TEST_CXXFLAGS = -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+	-I./inc/boot $(MODULE_INCLUDES)
 TEST_LDFLAGS = -m32
 
 # Add coverage flags if COVERAGE is set
@@ -90,6 +94,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/kernel/print/formats.c \
 	$(SRC_DIR)/kernel/system/system.c \
 	$(SRC_DIR)/kernel/system/system_log.c \
+	$(SRC_DIR)/kernel/system/stack_kernel/print_stack.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strlen.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcmp.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strcpy.c \
@@ -111,16 +116,23 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
+	$(SRC_DIR)/shell/builtins/stack_kernel.c \
+	$(SRC_DIR)/shell/builtins/memory.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
-	$(SRC_DIR)/shell/shell.c
+	$(SRC_DIR)/shell/shell.c \
+	$(SRC_DIR)/mm/pmm.c \
+	$(SRC_DIR)/mm/paging.c \
+	$(SRC_DIR)/mm/memory.c
 
 
 INCLUDES = $(addprefix -I, ./inc)
 INCLUDES += $(addprefix -I, ./inc/stdint)
 INCLUDES += $(addprefix -I, ./inc/stdbool)
+INCLUDES += $(addprefix -I, ./inc/boot)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/interrupts/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/keyboard/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/system/stack_kernel/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/terminal/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/display/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/wrappers)
@@ -128,6 +140,7 @@ INCLUDES += $(addprefix -I, $(SRC_DIR)/kernel/print)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/readline)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
 INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/)
+INCLUDES += $(addprefix -I, $(SRC_DIR)/mm/)
 
 # Test source files (kernel lib without main.c for testing)
 # C wrappers call assembly - both compile in 32-bit mode
@@ -151,13 +164,21 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
-	$(SRC_DIR)/shell/builtins/mode_switch.c
+	$(SRC_DIR)/shell/builtins/mode_switch.c \
+	$(SRC_DIR)/shell/builtins/memory.c \
+	$(SRC_DIR)/shell/builtins/stack_kernel.c \
+	$(SRC_DIR)/kernel/system/system.c \
+	$(SRC_DIR)/kernel/system/system_log.c \
+	$(SRC_DIR)/kernel/system/stack_kernel/print_stack.c \
+	$(SRC_DIR)/mm/memory.c
+
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
 TEST_FIXTURE_SOURCES = $(TEST_DIR)/fixtures/io_stub.c
 TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_builtins.cpp \
+	$(TEST_DIR)/unit/test_memory.cpp \
 	$(TEST_DIR)/unit/test_strlen.cpp \
 	$(TEST_DIR)/unit/test_strcmp.cpp \
 	$(TEST_DIR)/unit/test_strcpy.cpp \
@@ -194,12 +215,12 @@ REQUIRED_TOOLS = qemu-system-x86_64 nasm grub-mkrescue $(CC)
 
 # Subdirectories to create
 KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
-	kernel/terminal kernel/system kernel/print \
+	kernel/terminal kernel/system kernel/system/stack_kernel kernel/print \
 	kernel/interrupts kernel/keyboard \
-	shell/readline shell/builtins
+	shell/readline shell/builtins mm
 TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
-	kernel/keyboard kernel/terminal shell shell/readline shell/builtins \
-	fixtures
+	kernel/keyboard kernel/terminal kernel/system kernel/system/stack_kernel \
+	shell shell/readline shell/builtins fixtures mm
 
 ################################################################################
 #                               PHONY TARGETS                                  #
