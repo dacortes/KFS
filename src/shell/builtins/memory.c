@@ -172,6 +172,7 @@ static int do_test(void)
 		kfree(kptr);
 	if (vptr)
 		vfree(vptr);
+	vfree(vptr);
 	printf("memory test complete\n");
 	return 0;
 }
