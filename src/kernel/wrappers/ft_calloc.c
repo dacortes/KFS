@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
+#include <helper.h>
+
 /**
  * @brief Allocates and zero-initializes memory for an array of elements.
  *

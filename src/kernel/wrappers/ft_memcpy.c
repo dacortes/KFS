@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
+#include <helper.h>
+
 /**
  * @brief Copies a block of memory from source to destination.
  *

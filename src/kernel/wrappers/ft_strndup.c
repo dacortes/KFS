@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
+#include <helper.h>
+
 /**
  * @brief Duplicates a string up to a specified number of characters.
  *
