@@ -250,6 +250,12 @@ unsigned int ft_strlen_asm(const char *s);
 int ft_strcmp_asm(const char *s1, const char *s2);
 char *ft_strcpy_asm(char *dst, const char *src);
 
+/**
+ * free - Release memory allocated by kernel allocators.
+ * Full documentation is in the implementation file.
+ */
+bool free(void *ptr);
+
 #ifdef __cplusplus
 }
 #endif
