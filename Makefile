@@ -231,30 +231,19 @@ TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
 ################################################################################
 #                               DEFAULT TARGET                                 #
 ################################################################################
-all: check_requirements kernel-bin iso
+all: check_requirements kernel-bin iso ## Build the kernel binary and create the bootable ISO image.
 
 ################################################################################
 #                               HELP TARGET                                    #
 ################################################################################
-help:
-	@printf "$(INFO) KFS Makefile - Available targets:\n\n"
-	@printf "  $(BLUE)make all$(END)              $(INFO) Build kernel binary + ISO\n"
-	@printf "  $(BLUE)make kernel-bin$(END)       $(INFO) Build only the kernel binary ($(KERNEL_BIN))\n"
-	@printf "  $(BLUE)make iso$(END)              $(INFO) Create bootable ISO image ($(ISO))\n"
-	@printf "  $(BLUE)make run$(END)              $(INFO) Run kernel in QEMU emulator\n"
-	@printf "  $(BLUE)make debug$(END)            $(INFO) Run kernel in QEMU with GDB support\n"
-	@printf "  $(BLUE)make test$(END)             $(INFO) Build and run unit tests\n"
-	@printf "  $(BLUE)make test-verbose$(END)     $(INFO) Run tests with verbose output\n"
-	@printf "  $(BLUE)make clean$(END)            $(INFO) Remove build artifacts\n"
-	@printf "  $(BLUE)make distclean$(END)        $(INFO) Remove all generated files\n"
-	@printf "  $(BLUE)make re$(END)               $(INFO) Rebuild everything from scratch\n"
-	@printf "  $(BLUE)make help$(END)             $(INFO) Show this help message\n"
-	@printf "  $(BLUE)make cross-help$(END)       $(INFO) Show cross-compiler setup targets\n\n"
+help: ## Display this help message with available targets.
+	@echo "$(INFO) Available targets:$(END)"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(LIGTH)%-20s$(END) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 ################################################################################
 #                               REQUIREMENTS CHECK                             #
 ################################################################################
-check_requirements:
+check_requirements: ##Verify that all required development tools are installed
 	@failed=false; \
 	for tool in $(REQUIRED_TOOLS); do \
 		if command -v $$tool >/dev/null 2>&1; then \
@@ -313,7 +302,7 @@ $(KERNEL_OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 	fi
 
 # Link kernel binary
-kernel-bin: $(KERNEL_BIN)
+kernel-bin: $(KERNEL_BIN) ## Compile and link the kernel executable (myos42.bin).
 
 $(KERNEL_BIN): $(KERNEL_OBJECTS_AS) $(KERNEL_OBJECTS_C) $(LINKER)
 	@printf "$(INFO) Linking kernel binary: $(KERNEL_BIN) ...\n"
@@ -341,7 +330,7 @@ $(GRUBCFG):
 	@echo '}' >> $(GRUBCFG)
 	@printf "$(SUCCESS) Created: $(GRUBCFG)\n"
 
-iso: $(ISO)
+iso: $(ISO) ## Generate the GRUB‑based bootable ISO image (myos42.iso).
 
 $(ISO): $(KERNEL_BIN) $(GRUBCFG)
 	@printf "$(INFO) Creating bootable ISO: $(ISO) ...\n"
@@ -373,14 +362,13 @@ $(ISO): $(KERNEL_BIN) $(GRUBCFG)
 ################################################################################
 #                               QEMU EXECUTION                                 #
 ################################################################################
-run: $(ISO)
+run: $(ISO) ## Launch the OS in QEMU (press Ctrl‑A then X to exit).
 	@printf "$(INFO) Starting QEMU with kernel ...\n"
 	@printf "$(INFO) Press Ctrl-A then X to exit QEMU\n"
 	@qemu-system-x86_64 -cdrom $(ISO) -no-shutdown
 
-debug: $(ISO)
-	@printf "$(INFO) Starting QEMU with GDB support ...\n"
-	@printf "$(INFO) Connect GDB with: gdb -ex 'target remote localhost:1234' -ex 'symbol-file $(KERNEL_BIN)'\n"
+debug: $(ISO) ## Start QEMU debugging.
+	@printf "$(INFO) Starting QEMU ...\n"
 	@qemu-system-x86_64 -cdrom $(ISO) -s -S
 
 ################################################################################
@@ -414,19 +402,19 @@ $(TEST_RUNNER): $(TEST_LIB_OBJECTS) $(TEST_OBJECTS)
 	@printf "$(SUCCESS) Test runner built: $(TEST_RUNNER)\n"
 
 # Build and run tests
-test: $(TEST_RUNNER)
+test: $(TEST_RUNNER) ## Build and run the unit test suite using Google Test.
 	@printf "$(INFO) Running tests...\n"
 	@./$(TEST_RUNNER)
 
 # Run tests with verbose output
-test-verbose: $(TEST_RUNNER)
+test-verbose: $(TEST_RUNNER) ## Run the tests with verbose output and timings.
 	@./$(TEST_RUNNER) --gtest_print_time=1 --gtest_verbose=1
 
 
 ################################################################################
 #                               CLEANUP TARGETS                                #
 ################################################################################
-clean:
+clean: ## Remove all build objects, test runner, and kernel binary.
 	@printf "$(INFO) Cleaning build artifacts...\n"
 	@$(RMV) $(OBJ_DIR) $(KERNEL_OBJ_DIR) $(KERNEL_DEP_DIR)
 	@$(RMV) $(TEST_RUNNER) $(KERNEL_BIN)
@@ -434,14 +422,14 @@ clean:
 	@find . -name "*.gcno" -delete 2>/dev/null || true
 	@printf "$(SUCCESS) Clean complete\n"
 
-clean-coverage:
+clean-coverage: ## Delete coverage report files and related artifacts.
 	@printf "$(INFO) Cleaning coverage reports...\n"
 	@$(RMV) coverage_report build_coverage
 	@find . -name "*.gcda" -delete 2>/dev/null || true
 	@find . -name "*.gcno" -delete 2>/dev/null || true
 	@printf "$(SUCCESS) Coverage clean complete\n"
 
-distclean: clean clean-coverage
+distclean: clean clean-coverage ## Perform a full cleanup, removing the ISO and GRUB configuration as well.
 	@printf "$(INFO) Cleaning all generated files...\n"
 	@$(RMV) $(ISO) $(GRUBCFG)
 	@printf "$(SUCCESS) Distclean complete\n"
@@ -449,7 +437,7 @@ distclean: clean clean-coverage
 ################################################################################
 #                               REBUILD TARGET                                 #
 ################################################################################
-re: distclean all
+re: distclean all ## Rebuild everything from scratch (equivalent to distclean followed by all).
 
 ################################################################################
 #                               DEPENDENCY INCLUSION                           #
