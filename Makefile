@@ -159,6 +159,9 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/ft_isdigit.c \
 	$(SRC_DIR)/kernel/wrappers/ft_isblank.c \
 	$(SRC_DIR)/kernel/wrappers/ft_atoi.c \
+	$(SRC_DIR)/kernel/wrappers/ft_calloc.c \
+	$(SRC_DIR)/kernel/wrappers/ft_strndup.c \
+	$(SRC_DIR)/kernel/wrappers/ft_memcpy.c \
 	$(SRC_DIR)/shell/shell.c \
 	$(SRC_DIR)/shell/readline/ft_readline.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
