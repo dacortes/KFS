@@ -74,7 +74,11 @@ struct tss_entry {
 	unsigned short iomap_base;
 } __attribute__((packed));
 
-
+#include <stdint.h>
+/**
+ * @brief Top of the kernel stack exported by the boot linker script.
+ */
+extern uint32_t stack_top;
 
 /**
  * @brief Initialize and load a flat kernel GDT.

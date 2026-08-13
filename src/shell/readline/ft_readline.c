@@ -14,15 +14,34 @@ void set_prompt(const char *prompt)
 	ft_strlcpy(term->prefix, prompt, ft_strlen(prompt) + 1);
 }
 
-char *readline(char *line)
+// char *readline(char *line)
+// {
+// 	uint32_t active = sys.active_terminal;
+// 	terminal_t *term = &sys.terminals[active];
+// 	unsigned int	len = ft_strlen(term->line);
+
+// 	if (!term->line_ready)
+// 		return ft_memset(line, 0, sizeof(line));
+// 	ft_strlcpy(line, term->line, len + 1);
+// 	term->line_ready = 0;
+// 	term->clear_line(term);
+// 	return line;
+// }
+
+char *readline(const char *prompt)
 {
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
 	unsigned int	len = ft_strlen(term->line);
 
+	set_prompt(prompt);
 	if (!term->line_ready)
-		return ft_memset(line, 0, sizeof(line));
-	ft_strlcpy(line, term->line, len + 1);
+		return ft_calloc(len, sizeof(char *) + 1);
+
+	char *line = ft_strndup(term->line, len);
+
+	if (!line)
+		return NULL;
 	term->line_ready = 0;
 	term->clear_line(term);
 	return line;

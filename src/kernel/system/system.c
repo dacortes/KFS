@@ -123,12 +123,15 @@ void main_loop(system_t *self, multiboot_info_t **info)
 
 		shell_init(&shell, info);
 		if (*ascii) {
-			char	line[256];
 			int	completed;
 
 			term->handle_keyboard_input(term, *ascii);
 			completed = term->line_ready;
-			readline(line);
+			char *line = readline("[42] ");
+
+			if (!line)
+				return;
+
 			if (completed) {
 				if (shell.create_tokens(&shell, line)) {
 					shell.execute(&shell);
@@ -137,6 +140,7 @@ void main_loop(system_t *self, multiboot_info_t **info)
 				term->write_prefix(term);
 				term->set_cursor_color(term, BLACK_ON_WHITE);
 			}
+			free(line);
 		}
 		self->keyboard.input = 0;
 		__asm__ volatile("hlt");
