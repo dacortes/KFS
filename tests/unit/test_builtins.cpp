@@ -112,7 +112,12 @@ TEST_F(BuiltinTest, ShowModeReportsUserMode)
 
 	EXPECT_EQ(cmd_show_mode(&shell), 0);
 }
+TEST_F(BuiltinTest, IdtProbeReportsSignalQueueAndHandlers)
+{
+	shell_t shell = {};
 
+	EXPECT_EQ(cmd_idt_probe(&shell), 0);
+}
 TEST_F(BuiltinTest, ShowModeReportsUnknownPrivilege)
 {
 	shell_t shell = {};

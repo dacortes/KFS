@@ -54,9 +54,9 @@ MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/shell/builtins/)
 MODULE_INCLUDES += $(addprefix -I, $(SRC_DIR)/mm/)
 
 
-TEST_CFLAGS = -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+TEST_CFLAGS = -DKFS_UNIT_TEST -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
 	-I./inc/boot $(MODULE_INCLUDES)
-TEST_CXXFLAGS = -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
+TEST_CXXFLAGS = -DKFS_UNIT_TEST -D'asm(...)=' -D'__asm__(...)=' -m32 -Wall -Wextra -O2 -I. -I$(SRC_DIR) \
 	-I./inc/boot $(MODULE_INCLUDES)
 TEST_LDFLAGS = -m32
 
@@ -82,6 +82,7 @@ KERNEL_SOURCES_AS = $(SRC_DIR)/boot/entry.s \
 	$(SRC_DIR)/kernel/assembly/gdt.s \
 	$(SRC_DIR)/kernel/assembly/idt.s \
 	$(SRC_DIR)/kernel/assembly/isr.s \
+	$(SRC_DIR)/kernel/assembly/exceptions.s \
 	$(SRC_DIR)/kernel/assembly/commands/halt.s \
 	$(SRC_DIR)/kernel/assembly/commands/reboot.s \
 	$(SRC_DIR)/kernel/assembly/commands/user_mode.s \
@@ -118,6 +119,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
 	$(SRC_DIR)/shell/builtins/stack_kernel.c \
 	$(SRC_DIR)/shell/builtins/memory.c \
+	$(SRC_DIR)/shell/builtins/idt_probe.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
 	$(SRC_DIR)/shell/shell.c \
 	$(SRC_DIR)/mm/pmm.c \
@@ -153,6 +155,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/keyboard/keyboard.c \
 	$(SRC_DIR)/kernel/terminal/terminal.c \
 	$(SRC_DIR)/kernel/terminal/color_parser.c \
+	$(SRC_DIR)/kernel/interrupts/idt.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memset.c \
 	$(SRC_DIR)/kernel/wrappers/ft_memchr.c \
 	$(SRC_DIR)/kernel/wrappers/ft_strchr.c \
@@ -166,6 +169,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/shell/builtins/halt.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
 	$(SRC_DIR)/shell/builtins/memory.c \
+	$(SRC_DIR)/shell/builtins/idt_probe.c \
 	$(SRC_DIR)/shell/builtins/stack_kernel.c \
 	$(SRC_DIR)/kernel/system/system.c \
 	$(SRC_DIR)/kernel/system/system_log.c \
@@ -174,7 +178,9 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
 	$(SRC_DIR)/kernel/assembly/ft_strcmp.s \
-	$(SRC_DIR)/kernel/assembly/ft_strcpy.s
+	$(SRC_DIR)/kernel/assembly/ft_strcpy.s \
+	$(SRC_DIR)/kernel/assembly/isr.s \
+	$(SRC_DIR)/kernel/assembly/exceptions.s
 TEST_FIXTURE_SOURCES = $(TEST_DIR)/fixtures/io_stub.c
 TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_builtins.cpp \
@@ -186,6 +192,7 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_keyboard.cpp \
 	$(TEST_DIR)/unit/test_terminal.cpp \
 	$(TEST_DIR)/unit/test_system.cpp \
+	$(TEST_DIR)/unit/test_interrupts.cpp \
 	$(TEST_DIR)/unit/test_atoi.cpp \
 	$(TEST_DIR)/unit/test_isdigit.cpp \
 	$(TEST_DIR)/unit/test_memchr.cpp \
@@ -218,9 +225,9 @@ KERNEL_SUBDIRS = boot kernel kernel/display kernel/assembly kernel/assembly/comm
 	kernel/terminal kernel/system kernel/system/stack_kernel kernel/print \
 	kernel/interrupts kernel/keyboard \
 	shell/readline shell/builtins mm
-TEST_SUBDIRS = kernel/display kernel/assembly kernel/wrappers \
+TEST_SUBDIRS = kernel/display kernel/assembly kernel/assembly/commands kernel/wrappers \
 	kernel/keyboard kernel/terminal kernel/system kernel/system/stack_kernel \
-	shell shell/readline shell/builtins fixtures mm
+	kernel/interrupts shell shell/readline shell/builtins fixtures mm
 
 ################################################################################
 #                               PHONY TARGETS                                  #
