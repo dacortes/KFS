@@ -1,0 +1,100 @@
+name: PR Description Generator
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  generate-description:
+    if: github.event.label.name == 'generate-description'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout pull request head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Fetch base branch
+        run: |
+          set -euo pipefail
+
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          echo "Base ref: ${BASE_REF}"
+
+          git fetch origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+          git branch -a
+
+      - name: Generate description with AI
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          BASE_BRANCH="origin/${BASE_REF}"
+
+          echo "=== Debug Info ==="
+          echo "Base: ${BASE_REF}"
+          echo "Head: ${HEAD_SHA}"
+          echo "Available branches:"
+          git branch -a
+          echo "=== End Debug ==="
+
+          git diff "${BASE_BRANCH}..${HEAD_SHA}" > /tmp/diff.txt || \
+            git diff "${BASE_REF}..${HEAD_SHA}" > /tmp/diff.txt || \
+            git diff "${BASE_REF}..HEAD" > /tmp/diff.txt
+
+          git log "${BASE_BRANCH}..${HEAD_SHA}" --pretty=format:"- %s" > /tmp/commits.txt || \
+            git log "${BASE_REF}..${HEAD_SHA}" --pretty=format:"- %s" > /tmp/commits.txt || \
+            git log "${BASE_REF}..HEAD" --pretty=format:"- %s" > /tmp/commits.txt
+
+          echo "Diff size: $(wc -l < /tmp/diff.txt) lines"
+          echo "Commits:"
+          cat /tmp/commits.txt
+
+          DIFF_CONTENT=$(head -2000 /tmp/diff.txt | jq -s -R -r @json)
+          COMMITS_CONTENT=$(cat /tmp/commits.txt | jq -s -R -r @json)
+
+          RESPONSE=$(curl -s https://openrouter.ai/api/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${OPENROUTER_API_KEY}" \
+            -H "HTTP-Referer: https://github.com" \
+            -d '{
+              "model": "openai/gpt-3.5-turbo",
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "You are a helpful assistant. Generate a clear, professional PR description in English following Conventional Commits format. Include a summary, list of changes, and technical details."
+                },
+                {
+                  "role": "user",
+                  "content": "Generate a PR description for these changes:\n\nCommits:\n'"${COMMITS_CONTENT}"'\n\nDiff:\n'"${DIFF_CONTENT}"'\n\nFormat:\n## Summary\n[Brief overview]\n\n## Changes\n- [List of changes]\n\n## Technical Details\n[Technical implementation details]\n\n## Testing\n[How to test]"
+                }
+              ]
+            }')
+
+          DESCRIPTION=$(echo "${RESPONSE}" | jq -r '.choices[0].message.content')
+
+          echo "=== Generated Description ==="
+          echo "${DESCRIPTION}"
+
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          DESCRIPTION_JSON=$(echo "${DESCRIPTION}" | jq -s -R -r @json)
+
+          curl -s -X PATCH \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}" \
+            -d '{
+              "body": '"${DESCRIPTION_JSON}"'
+            }'
+
+          echo "✅ PR description updated!"
