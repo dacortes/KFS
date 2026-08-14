@@ -38,13 +38,11 @@ void reset_builtin_stub_state(void)
 void halt_system(void)
 {
 	g_halt_system_calls++;
-	longjmp(g_halt_jmp, 1);
 }
 
 void reboot_system(void)
 {
 	g_reboot_system_calls++;
-	longjmp(g_reboot_jmp, 1);
 }
 
 void __attribute__((weak)) switch_to_user_mode(void (*function)(void), void *stack_top)

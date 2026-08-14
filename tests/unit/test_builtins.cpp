@@ -7,11 +7,15 @@
 
 #include <gtest/gtest.h>
 
+#include <system_log.h>
+
 #define write kfs_write
 extern "C" {
 #include <builtins.h>
+#include <stack_kernel.h>
 }
 #undef write
+
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
@@ -125,4 +129,61 @@ TEST_F(BuiltinTest, ShowModeReportsUnknownPrivilege)
 	g_current_privilege_level_value = 1;
 
 	EXPECT_EQ(cmd_show_mode(&shell), 0);
+}
+
+TEST_F(BuiltinTest, HaltAndRebootBuiltinsInvokeSystemCalls)
+{
+	shell_t shell = {};
+
+	EXPECT_EQ(cmd_half(&shell), 0);
+	EXPECT_EQ(g_halt_system_calls, 1);
+
+	reset_builtin_stub_state();
+	EXPECT_EQ(cmd_reboot(&shell), 0);
+	EXPECT_EQ(g_reboot_system_calls, 1);
+}
+
+TEST_F(BuiltinTest, StackKernelBuiltinPrintsMultibootInfo)
+{
+	shell_t shell = {};
+	multiboot_info_t info = {};
+	uint8_t buffer[64] = {0};
+	multiboot_map_entry_t *entry = (multiboot_map_entry_t *)buffer;
+
+	entry->size = sizeof(*entry);
+	entry->base_addr = 0;
+	entry->length = 1024 * 1024;
+	entry->type = 1;
+	info.mmap_addr = (uint32_t)(uintptr_t)buffer;
+	info.mmap_length = sizeof(buffer);
+	shell.info = &info;
+
+	EXPECT_EQ(cmd_info_stack_kernel(&shell), 0);
+}
+
+TEST_F(BuiltinTest, SystemLogInitWriteDumpAndSetLogLevel)
+{
+	system_log_t log = {};
+	terminal_t terminal = {};
+	static char sink[256];
+
+	terminal.write_string = [](terminal_t *self, const char *text) {
+		(void)self;
+		if (!text)
+			return 0;
+		strncpy(sink, text, sizeof(sink) - 1);
+		sink[sizeof(sink) - 1] = '\0';
+		return (int)strlen(text);
+	};
+
+	system_log_init(&log);
+	log.write(&log, KERN_INFO, "hello");
+	log.write(&log, KERN_DEBUG, "world");
+	log.set_loglevel(&log, KERN_ERR, KERN_DEBUG);
+	log.dump(&log, &terminal);
+
+	EXPECT_EQ(log.entry_count, 2u);
+	EXPECT_EQ(log.console_loglevel, KERN_ERR);
+	EXPECT_EQ(log.syslog_loglevel, KERN_DEBUG);
+	EXPECT_GT(strlen(sink), 0u);
 }

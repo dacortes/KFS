@@ -47,8 +47,8 @@ int idt_call_handler(unsigned int vector)
 {
 	unsigned int entry = idt_get_entry(vector);
 
-	printf("[IDT] idt_call_handler: vector=0x%x entry=0x%x\n",
-		vector, entry);
+	printf("[IDT] %s: vector=0x%x entry=0x%x\n",
+		__func__, vector, entry);
 	if (entry == 0)
 		return -1;
 	if (vector < KERNEL_EXCEPTION_COUNT)
