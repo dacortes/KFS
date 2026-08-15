@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <helper.h>
+#include <print.h>
 
 /**
  * @brief Duplicates a string up to a specified number of characters.
@@ -46,6 +47,13 @@ char	*ft_strndup(const char *src, size_t n)
 
 	if (!dst)
 		return NULL;
+
+	printf("src =%s   %x\n", src, src);
 	ft_memcpy(dst, src, len);
+
+	// for (uint32_t i = 0; i < len; i++)
+	// 	dst[i] = src[i];
+
+	printf("=======> destino *%s*  %x\n", dst, dst);
 	return dst;
 }

@@ -86,9 +86,9 @@ static int handle_alloc(shell_t *self, memory_slot_t *slots, size_t count,
 		return -1;
 	}
 
-	size = (size_t)ft_atoi(self->token[3].word);
+	size = (size_t)ft_atoi(self->tokens[3].word);
 	if (!size) {
-		printf("Invalid size: %s\n", self->token[3].word);
+		printf("Invalid size: %s\n", self->tokens[3].word);
 		return -1;
 	}
 
@@ -125,7 +125,7 @@ static int handle_free(shell_t *self, memory_slot_t *slots, size_t count,
 		return -1;
 	}
 
-	id = ft_atoi(self->token[id_index].word);
+	id = ft_atoi(self->tokens[id_index].word);
 	slot = get_slot(slots, count, id);
 	if (!slot || !slot->ptr) {
 		printf("Invalid slot: %d\n", id);
@@ -172,12 +172,12 @@ static int do_test(void)
 
 int cmd_memory(shell_t *self)
 {
-	if (self->num_tk < 2 || !ft_strcmp(self->token[1].word, "help")) {
+	if (self->num_tk < 2 || !ft_strcmp(self->tokens[1].word, "help")) {
 		print_usage();
 		return 0;
 	}
 
-	if (!ft_strcmp(self->token[1].word, "stats")) {
+	if (!ft_strcmp(self->tokens[1].word, "stats")) {
 		printf("PMM free pages: %u\n", (uint32_t)pmm_get_free_frame_count());
 		printf("PMM used pages: %u\n", (uint32_t)pmm_get_used_frame_count());
 		print_slots("kernel", kernel_slots, MEMORY_SLOTS);
@@ -185,7 +185,7 @@ int cmd_memory(shell_t *self)
 		return 0;
 	}
 
-	if (!ft_strcmp(self->token[1].word, "test"))
+	if (!ft_strcmp(self->tokens[1].word, "test"))
 		return do_test();
 
 	if (self->num_tk < 3) {
@@ -193,14 +193,14 @@ int cmd_memory(shell_t *self)
 		return -1;
 	}
 
-	if (!ft_strcmp(self->token[1].word, "k")) {
-		if (!ft_strcmp(self->token[2].word, "alloc"))
+	if (!ft_strcmp(self->tokens[1].word, "k")) {
+		if (!ft_strcmp(self->tokens[2].word, "alloc"))
 			return handle_alloc(self, kernel_slots, MEMORY_SLOTS, 0);
-		if (!ft_strcmp(self->token[2].word, "free"))
+		if (!ft_strcmp(self->tokens[2].word, "free"))
 			return handle_free(self, kernel_slots, MEMORY_SLOTS,
 				MEMORY_SPACE_KERNEL, MEMORY_SPACE_KERNEL, 3);
-		if (!ft_strcmp(self->token[2].word, "freeas") && self->num_tk >= 5) {
-			memory_space_t requester = parse_space(self->token[3].word);
+		if (!ft_strcmp(self->tokens[2].word, "freeas") && self->num_tk >= 5) {
+			memory_space_t requester = parse_space(self->tokens[3].word);
 
 			if (!requester)
 				return -1;
@@ -209,14 +209,14 @@ int cmd_memory(shell_t *self)
 		}
 	}
 
-	if (!ft_strcmp(self->token[1].word, "v")) {
-		if (!ft_strcmp(self->token[2].word, "alloc"))
+	if (!ft_strcmp(self->tokens[1].word, "v")) {
+		if (!ft_strcmp(self->tokens[2].word, "alloc"))
 			return handle_alloc(self, virtual_slots, MEMORY_SLOTS, 1);
-		if (!ft_strcmp(self->token[2].word, "free"))
+		if (!ft_strcmp(self->tokens[2].word, "free"))
 			return handle_free(self, virtual_slots, MEMORY_SLOTS,
 				MEMORY_SPACE_USER, MEMORY_SPACE_USER, 3);
-		if (!ft_strcmp(self->token[2].word, "freeas") && self->num_tk >= 5) {
-			memory_space_t requester = parse_space(self->token[3].word);
+		if (!ft_strcmp(self->tokens[2].word, "freeas") && self->num_tk >= 5) {
+			memory_space_t requester = parse_space(self->tokens[3].word);
 
 			if (!requester)
 				return -1;

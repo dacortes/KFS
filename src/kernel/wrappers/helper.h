@@ -253,8 +253,16 @@ char *ft_strcpy_asm(char *dst, const char *src);
 /**
  * free - Release memory allocated by kernel allocators.
  * Full documentation is in the implementation file.
+ * @file free.c
  */
 bool free(void *ptr);
+
+/**
+ * ft_realloc - Resize an allocated memory block.
+ * Full documentation is in the implementation file.
+ * @file ft_realloc.c
+ */
+void *ft_realloc(void *ptr, size_t old_size, size_t new_size);
 
 #ifdef __cplusplus
 }

@@ -30,6 +30,8 @@
 #define MAX_LINE 256
 #endif
 
+#define MSG_ERROR_MEM "\033[0;31m[ERROR]\033[0m Memory allocation error in variable -"
+
 typedef struct shell_s shell_t;
 typedef struct token_s token_t;
 
@@ -40,10 +42,15 @@ typedef struct {
 } builtin_t;
 
 // cambiar el max_word por memoria dinamica una vez se haga
+// struct token_s {
+// 	char		word[MAX_WORD];
+// 	uint16_t	type;
+// 	void 		(*clear)(token_t *self);
+// };
+
 struct token_s {
-	char		word[MAX_WORD];
+	char		*word;
 	uint16_t	type;
-	void 		(*clear)(token_t *self);
 };
 
 struct shell_s {
@@ -51,9 +58,9 @@ struct shell_s {
 	uint32_t		lv;
 	char			***history;
 	char			line[MAX_LINE];
-	token_t			token[MAX_TOKEN];
+	token_t			*tokens;
+	uint32_t		capacity; 
 	const builtin_t *builtins;
-	// token_t			*token2;
 	multiboot_info_t *info;
 	uint16_t	(*create_tokens)(shell_t *self, char *line);
 	uint16_t	(*execute)(shell_t *self);
