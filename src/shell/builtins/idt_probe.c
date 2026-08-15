@@ -23,42 +23,6 @@ static void idt_fault_handler(unsigned int signal, void *context)
 		signal, counter != NULL ? *counter : 0u);
 }
 
-static int idt_probe_simulated(void)
-{
-	unsigned int divide_count = 0;
-	unsigned int gp_count = 0;
-	unsigned int page_count = 0;
-	struct kernel_signal_snapshot snapshot;
-
-	printf("[IDT] host-safe signal queue probe\n");
-	ft_memset(&snapshot, 0, sizeof(snapshot));
-
-	if (kernel_register_signal_handler(KERNEL_SIG_DIVIDE_ERROR,
-					idt_probe_handler, &divide_count) != 0)
-		return -1;
-	if (kernel_register_signal_handler(KERNEL_SIG_GENERAL_PROTECTION,
-					idt_probe_handler, &gp_count) != 0)
-		return -1;
-	if (kernel_register_signal_handler(KERNEL_SIG_PAGE_FAULT,
-					idt_probe_handler, &page_count) != 0)
-		return -1;
-	if (kernel_schedule_signal(KERNEL_SIG_DIVIDE_ERROR, &divide_count) != 0)
-		return -1;
-	if (kernel_schedule_signal(KERNEL_SIG_GENERAL_PROTECTION, &gp_count) != 0)
-		return -1;
-	if (kernel_schedule_signal(KERNEL_SIG_PAGE_FAULT, &page_count) != 0)
-		return -1;
-
-	printf("  [IDT] queue: divide_error, general_protection, page_fault\n");
-	kernel_exception_dispatch(KERNEL_SIG_DIVIDE_ERROR);
-	kernel_exception_dispatch(KERNEL_SIG_GENERAL_PROTECTION);
-	kernel_exception_dispatch(KERNEL_SIG_PAGE_FAULT);
-	printf("  [IDT] final counts: divide_error=%u general_protection=%u page_fault=%u\n",
-		divide_count, gp_count, page_count);
-	printf("[IDT] probe complete\n");
-	return 0;
-}
-
 int cmd_idt_probe(shell_t *self)
 {
 	unsigned int divide_count = 0;
