@@ -13,6 +13,8 @@ int cmd_user_mode(shell_t *self);
 int cmd_show_mode(shell_t *self);
 int cmd_info_stack_kernel(shell_t *self);
 int cmd_memory(shell_t *self);
+int cmd_idt_probe(shell_t *self);
+int cmd_idt_fault(shell_t *self);
 
 typedef struct memory_slot {
 	void *ptr;

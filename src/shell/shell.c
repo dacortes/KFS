@@ -96,11 +96,13 @@ void shell_clear(shell_t *self)
 static uint16_t execute(shell_t *self)
 {
 	char *cmd = self->token[0].word;
+	size_t num = 0;
 
-	for (size_t num = 0; num < NUM_COMMANDS; num++) {
+	while (self->builtins[num].name != NULL) {
 		//printf("Comparing '%s' with '%s'\n", cmd, self->builtins[num].name);
 		if (!ft_strcmp(cmd, self->builtins[num].name))
 			return self->builtins[num].func(self);
+		num++;
 	}
 	printf("%s[ERROR]%s: %s: command not found\n", RED, END, cmd);
 	return 127;
@@ -115,6 +117,8 @@ void	shell_init(shell_t *self, multiboot_info_t **info)
 		{"half",   cmd_half,   "Halt the CPU"},
 		{"echo", cmd_echo, "Print arguments"},
 		{"memory", cmd_memory, "Inspect and test memory helpers"},
+		{"idt_probe", cmd_idt_probe, "Probe the IDT signal queue and handlers"},
+		{"idt_fault", cmd_idt_fault, "Intentionally trigger a real divide-by-zero fault"},
 		{"user_mode", cmd_user_mode, "Switch to user mode"},
 		{"show_mode", cmd_show_mode, "Show current privilege level"},
 		{"stack_kernel", cmd_info_stack_kernel, "Show stack kernel information"},

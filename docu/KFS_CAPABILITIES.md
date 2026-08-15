@@ -23,9 +23,9 @@ Each section will be filled in as the project evolves.
 
 ## KFS 3
 
-- Capability: TBD
-- Notes: TBD
-- Relevant files: TBD
+- Capability: Interrupt Descriptor Table, interrupt stubs, PIC remap, IRQ routing, and exception handling probes.
+- Notes: The interrupt subsystem now includes a kernel exception signal queue, registration and dispatch logic, and a safe runtime probe for observing handlers without corrupting the VM. The full discussion is recorded in [kfs_3.md](kfs_3.md).
+- Relevant files: [kfs_3.md](kfs_3.md), [src/kernel/interrupts/idt.c](../src/kernel/interrupts/idt.c), [src/kernel/interrupts/idt.h](../src/kernel/interrupts/idt.h), [src/kernel/assembly/idt.s](../src/kernel/assembly/idt.s), [src/kernel/assembly/isr.s](../src/kernel/assembly/isr.s), [src/shell/builtins/idt_probe.c](../src/shell/builtins/idt_probe.c)
 
 ## KFS 4
 
