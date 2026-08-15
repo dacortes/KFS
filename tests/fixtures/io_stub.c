@@ -38,28 +38,26 @@ void reset_builtin_stub_state(void)
 void halt_system(void)
 {
 	g_halt_system_calls++;
-	longjmp(g_halt_jmp, 1);
 }
 
 void reboot_system(void)
 {
 	g_reboot_system_calls++;
-	longjmp(g_reboot_jmp, 1);
 }
 
-void switch_to_user_mode(void (*function)(void), void *stack_top)
+void __attribute__((weak)) switch_to_user_mode(void (*function)(void), void *stack_top)
 {
 	g_switch_to_user_mode_calls++;
 	g_last_user_mode_function = function;
 	g_last_user_mode_stack_top = stack_top;
 }
 
-void return_to_kernel_mode(void)
+void __attribute__((weak)) return_to_kernel_mode(void)
 {
 	g_return_to_kernel_mode_calls++;
 }
 
-int get_current_privilege_level(void)
+int __attribute__((weak)) get_current_privilege_level(void)
 {
 	g_get_current_privilege_level_calls++;
 	return g_current_privilege_level_value;
@@ -120,7 +118,7 @@ void pic_send_eoi(unsigned char irq)
 /**
  * Stub for idt_init - not used in unit tests
  */
-void idt_init(void)
+void __attribute__((weak)) idt_init(void)
 {
 }
 
@@ -172,7 +170,7 @@ void pic_init(void)
 /**
  * Stub for idt_set_gate - not used in unit tests
  */
-void idt_set_gate(unsigned char num, unsigned int base,
+void __attribute__((weak)) idt_set_gate(unsigned char num, unsigned int base,
 		  unsigned short selector, unsigned char flags)
 {
 	(void)num;
@@ -182,10 +180,24 @@ void idt_set_gate(unsigned char num, unsigned int base,
 }
 
 /**
+ * Stub for idt_load - not used in unit tests because this is a ring-0 CPU op.
+ */
+void __attribute__((weak)) idt_load(unsigned int idt_ptr_addr)
+{
+	(void)idt_ptr_addr;
+}
+
+/**
  * Stub for irq1_handler - not used in unit tests
  */
-void irq1_handler(void)
+void __attribute__((weak)) irq1_handler(void)
 {
 }
+
+void __attribute__((weak)) syscall_handler(void)
+{
+}
+
+unsigned int __attribute__((weak)) kernel_return_esp;
 
 uint32_t endkernel = 0x100000; 

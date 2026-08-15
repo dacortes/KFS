@@ -38,9 +38,17 @@ Educational x86 (i686) 32-bit kernel. Boots via GRUB (Multiboot v1), runs in VGA
 | `ft_strncpy`, `ft_memset`, `ft_memchr`, `ft_strchr` | Pure C |
 | `ft_atoi`, `ft_isdigit` | Pure C |
 
+### Interrupts & Exceptions
+- IDT with 256 entries, full x86 gate setup, and runtime loading via `lidt`
+- ISR stubs for CPU exceptions and a syscall gate at `0x80`
+- Kernel signal registration and queue dispatch layer for exception handling
+- Safe shell probe: `idt_probe` shows queued signals and handler execution without triggering hardware faults
+- Real fault demo: `idt_fault` intentionally executes a divide-by-zero and halts the kernel afterward
+- Shell visibility for dispatch tracing so handlers can be observed in the running kernel console
+
 ### Build & Testing
 - Makefile: freestanding i686 ELF32, `grub-mkrescue` ISO, QEMU targets
-- 14 GoogleTest suites (225 tests), lcov coverage, cppcheck, checkpatch.pl
+- 18 GoogleTest suites, lcov coverage, cppcheck, checkpatch.pl
 - CI pipeline: style → static analysis → build → coverage (≥80%)
 
 ## Quick Start

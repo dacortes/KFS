@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define LOG_BUFFER_SIZE     65536 // 64KB para logs del sistema
 
 #include <stdint.h>
@@ -41,3 +45,7 @@ void system_log_init(system_log_t *log);
 
 void kprintk(uint32_t level, const char *fmt, ...);
 void kvprintk(uint32_t level, const char *fmt, va_list ap);
+
+#ifdef __cplusplus
+}
+#endif

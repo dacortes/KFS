@@ -146,17 +146,14 @@ void token_clear(token_t *self)
 
 static uint16_t execute(shell_t *self)
 {
-	printf("Entrando al ejecutor %d\n", self->num_tk);
-	if (!self->tokens || self->num_tk == 0)
-		return 1;
+	char *cmd = self->token[0].word;
+	size_t num = 0;
 
-	printf("%s\n", self->tokens[0].word);
-	char *cmd = self->tokens[0].word;
-	printf("esto peta\n");
-	for (size_t num = 0; num < NUM_COMMANDS; num++) {
-		printf("Comparing '%s' with '%s'\n", cmd, self->builtins[num].name);
+	while (self->builtins[num].name != NULL) {
+		//printf("Comparing '%s' with '%s'\n", cmd, self->builtins[num].name);
 		if (!ft_strcmp(cmd, self->builtins[num].name))
 			return self->builtins[num].func(self);
+		num++;
 	}
 	printf("%s[ERROR]%s: %s: command not found\n", RED, END, cmd);
 	return 127;
@@ -180,12 +177,14 @@ void shell_init(shell_t *self, multiboot_info_t **info)
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
 	static const builtin_t builtins[] = {
-		{"reboot",      cmd_reboot,         "Reboot the system"},
-		{"half",        cmd_half,           "Halt the CPU"},
-		{"echo",        cmd_echo,           "Print arguments"},
-		{"memory",      cmd_memory,         "Inspect and test memory helpers"},
-		{"user_mode",   cmd_user_mode,      "Switch to user mode"},
-		{"show_mode",   cmd_show_mode,      "Show current privilege level"},
+		{"reboot", cmd_reboot, "Reboot the system"},
+		{"half",   cmd_half,   "Halt the CPU"},
+		{"echo", cmd_echo, "Print arguments"},
+		{"memory", cmd_memory, "Inspect and test memory helpers"},
+		{"idt_probe", cmd_idt_probe, "Probe the IDT signal queue and handlers"},
+		{"idt_fault", cmd_idt_fault, "Intentionally trigger a real divide-by-zero fault"},
+		{"user_mode", cmd_user_mode, "Switch to user mode"},
+		{"show_mode", cmd_show_mode, "Show current privilege level"},
 		{"stack_kernel", cmd_info_stack_kernel, "Show stack kernel information"},
 		{NULL, NULL, NULL}
 	};
