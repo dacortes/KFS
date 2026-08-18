@@ -228,9 +228,9 @@ void pmm_init(multiboot_info_t *info)
 	// ============================================================
 	printf("\n=== PMM Initialized ===\n");
 	printf("Total pages:    %d\n", total_pages);
-	printf("Used pages:     %d (%.2f%%)\n", used_pages,
+	printf("Used pages:     %d (%f%%)\n", used_pages,
 		(float)used_pages / total_pages * 100);
-	printf("Free pages:     %d (%.2f%%)\n", total_pages - used_pages,
+	printf("Free pages:     %d (%f%%)\n", total_pages - used_pages,
 		(float)(total_pages - used_pages) / total_pages * 100);
 	printf("Free memory:    %d MB\n", ((total_pages - used_pages) * PAGE_SIZE) / (1024 * 1024));
 	printf("=======================\n\n");
