@@ -36,24 +36,29 @@
 void *ft_realloc(void *ptr, size_t old_size, size_t new_size)
 {
 	void *new_ptr;
+	size_t copy_size;
 
 	if (new_size == 0) {
 		if (ptr)
 			vfree(ptr);
 		return NULL;
 	}
+
 	if (!ptr)
 		return ft_calloc(1, new_size);
+
+	if (new_size <= old_size)
+		copy_size = new_size;
+	else
+		copy_size = old_size;
+
 	new_ptr = vmalloc(new_size);
 	if (!new_ptr)
 		return NULL;
-	if (old_size > 0) {
-		if (old_size < new_size)
-			ft_memcpy(new_ptr, ptr, old_size);
-		else
-			ft_memcpy(new_ptr, ptr, new_size);
-	}
-	ft_memset(new_ptr, 0, new_size);
+
+	if (copy_size > 0)
+		ft_memcpy(new_ptr, ptr, copy_size);
+
 	vfree(ptr);
 	return new_ptr;
 }

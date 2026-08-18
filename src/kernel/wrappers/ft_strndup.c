@@ -48,12 +48,11 @@ char	*ft_strndup(const char *src, size_t n)
 	if (!dst)
 		return NULL;
 
-	printf("src =%s   %x\n", src, src);
 	ft_memcpy(dst, src, len);
-
+	printf("size dst %u\n", sizeof(dst));
 	// for (uint32_t i = 0; i < len; i++)
 	// 	dst[i] = src[i];
 
-	printf("=======> destino *%s*  %x\n", dst, dst);
+	printf("=======> src = *%s* dst = *%s*  %x size = %u len = %u\n", src, dst, dst, n, len);
 	return dst;
 }
