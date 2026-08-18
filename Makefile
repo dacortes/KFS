@@ -127,6 +127,7 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/shell/builtins/idt_probe.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
 	$(SRC_DIR)/shell/shell.c \
+	$(SRC_DIR)/mm/memory_debug.c \
 	$(SRC_DIR)/mm/pmm.c \
 	$(SRC_DIR)/mm/paging.c \
 	$(SRC_DIR)/mm/memory.c
@@ -184,6 +185,7 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/system/system.c \
 	$(SRC_DIR)/kernel/system/system_log.c \
 	$(SRC_DIR)/kernel/system/stack_kernel/print_stack.c \
+	$(SRC_DIR)/mm/memory_debug.c \
 	$(SRC_DIR)/mm/memory.c
 
 KERNEL_LIB_SOURCES_ASM = $(SRC_DIR)/kernel/assembly/ft_strlen.s \
@@ -382,11 +384,12 @@ $(ISO): $(KERNEL_BIN) $(GRUBCFG)
 run: $(ISO) ## Launch the OS in QEMU (press Ctrl‑A then X to exit).
 	@printf "$(INFO) Starting QEMU with kernel ...\n"
 	@printf "$(INFO) Press Ctrl-A then X to exit QEMU\n"
+# 	@qemu-system-x86_64 -m 512M -cdrom $(ISO) -no-shutdown
 	@qemu-system-x86_64 -cdrom $(ISO) -no-shutdown
 
 debug: $(ISO) ## Start QEMU debugging.
 	@printf "$(INFO) Starting QEMU ...\n"
-	@qemu-system-x86_64 -cdrom $(ISO) -s -S
+	@qemu-system-x86_64 -m 512M -cdrom $(ISO) -s -S
 
 ################################################################################
 #                               TEST BUILD RULES                               #
