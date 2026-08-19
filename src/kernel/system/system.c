@@ -166,24 +166,17 @@ void main_loop(system_t *self, multiboot_info_t **info)
 
 			term->handle_keyboard_input(term, *ascii);
 			completed = term->line_ready;
-			char *tmp = vmalloc(1 * sizeof(char)); //10
-			char *line = readline("[42] "); //20
-			// printf("tmp = %x line = %x\n", tmp, line);
 
-			if (!line)
-				return;
-			
-			// if (completed) {
-			// 	if (shell.create_tokens(&shell, line)) {
-			// 		// shell.execute(&shell);
-			// 		// shell.clear(&shell);
-			// 	}
-			// 	term->write_prefix(term);
-			// 	term->set_cursor_color(term, BLACK_ON_WHITE);
-			// }
-			// printf("*%s* %x", line);
-			vfree(line);
-			vfree(tmp);
+			if (completed) {
+				char *line = readline("[42] ");
+				if (shell.create_tokens(&shell, line))
+					shell.execute(&shell);
+					// shell.clear(&shell);
+				shell.clear(&shell);
+				term->write_prefix(term);
+				term->set_cursor_color(term, BLACK_ON_WHITE);
+				free(line);
+			}
 		}
 		self->keyboard.input = 0;
 		__asm__ volatile("hlt");

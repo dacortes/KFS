@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include <helper.h>
+#include <print.h>
 
 /**
 * @brief Resize a previously allocated memory block.
@@ -37,6 +38,7 @@ void *ft_realloc(void *ptr, size_t old_size, size_t new_size)
 {
 	void *new_ptr;
 	size_t copy_size;
+	size_t actual_size;
 
 	if (new_size == 0) {
 		if (ptr)
@@ -44,17 +46,32 @@ void *ft_realloc(void *ptr, size_t old_size, size_t new_size)
 		return NULL;
 	}
 
-	if (!ptr)
+	if (!ptr) {
+		if (old_size != 0) {
+			printf("WARNING: ft_realloc called with ptr=NULL but old_size=%u (ignored)\n",
+				(uint32_t)old_size);
+		}
 		return ft_calloc(1, new_size);
+	}
 
-	if (new_size <= old_size)
-		copy_size = new_size;
+	/* Get actual size from allocator instead of trusting old_size */
+	actual_size = vsize(ptr);
+	if (actual_size == 0) {
+		printf("ERROR: ft_realloc on invalid pointer 0x%x\n", (uint32_t)ptr);
+		return NULL;
+	}
+
+	/* Use actual size for copying (more robust than old_size parameter) */
+	if (actual_size < new_size)
+		copy_size = actual_size;
 	else
-		copy_size = old_size;
+		copy_size = new_size;
 
 	new_ptr = vmalloc(new_size);
-	if (!new_ptr)
+	if (!new_ptr) {
+		printf("ERROR: ft_realloc vmalloc(%u) failed\n", (uint32_t)new_size);
 		return NULL;
+	}
 
 	if (copy_size > 0)
 		ft_memcpy(new_ptr, ptr, copy_size);

@@ -266,7 +266,8 @@ uint32_t pmm_alloc_frame(void)
 	first_free_hint = page_num + 1;
 
 	// Return physical address
-	uint32_t phys_addr = memory_base + (page_num * PAGE_SIZE);
+	// uint32_t phys_addr = memory_base + (page_num * PAGE_SIZE);
+	uint32_t phys_addr = page_num * PAGE_SIZE;
 	return phys_addr;
 }
 
@@ -296,7 +297,8 @@ uint32_t pmm_alloc_frame_range(size_t count)
 	}
 
 	first_free_hint = (uint32_t)page_num + (uint32_t)count;
-	return memory_base + ((uint32_t)page_num * PAGE_SIZE);
+	// return memory_base + ((uint32_t)page_num * PAGE_SIZE);
+	return ((uint32_t)page_num * PAGE_SIZE);
 }
 
 /**
@@ -312,12 +314,13 @@ void pmm_free_frame(uint32_t phys_addr)
 	}
 
 	// Calculate page number
-	if (phys_addr < memory_base) {
-		printf("ERROR: Address below memory_base: 0x%x\n", phys_addr);
-		return;
-	}
+	// if (phys_addr < memory_base) {
+	// 	printf("ERROR: Address below memory_base: 0x%x\n", phys_addr);
+	// 	return;
+	// }
 
-	uint32_t page_num = (phys_addr - memory_base) / PAGE_SIZE;
+	// uint32_t page_num = (phys_addr - memory_base) / PAGE_SIZE;
+	uint32_t page_num = phys_addr / PAGE_SIZE;
 
 	if (page_num >= total_pages) {
 		printf("ERROR: Page out of range: %d (max: %d)\n", page_num, total_pages);

@@ -20,14 +20,17 @@ char *readline(const char *prompt)
 	terminal_t *term = &sys.terminals[active];
 	unsigned int	len = ft_strlen(term->line);
 
-	set_prompt(prompt);
+	(void)prompt;
+	// set_prompt(prompt);
+	printf("term line *%s*\n", term->line);
 	if (!term->line_ready)
-		return (char *)ft_calloc(1, sizeof(char));
+		return NULL;
 
 	char *line = ft_strndup(term->line, len);
 
 	if (!line)
 		return NULL;
+
 	term->line_ready = 0;
 	term->clear_line(term);
 	return line;

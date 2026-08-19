@@ -49,10 +49,5 @@ char	*ft_strndup(const char *src, size_t n)
 		return NULL;
 
 	ft_memcpy(dst, src, len);
-	printf("size dst %u\n", sizeof(dst));
-	// for (uint32_t i = 0; i < len; i++)
-	// 	dst[i] = src[i];
-
-	printf("=======> src = *%s* dst = *%s*  %x size = %u len = %u\n", src, dst, dst, n, len);
 	return dst;
 }
