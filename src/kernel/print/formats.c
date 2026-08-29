@@ -77,6 +77,51 @@ int	ptr_format(unsigned long n, int *count)
 	return *count;
 }
 
+/**
+ * @brief Format a floating-point number with 2 decimal places.
+ *
+ * Converts a float to its integer and fractional parts and prints
+ * them separated by a decimal point. Precision is fixed at 2 decimals.
+ *
+ * @param f Floating-point number to format
+ * @param count Pointer to running output count; updated on success
+ * @return New count value, or -1 on error
+ */
+int	float_format(double f, int *count)
+{
+	int	integer_part;
+	int	decimal_part;
+
+	/* Handle negative numbers */
+	if (f < 0) {
+		if (char_format('-', count) == -1)
+			return -1;
+		f = -f;
+	}
+
+	/* Separate integer and fractional parts */
+	integer_part = (int)f;
+	decimal_part = (int)((f - integer_part) * 100);
+
+	/* Print integer part */
+	if (base_number_format(integer_part, count, 0, 10) == -1)
+		return -1;
+
+	/* Print decimal point */
+	if (char_format('.', count) == -1)
+		return -1;
+
+	/* Print decimal part with leading zero if needed (e.g., 0.05 for 5) */
+	if (decimal_part < 10) {
+		if (char_format('0', count) == -1)
+			return -1;
+	}
+	if (base_number_format(decimal_part, count, 0, 10) == -1)
+		return -1;
+
+	return *count;
+}
+
 int	formats(va_list *args, char const type, int *count)
 {
 	/**
@@ -101,5 +146,7 @@ int	formats(va_list *args, char const type, int *count)
 		*count = base_number_format(va_arg(*args, unsigned int), count, 2, 16);
 	if (type == 'p')
 		*count = ptr_format(va_arg(*args, unsigned long), count);
+	if (type == 'f')
+		*count = float_format(va_arg(*args, double), count);
 	return *count;
 }

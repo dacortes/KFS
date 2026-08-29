@@ -228,9 +228,9 @@ void pmm_init(multiboot_info_t *info)
 	// ============================================================
 	printf("\n=== PMM Initialized ===\n");
 	printf("Total pages:    %d\n", total_pages);
-	printf("Used pages:     %d (%.2f%%)\n", used_pages,
+	printf("Used pages:     %d (%f%%)\n", used_pages,
 		(float)used_pages / total_pages * 100);
-	printf("Free pages:     %d (%.2f%%)\n", total_pages - used_pages,
+	printf("Free pages:     %d (%f%%)\n", total_pages - used_pages,
 		(float)(total_pages - used_pages) / total_pages * 100);
 	printf("Free memory:    %d MB\n", ((total_pages - used_pages) * PAGE_SIZE) / (1024 * 1024));
 	printf("=======================\n\n");
@@ -266,7 +266,8 @@ uint32_t pmm_alloc_frame(void)
 	first_free_hint = page_num + 1;
 
 	// Return physical address
-	uint32_t phys_addr = memory_base + (page_num * PAGE_SIZE);
+	// uint32_t phys_addr = memory_base + (page_num * PAGE_SIZE);
+	uint32_t phys_addr = page_num * PAGE_SIZE;
 	return phys_addr;
 }
 
@@ -296,7 +297,8 @@ uint32_t pmm_alloc_frame_range(size_t count)
 	}
 
 	first_free_hint = (uint32_t)page_num + (uint32_t)count;
-	return memory_base + ((uint32_t)page_num * PAGE_SIZE);
+	// return memory_base + ((uint32_t)page_num * PAGE_SIZE);
+	return ((uint32_t)page_num * PAGE_SIZE);
 }
 
 /**
@@ -312,12 +314,13 @@ void pmm_free_frame(uint32_t phys_addr)
 	}
 
 	// Calculate page number
-	if (phys_addr < memory_base) {
-		printf("ERROR: Address below memory_base: 0x%x\n", phys_addr);
-		return;
-	}
+	// if (phys_addr < memory_base) {
+	//	printf("ERROR: Address below memory_base: 0x%x\n", phys_addr);
+	//	return;
+	//}
 
-	uint32_t page_num = (phys_addr - memory_base) / PAGE_SIZE;
+	// uint32_t page_num = (phys_addr - memory_base) / PAGE_SIZE;
+	uint32_t page_num = phys_addr / PAGE_SIZE;
 
 	if (page_num >= total_pages) {
 		printf("ERROR: Page out of range: %d (max: %d)\n", page_num, total_pages);

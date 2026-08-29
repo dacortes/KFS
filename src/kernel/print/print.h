@@ -89,8 +89,8 @@ int	formats(va_list *args, char const type, int *count);
  * @brief Simple printf-like function for kernel output.
  *
  * Supported format specifiers are a reduced set: `%`, `c`, `s`, `d`, `i`,
- * `u`, `x`, `X`, `p`. The implementation is intentionally small and
- * synchronous.
+ * `u`, `x`, `X`, `p`, `f`. The implementation is intentionally small and
+ * synchronous. Float formatting uses 2 decimal places of precision.
  *
  * @param str Format string.
  * @return Number of characters printed, or -1 on error.

@@ -115,27 +115,29 @@ void main_loop(system_t *self, multiboot_info_t **info)
 	if (!self || !info || !*info)
 		return;
 
-	while (1) {
-		unsigned char *ascii = &self->keyboard.input;
-		uint32_t active = self->active_terminal;
-		terminal_t *term = &sys.terminals[active];
-		shell_t	shell;
+	unsigned char *ascii = &self->keyboard.input;
+	uint32_t active = self->active_terminal;
+	terminal_t *term = &sys.terminals[active];
+	shell_t	shell = {0};
 
-		shell_init(&shell, info);
+	shell_init(&shell, info);
+	while (1) {
 		if (*ascii) {
-			char	line[256];
 			int	completed;
 
 			term->handle_keyboard_input(term, *ascii);
 			completed = term->line_ready;
-			readline(line);
+
 			if (completed) {
-				if (shell.create_tokens(&shell, line)) {
+				char *line = readline("[42] ");
+
+				if (shell.create_tokens(&shell, line))
 					shell.execute(&shell);
-					shell.clear(&shell);
-				}
+					// shell.clear(&shell);
+				shell.clear(&shell);
 				term->write_prefix(term);
 				term->set_cursor_color(term, BLACK_ON_WHITE);
+				ft_free(line);
 			}
 		}
 		self->keyboard.input = 0;

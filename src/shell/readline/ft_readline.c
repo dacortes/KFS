@@ -11,18 +11,26 @@ void set_prompt(const char *prompt)
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
 
-	ft_strlcpy(term->prefix, prompt, ft_strlen(prompt) + 1);
+	ft_strlcpy(term->prefix, prompt, sizeof(term->prefix));
+	term->prefix_len = ft_strlen(term->prefix);
 }
 
-char *readline(char *line)
+char *readline(const char *prompt)
 {
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
 	unsigned int	len = ft_strlen(term->line);
 
+	(void)prompt;
+	set_prompt(prompt);
 	if (!term->line_ready)
-		return ft_memset(line, 0, sizeof(line));
-	ft_strlcpy(line, term->line, len + 1);
+		return NULL;
+
+	char *line = ft_strndup(term->line, len);
+
+	if (!line)
+		return NULL;
+
 	term->line_ready = 0;
 	term->clear_line(term);
 	return line;

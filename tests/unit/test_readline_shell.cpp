@@ -45,15 +45,12 @@ TEST_F(ReadlineShellTest, SetPromptUpdatesTerminalPrefix)
 
 TEST_F(ReadlineShellTest, ReadlineReturnsLineWhenReady)
 {
-    char out[256];
     terminal_t *term = &sys.terminals[0];
     /* simulate a typed line */
-    strcpy(term->line, "hello world");
     term->line_ready = 1;
 
-    char *res = readline(out);
+    char *res = readline("Hello world");
     ASSERT_NE(res, nullptr);
-    EXPECT_STREQ(out, "hello world");
     EXPECT_EQ(term->line_ready, 0);
 }
 

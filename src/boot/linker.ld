@@ -1,64 +1,55 @@
-/* linker.ld */
 ENTRY(_start)
 
 SECTIONS
 {
-
-    /* Init section GDT*/
-    . = 0x800;
-    
-    /* section GDT */
-    .gdt : {
+	/* Init section GDT */
+	. = 0x800;
+	.gdt : {
 		gdt_phys_start = .;
 		*(.gdt)
 		. = ALIGN(8);
 		gdt_phys_end = .;
-    }
-    /* Kernel loaded at 1MB */
-    . = 1M;
+	}
 
-    /* Multiboot header MUST be early */
-    .multiboot : ALIGN(4)
-    {
-        *(.multiboot)
-    }
+	/* Kernel loaded at 1MB */
+	. = 1M;
 
-    .text : ALIGN(4K)
-    {
+	.multiboot : ALIGN(4) {
+		*(.multiboot)
+	}
+
+	.text : ALIGN(4K) {
 		text_start = .;
-        *(.text*)
-    }
+		*(.text*)
+	}
 
-    .rodata : ALIGN(4K)
-    {
+	.rodata : ALIGN(4K) {
 		rodata_start = .;
-        *(.rodata*)
-    }
+		*(.rodata*)
+	}
 
-    .data : ALIGN(4K)
-    {
+	.data : ALIGN(4K) {
 		data_start = .;
-        *(.data*)
-    }
+		*(.data*)
+	}
 
-    .bss : ALIGN(4K)
-    {
+	.bss : ALIGN(4K) {
 		bss_start = .;
-        *(COMMON)
-        *(.bss*)
+		*(COMMON)
+		*(.bss*)
 		bss_end = .;
-    }
+	}
+
+	/* ========== Stack (16 KB) ========== */
+	. = ALIGN(16);
+	stack_bottom = .;
+	. += 16K;
+	stack_top = .;
+
 
 	endkernel = .;
-
-    /* Stack (16 KB) */
-    . = ALIGN(16);
-    stack_bottom = .;
-    . += 16K;
-    stack_top = .;
+	kernel_end = endkernel;
 
 	kernel_start = 1M;
-    kernel_end = endkernel;
-    kernel_size = endkernel - kernel_start;
+	kernel_size = endkernel - kernel_start;
 }
-

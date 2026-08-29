@@ -20,5 +20,13 @@
  */
 unsigned int ft_strlen(const char *s)
 {
-	return ft_strlen_asm(s);
+	// return ft_strlen_asm(s);
+	if (!s)
+		return 0;
+
+	unsigned int len = 0;
+
+	while (s[len])
+		len++;
+	return len;
 }

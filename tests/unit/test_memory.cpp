@@ -26,6 +26,7 @@ size_t vsize(const void *ptr);
 void *vbrk(size_t size);
 int memory_free_as(void *ptr, memory_space_t requester);
 memory_space_t memory_owner(const void *ptr);
+void *ft_realloc(void *ptr, size_t old_size, size_t new_size);
 }
 #undef write
 
@@ -88,15 +89,17 @@ static shell_t make_memory_shell(const char *arg1, const char *arg2,
 {
 	shell_t shell = {};
 
-	strncpy(shell.token[0].word, "memory", MAX_WORD - 1);
+	shell.tokens = (token_t *)malloc(sizeof(token_t) * 5);
+
+	shell.tokens[0].word = ft_strndup("memory", ft_strlen("memory") + 1);
 	if (arg1)
-		strncpy(shell.token[1].word, arg1, MAX_WORD - 1);
+		shell.tokens[1].word = ft_strndup(arg1, ft_strlen(arg1) + 1);
 	if (arg2)
-		strncpy(shell.token[2].word, arg2, MAX_WORD - 1);
+		shell.tokens[2].word = ft_strndup(arg2, ft_strlen(arg2) + 1);
 	if (arg3)
-		strncpy(shell.token[3].word, arg3, MAX_WORD - 1);
+		shell.tokens[3].word = ft_strndup(arg3, ft_strlen(arg3) + 1);
 	if (arg4)
-		strncpy(shell.token[4].word, arg4, MAX_WORD - 1);
+		shell.tokens[4].word = ft_strndup(arg4, ft_strlen(arg4) + 1);
 	shell.num_tk = arg4 ? 5 : (arg3 ? 4 : (arg2 ? 3 : 2));
 	return shell;
 }
@@ -125,6 +128,121 @@ TEST_F(MemoryTest, VmallocVfreeAndVsizeWork)
 	EXPECT_EQ(g_free_calls, 1u);
 	EXPECT_EQ(g_last_free_count, 1u);
 	EXPECT_EQ(vsize(ptr), 0u);
+}
+
+TEST_F(MemoryTest, ReallocNullPointerUsesCallocSemantics)
+{
+	unsigned char *bytes;
+	void *ptr;
+
+	for (size_t i = 0; i < 24; ++i)
+		g_pool[sizeof(memory_header_t) + i] = 0xAA;
+
+	ptr = ft_realloc(NULL, 16, 24);
+	ASSERT_NE(ptr, nullptr);
+	EXPECT_EQ(vsize(ptr), 24u);
+	EXPECT_EQ(memory_owner(ptr), MEMORY_SPACE_USER);
+
+	bytes = static_cast<unsigned char *>(ptr);
+	for (size_t i = 0; i < 24; ++i)
+		EXPECT_EQ(bytes[i], 0u);
+
+	vfree(ptr);
+}
+
+TEST_F(MemoryTest, ReallocCopiesDataAndIgnoresOldSizeMismatch)
+{
+	unsigned char *bytes;
+	unsigned char *new_bytes;
+	void *ptr;
+	void *new_ptr;
+
+	ptr = vmalloc(8);
+	ASSERT_NE(ptr, nullptr);
+
+	bytes = static_cast<unsigned char *>(ptr);
+	for (size_t i = 0; i < 8; ++i)
+		bytes[i] = static_cast<unsigned char>(0x10 + i);
+
+	new_ptr = ft_realloc(ptr, 1, 16);
+	ASSERT_NE(new_ptr, nullptr);
+	EXPECT_EQ(vsize(ptr), 0u);
+	EXPECT_EQ(g_free_calls, 1u);
+	EXPECT_EQ(memory_owner(ptr), (memory_space_t)0);
+	EXPECT_EQ(vsize(new_ptr), 16u);
+
+	new_bytes = static_cast<unsigned char *>(new_ptr);
+	for (size_t i = 0; i < 8; ++i)
+		EXPECT_EQ(new_bytes[i], static_cast<unsigned char>(0x10 + i));
+
+	vfree(new_ptr);
+}
+
+TEST_F(MemoryTest, ReallocShrinksBlockAndFreesOriginal)
+{
+	unsigned char *bytes;
+	unsigned char *new_bytes;
+	void *ptr;
+	void *new_ptr;
+
+	ptr = vmalloc(12);
+	ASSERT_NE(ptr, nullptr);
+
+	bytes = static_cast<unsigned char *>(ptr);
+	for (size_t i = 0; i < 12; ++i)
+		bytes[i] = static_cast<unsigned char>(0x40 + i);
+
+	new_ptr = ft_realloc(ptr, 12, 5);
+	ASSERT_NE(new_ptr, nullptr);
+	EXPECT_EQ(vsize(ptr), 0u);
+	EXPECT_EQ(g_free_calls, 1u);
+	EXPECT_EQ(vsize(new_ptr), 5u);
+
+	new_bytes = static_cast<unsigned char *>(new_ptr);
+	for (size_t i = 0; i < 5; ++i)
+		EXPECT_EQ(new_bytes[i], static_cast<unsigned char>(0x40 + i));
+
+	vfree(new_ptr);
+}
+
+TEST_F(MemoryTest, ReallocZeroSizeFreesOriginal)
+{
+	void *ptr = vmalloc(32);
+
+	ASSERT_NE(ptr, nullptr);
+	EXPECT_EQ(ft_realloc(ptr, 32, 0), nullptr);
+	EXPECT_EQ(vsize(ptr), 0u);
+	EXPECT_EQ(g_free_calls, 1u);
+}
+
+TEST_F(MemoryTest, ReallocRejectsInvalidPointerWithoutFreeing)
+{
+	void *ptr = kmalloc(32);
+
+	ASSERT_NE(ptr, nullptr);
+	EXPECT_EQ(ft_realloc(ptr, 32, 64), nullptr);
+	EXPECT_EQ(ksize(ptr), 32u);
+	EXPECT_EQ(g_free_calls, 0u);
+	kfree(ptr);
+}
+
+TEST_F(MemoryTest, ReallocReturnsNullWhenVmAllocFails)
+{
+	void *blocker;
+	void *ptr;
+
+	ptr = vmalloc(1);
+	ASSERT_NE(ptr, nullptr);
+
+	blocker = vmalloc(31 * PAGE_SIZE - sizeof(memory_header_t));
+	ASSERT_NE(blocker, nullptr);
+
+	EXPECT_EQ(ft_realloc(ptr, 1, 64), nullptr);
+	EXPECT_EQ(vsize(ptr), 1u);
+	EXPECT_EQ(g_free_calls, 0u);
+
+	vfree(blocker);
+	vfree(ptr);
 }
 
 TEST_F(MemoryTest, DoubleFreeIsRejectedWithoutFreeingAgain)
@@ -190,7 +308,7 @@ TEST_F(MemoryTest, WrongSpaceFreeIsRejected)
 TEST_F(MemoryTest, MemoryBuiltinAllocFreeAndTestCommands)
 {
 	shell_t shell = make_memory_shell("k", "alloc", "64");
-
+	
 	EXPECT_EQ(cmd_memory(&shell), 0);
 	EXPECT_NE(g_next_page, 0u);
 

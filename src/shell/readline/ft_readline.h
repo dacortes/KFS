@@ -17,7 +17,9 @@ extern "C" {
 #endif
 
 void	set_prompt(const char *prompt);
-char	*readline(char *line);
+// char	*readline(char *line);
+
+char	*readline(const char *prompt);
 
 #ifdef __cplusplus
 }
