@@ -66,11 +66,9 @@ static bool add_token(shell_t *self, const char *word, uint32_t len)
 	if (!self || !word || len == 0)
 		return false;
 
-	/* Check if we need to expand capacity */
 	if (self->num_tk >= self->capacity) {
 		new_cap = (self->capacity == 0) ? 4 : self->capacity * 2;
 
-		/* Prevent overflow: don't expand beyond reasonable limit */
 		if (new_cap > 1024) {
 			printf("ERROR: token capacity would exceed 1024 (current: %u)\n",
 				new_cap);
@@ -94,27 +92,22 @@ static bool add_token(shell_t *self, const char *word, uint32_t len)
 		self->capacity = new_cap;
 	}
 
-	/* Validate that we have space and that tokens array is valid */
 	if (!self->tokens || self->num_tk >= self->capacity) {
 		printf("ERROR: token array invalid after realloc\n");
 		return false;
 	}
 
-	/* Get pointer to next token slot */
 	tk = &self->tokens[self->num_tk];
 
-	/* Zero-initialize the token structure */
 	tk->word = NULL;
 	tk->type = 0;
 
-	/* Duplicate the word string */
 	tk->word = ft_strndup(word, len);
 	if (!tk->word) {
 		printf("ERROR: ft_strndup failed for token word (len=%u)\n", len);
 		return false;
 	}
 
-	/* Increment token count */
 	self->num_tk++;
 	return true;
 }
@@ -142,7 +135,6 @@ uint16_t create_tokens(shell_t *self, char *line)
 			return 0;
 		}
 
-		/* Debug: warn if we're at a critical expansion point */
 		if (self->num_tk == 8 || self->num_tk == 16) {
 			printf("[DEBUG] Reached %u tokens (capacity: %u)\n",
 				self->num_tk, self->capacity);
