@@ -27,7 +27,7 @@
  *            ptr is a valid allocated address or NULL.
  */
 
-bool free(void *ptr)
+bool ft_free(void *ptr)
 {
 	if (!ptr)
 		return false;

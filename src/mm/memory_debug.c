@@ -9,14 +9,15 @@
 #include <pmm.h>
 #include <print.h>
 
-static uint32_t alloc_count = 0;
-static uint32_t free_count = 0;
-static uint32_t total_allocated = 0;
-static uint32_t total_freed = 0;
+static uint32_t alloc_count;
+static uint32_t free_count;
+static uint32_t total_allocated;
+static uint32_t total_freed;
 
 void *debug_vmalloc(size_t size, const char *caller)
 {
 	void *ptr = vmalloc(size);
+
 	if (ptr) {
 		alloc_count++;
 		total_allocated += size;
@@ -32,7 +33,7 @@ void *debug_vmalloc(size_t size, const char *caller)
 void debug_vfree(void *ptr, const char *caller)
 {
 	size_t size;
-	
+
 	if (!ptr) {
 		printf("[VFREE WARNING] %s: attempted to free NULL\n", caller);
 		return;
@@ -49,6 +50,7 @@ void debug_vfree(void *ptr, const char *caller)
 void memory_debug_print_stats(void)
 {
 	uint32_t net = total_allocated - total_freed;
+
 	printf("\n=== Memory Debug Stats ===\n");
 	printf("Allocations:   %u\n", alloc_count);
 	printf("Frees:         %u\n", free_count);

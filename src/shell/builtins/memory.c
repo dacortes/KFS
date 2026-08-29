@@ -198,7 +198,7 @@ int cmd_memory(shell_t *self)
 			return handle_alloc(self, kernel_slots, MEMORY_SLOTS, 0);
 		if (!ft_strcmp(self->tokens[2].word, "free"))
 			return handle_free(self, kernel_slots, MEMORY_SLOTS,
-				MEMORY_SPACE_KERNEL, MEMORY_SPACE_KERNEL, 3);
+			MEMORY_SPACE_KERNEL, MEMORY_SPACE_KERNEL, 3);
 		if (!ft_strcmp(self->tokens[2].word, "freeas") && self->num_tk >= 5) {
 			memory_space_t requester = parse_space(self->tokens[3].word);
 

@@ -315,9 +315,9 @@ void pmm_free_frame(uint32_t phys_addr)
 
 	// Calculate page number
 	// if (phys_addr < memory_base) {
-	// 	printf("ERROR: Address below memory_base: 0x%x\n", phys_addr);
-	// 	return;
-	// }
+	//	printf("ERROR: Address below memory_base: 0x%x\n", phys_addr);
+	//	return;
+	//}
 
 	// uint32_t page_num = (phys_addr - memory_base) / PAGE_SIZE;
 	uint32_t page_num = phys_addr / PAGE_SIZE;

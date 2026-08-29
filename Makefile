@@ -127,7 +127,6 @@ KERNEL_SOURCES_C = $(SRC_DIR)/kernel/main.c \
 	$(SRC_DIR)/shell/builtins/idt_probe.c \
 	$(SRC_DIR)/shell/builtins/mode_switch.c \
 	$(SRC_DIR)/shell/shell.c \
-	$(SRC_DIR)/shell/shell_debug.c \
 	$(SRC_DIR)/mm/memory_debug.c \
 	$(SRC_DIR)/mm/pmm.c \
 	$(SRC_DIR)/mm/paging.c \
@@ -175,7 +174,6 @@ KERNEL_LIB_SOURCES_C = $(SRC_DIR)/kernel/display/display.c \
 	$(SRC_DIR)/kernel/wrappers/free.c \
 	$(SRC_DIR)/kernel/wrappers/ft_realloc.c \
 	$(SRC_DIR)/shell/shell.c \
-	$(SRC_DIR)/shell/shell_debug.c \
 	$(SRC_DIR)/shell/readline/ft_readline.c \
 	$(SRC_DIR)/shell/builtins/echo.c \
 	$(SRC_DIR)/shell/builtins/reboot.c \
@@ -213,7 +211,8 @@ TEST_SOURCES = $(TEST_DIR)/unit/test_display.cpp \
 	$(TEST_DIR)/unit/test_memset.cpp \
 	$(TEST_DIR)/unit/test_strchr.cpp \
 	$(TEST_DIR)/unit/test_printf.cpp \
-	$(TEST_DIR)/unit/test_readline_shell.cpp
+	$(TEST_DIR)/unit/test_readline_shell.cpp \
+
 
 # Object files for kernel build
 KERNEL_OBJECTS_AS = $(patsubst $(SRC_DIR)/%.s,$(KERNEL_OBJ_DIR)/%.o,$(KERNEL_SOURCES_AS))

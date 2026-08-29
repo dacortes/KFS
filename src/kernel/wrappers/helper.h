@@ -256,7 +256,7 @@ char *ft_strcpy_asm(char *dst, const char *src);
  * Full documentation is in the implementation file.
  * @file free.c
  */
-bool free(void *ptr);
+bool ft_free(void *ptr);
 
 /**
  * ft_realloc - Resize an allocated memory block.

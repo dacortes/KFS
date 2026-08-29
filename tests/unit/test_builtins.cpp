@@ -9,6 +9,9 @@
 
 #include <system_log.h>
 
+#define ft_free(ptr) kfree(ptr)
+
+
 #define write kfs_write
 extern "C" {
 #include <builtins.h>
@@ -47,29 +50,51 @@ protected:
 	}
 };
 
-static shell_t make_shell_with_words(const char *first,
+static shell_t make_shell_with_words(const char* cmd, const char *first,
 					     const char *second)
 {
 	shell_t shell = {};
 
+	shell.tokens = (token_t *)malloc(sizeof(token_t) * 3);
+
+	if (!shell.tokens) {
+		// Handle allocation failure
+		return shell;
+	}
+
+	shell.tokens[0].word = strndup(cmd, ft_strlen(cmd) + 1);
+	if (!shell.tokens[0].word) {
+		// Handle allocation failure
+		return shell;
+	}
+
 	shell.num_tk = second ? 3 : 2;
-	strncpy(shell.token[1].word, first, MAX_WORD - 1);
-	if (second)
-		strncpy(shell.token[2].word, second, MAX_WORD - 1);
+	shell.tokens[1].word = strndup(first, ft_strlen(first) + 1);
+	if (!shell.tokens[1].word) {
+		// Handle allocation failure
+		return shell;
+	}
+	if (second) {
+		shell.tokens[2].word = strndup(second, ft_strlen(second) + 1);
+		if (!shell.tokens[2].word) {
+			// Handle allocation failure
+			return shell;
+		}
+	}
 
 	return shell;
 }
 
 TEST_F(BuiltinTest, EchoPrintsSingleArgument)
 {
-	shell_t shell = make_shell_with_words("hello", NULL);
+	shell_t shell = make_shell_with_words("echo", "hello", NULL);
 
 	EXPECT_EQ(cmd_echo(&shell), 0);
 }
 
 TEST_F(BuiltinTest, EchoPrintsMultipleArguments)
 {
-	shell_t shell = make_shell_with_words("hello", "world");
+	shell_t shell = make_shell_with_words("echo", "hello", "world");
 
 	EXPECT_EQ(cmd_echo(&shell), 0);
 }

@@ -109,45 +109,6 @@ void create_terminal(void)
  * @param self Pointer to the kernel `system_t` instance. Function
  *             returns immediately if `self` is NULL.
  */
-// void main_loop(system_t *self, multiboot_info_t **info)
-// {
-
-// 	if (!self || !info || !*info)
-// 		return;
-
-// 	while (1) {
-// 		unsigned char *ascii = &self->keyboard.input;
-// 		uint32_t active = self->active_terminal;
-// 		terminal_t *term = &sys.terminals[active];
-// 		shell_t	shell;
-
-// 		shell_init(&shell, info);
-// 		if (*ascii) {
-// 			int	completed;
-
-// 			term->handle_keyboard_input(term, *ascii);
-// 			completed = term->line_ready;
-// 			char *line = readline("[42] ");
-
-// 			if (!line)
-// 				return;
-
-// 			if (completed) {
-// 				if (shell.create_tokens(&shell, line)) {
-// 					shell.execute(&shell);
-// 					shell.clear(&shell);
-// 				}
-// 				term->write_prefix(term);
-// 				term->set_cursor_color(term, BLACK_ON_WHITE);
-// 			}
-// 			free(line);
-// 		}
-// 		self->keyboard.input = 0;
-// 		__asm__ volatile("hlt");
-// 	}
-// }
-
-
 void main_loop(system_t *self, multiboot_info_t **info)
 {
 
@@ -169,13 +130,14 @@ void main_loop(system_t *self, multiboot_info_t **info)
 
 			if (completed) {
 				char *line = readline("[42] ");
+
 				if (shell.create_tokens(&shell, line))
 					shell.execute(&shell);
 					// shell.clear(&shell);
 				shell.clear(&shell);
 				term->write_prefix(term);
 				term->set_cursor_color(term, BLACK_ON_WHITE);
-				free(line);
+				ft_free(line);
 			}
 		}
 		self->keyboard.input = 0;

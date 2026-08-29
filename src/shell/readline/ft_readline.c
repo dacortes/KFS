@@ -10,6 +10,7 @@ void set_prompt(const char *prompt)
 	}
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
+
 	ft_strlcpy(term->prefix, prompt, sizeof(term->prefix));
 	term->prefix_len = ft_strlen(term->prefix);
 }
