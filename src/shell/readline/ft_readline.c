@@ -21,8 +21,7 @@ char *readline(const char *prompt)
 	unsigned int	len = ft_strlen(term->line);
 
 	(void)prompt;
-	// set_prompt(prompt);
-	printf("term line *%s*\n", term->line);
+	set_prompt(prompt);
 	if (!term->line_ready)
 		return NULL;
 

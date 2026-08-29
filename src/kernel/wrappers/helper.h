@@ -13,6 +13,7 @@
 
 #include <../inc/stdint/stdint.h>
 #include <memory.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
