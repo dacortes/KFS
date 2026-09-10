@@ -34,13 +34,17 @@
  *              instead in such cases).
  */
 
+ #include <print.h>
+
 void		*ft_calloc(size_t count, size_t size)
 {
 	size_t	asig = size * count;
 	void	*res = vmalloc(asig);
 
-	if (!res)
-		return NULL;
+    if (!res) {
+        printf("[T] ft_calloc: vmalloc(%u) FAILED\n", (unsigned)asig);
+        return NULL;
+    }
 	ft_memset(res, 0, asig);
 	return res;
 }

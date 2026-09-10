@@ -7,6 +7,7 @@
 
 #include <kernel/terminal/terminal.h>
 #include <kernel/keyboard/keyboard.h>
+#include <print.h>
 
 /**
  * clear_buffer - Zero out a buffer
@@ -430,6 +431,8 @@ static void handle_backspace(terminal_t *self)
  */
 static void handle_newline(terminal_t *self)
 {
+	// printf("[T] newline: line_ready was %d, line='%s'\n",
+    //        self->line_ready, self->line);
 	self->save_history(self, self->line);
 	self->write_char(self, '\n');
 	self->line_pos = 0;
@@ -570,10 +573,14 @@ static void move_cursor(terminal_t *self, int direction)
  * Outputs the terminal prefix string at the current cursor
  * position using write_string.
  */
+
 static void write_prefix(terminal_t *self)
 {
 	if (!self)
 		return;
+	// printf("[TRACE] wp prefix='%s' EIP=0x%x\n",
+	// 		self->prefix,
+	// 		(unsigned int)__builtin_return_address(0));
 	self->write_string(self, self->prefix);
 }
 

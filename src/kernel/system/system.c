@@ -111,36 +111,39 @@ void create_terminal(void)
  */
 void main_loop(system_t *self, multiboot_info_t **info)
 {
-
 	if (!self || !info || !*info)
 		return;
 
 	unsigned char *ascii = &self->keyboard.input;
 	uint32_t active = self->active_terminal;
 	terminal_t *term = &sys.terminals[active];
-	shell_t	shell = {0};
+	shell_t shell = {0};
 
 	shell_init(&shell, info);
+	set_prompt("[42] ");
+	term->write_prefix(term);
+	term->set_cursor_color(term, BLACK_ON_WHITE);
+
 	while (1) {
 		if (*ascii) {
-			int	completed;
+			unsigned char key = *ascii;
+			self->keyboard.input = 0;
+			term->handle_keyboard_input(term, key);
 
-			term->handle_keyboard_input(term, *ascii);
-			completed = term->line_ready;
+			if (term->line_ready) {
+				char *line = readline(NULL);
 
-			if (completed) {
-				char *line = readline("[42] ");
-
-				if (shell.create_tokens(&shell, line))
-					shell.execute(&shell);
-					// shell.clear(&shell);
-				shell.clear(&shell);
+				if (line) {
+					if (shell.create_tokens(&shell, line))
+						shell.execute(&shell);
+					shell.clear(&shell);
+					ft_free(line);
+				}
+				term->line_ready = 0;
 				term->write_prefix(term);
 				term->set_cursor_color(term, BLACK_ON_WHITE);
-				ft_free(line);
 			}
 		}
-		self->keyboard.input = 0;
 		__asm__ volatile("hlt");
 	}
 }

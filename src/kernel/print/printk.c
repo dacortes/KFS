@@ -62,7 +62,7 @@ void kvprintk(uint32_t level, const char *fmt, va_list ap)
 	if (level <= sys.syslog.console_loglevel) {
 		terminal_t *term = &sys.terminals[sys.active_terminal];
 
-		term->write_prefix(term);
+		// term->write_prefix(term);
 		term->write_string(term, buf);
 		term->set_cursor_color(term, BLACK_ON_WHITE);
 	}
