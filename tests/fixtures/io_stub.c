@@ -154,13 +154,6 @@ void gdt_log_descriptors(void)
 }
 
 /**
- * Stub for gdt_run_privilege_demo - not used in unit tests
- */
-void gdt_run_privilege_demo(void)
-{
-}
-
-/**
  * Stub for pic_init - not used in unit tests
  */
 void pic_init(void)

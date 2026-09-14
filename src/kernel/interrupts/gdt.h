@@ -117,14 +117,6 @@ struct gdt_ptr gdt_get_gdtr(void);
 int gdt_verify(void);
 
 /**
- * @brief Start a small user-mode demo that intentionally triggers a GP fault.
- *
- * The demo transitions to ring 3 and tries to load a kernel data selector,
- * which should fault and prove that privilege checks are enforced.
- */
-void gdt_run_privilege_demo(void);
-
-/**
  * @brief Flag written from ring 3 to prove user data access works.
  */
 extern unsigned char gdt_user_demo_state;

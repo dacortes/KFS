@@ -60,13 +60,6 @@ void shortcut_handler(const unsigned char *keys, int count)
 {
 	if (!keys || count < 1)
 		return;
-
-	/* Ctrl+G starts the GDT privilege demonstration. */
-	if (keys[0] == 0x22) {
-		gdt_run_privilege_demo();
-		return;
-	}
-
 	/* Scancodes 0x02..0x0B correspond to keys '1'..'0' */
 	if (keys[0] >= 0x02 && keys[0] <= 0x0B) {
 		uint32_t id = keys[0] - 0x02;

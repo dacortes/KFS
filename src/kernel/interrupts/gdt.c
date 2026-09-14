@@ -229,21 +229,6 @@ void gdt_print_user_stack(void)
 }
 
 /**
- * @brief Start a ring-3 demo that intentionally triggers a GP fault.
- */
-void gdt_run_privilege_demo(void)
-{
-	unsigned int user_stack_top;
-
-	gdt_user_demo_state = 0;
-	gdt_user_demo_buffer[0] = '?';
-	gdt_user_demo_buffer[1] = '\0';
-
-	user_stack_top = (unsigned int)&user_demo_stack[sizeof(user_demo_stack)];
-	gdt_enter_user_mode((unsigned int)gdt_user_mode_entry, user_stack_top);
-}
-
-/**
  * @brief User-mode code that captures stack info and halts.
  *
  * This function (implemented in assembly) is called in ring 3.
