@@ -116,6 +116,7 @@ struct terminal_s {
 	uint16_t		cursor_prev_y;
 	uint8_t			curr_color;
 	char			cursor_char;
+	uint8_t			cursor_prev_color;
 
 	char			prefix[MAX_NAME];
 	uint16_t		prefix_len;

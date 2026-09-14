@@ -19,18 +19,20 @@ char *readline(const char *prompt)
 {
 	uint32_t active = sys.active_terminal;
 	terminal_t *term = &sys.terminals[active];
-	unsigned int	len = ft_strlen(term->line);
 
-	(void)prompt;
-	set_prompt(prompt);
+	if (prompt)
+		set_prompt(prompt);
+
 	if (!term->line_ready)
 		return NULL;
 
+	unsigned int len = ft_strlen(term->line);
 	char *line = ft_strndup(term->line, len);
 
-	if (!line)
+	if (!line) {
+		term->line_ready = 0;
 		return NULL;
-
+	}
 	term->line_ready = 0;
 	term->clear_line(term);
 	return line;

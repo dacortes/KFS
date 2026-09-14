@@ -305,6 +305,72 @@ TEST_F(MemoryTest, WrongSpaceFreeIsRejected)
 	vfree(virtual_ptr);
 }
 
+TEST_F(MemoryTest, MemoryBuiltinHelpStatsAndInvalidCommandBranches)
+{
+	shell_t shell = make_memory_shell("help", NULL, NULL);
+	EXPECT_EQ(cmd_memory(&shell), 0);
+
+	shell = make_memory_shell("stats", NULL, NULL);
+	EXPECT_EQ(cmd_memory(&shell), 0);
+
+	shell = make_memory_shell("k", NULL, NULL);
+	EXPECT_EQ(cmd_memory(&shell), -1);
+
+	shell = make_memory_shell("k", "alloc", "0");
+	EXPECT_EQ(cmd_memory(&shell), -1);
+
+	shell = make_memory_shell("v", "freeas", "bogus", "0");
+	EXPECT_EQ(cmd_memory(&shell), -1);
+
+	shell = make_memory_shell("bad", NULL, NULL);
+	EXPECT_EQ(cmd_memory(&shell), -1);
+}
+
+TEST_F(MemoryTest, MemoryBuiltinAllocFreeAndOwnershipChecks)
+{
+	shell_t shell = make_memory_shell("k", "alloc", "64");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+	EXPECT_NE(g_next_page, 0u);
+
+	shell = make_memory_shell("k", "freeas", "v", "0");
+	EXPECT_EQ(cmd_memory(&shell), -1);
+	EXPECT_EQ(g_free_calls, 0u);
+
+	shell = make_memory_shell("k", "free", "0");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+	EXPECT_EQ(g_free_calls, 1u);
+
+	shell = make_memory_shell("v", "alloc", "96");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+
+	shell = make_memory_shell("v", "free", "0");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+	EXPECT_EQ(g_free_calls, 2u);
+}
+
+TEST_F(MemoryTest, MemoryBuiltinRejectsInvalidSlotsAndWrongSpaceRequests)
+{
+	shell_t shell = make_memory_shell("v", "free", "3");
+	EXPECT_EQ(cmd_memory(&shell), -1);
+
+	shell = make_memory_shell("k", "free", "999");
+	EXPECT_EQ(cmd_memory(&shell), -1);
+
+	shell = make_memory_shell("k", "alloc", "32");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+
+	shell = make_memory_shell("k", "freeas", "k", "0");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+	EXPECT_EQ(g_free_calls, 1u);
+
+	shell = make_memory_shell("v", "alloc", "16");
+	EXPECT_EQ(cmd_memory(&shell), 0);
+
+	shell = make_memory_shell("v", "freeas", "k", "0");
+	EXPECT_EQ(cmd_memory(&shell), -1);
+	EXPECT_EQ(g_free_calls, 1u);
+}
+
 TEST_F(MemoryTest, MemoryBuiltinAllocFreeAndTestCommands)
 {
 	shell_t shell = make_memory_shell("k", "alloc", "64");

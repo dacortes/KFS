@@ -202,6 +202,19 @@ void pmm_init(multiboot_info_t *info)
 	}
 
 	// ============================================================
+	// 7.5. Mark low memory (0 - 1MB) as used
+	// ============================================================
+	// The range 0x0-0x100000 contains the IVT, BIOS data area,
+	// EBDA, VGA framebuffer, and other firmware structures.
+	// It must never be handed out by the allocator.
+	for (uint32_t i = 0; i < kernel_start_page; i++) {
+		if (!bitmap_test_bit(i)) {
+			bitmap_set_bit(i);
+			used_pages++;
+		}
+	}
+
+	// ============================================================
 	// 8. Mark reserved regions as used
 	// ============================================================
 	entry = (multiboot_map_entry_t *)info->mmap_addr;
@@ -298,6 +311,8 @@ uint32_t pmm_alloc_frame_range(size_t count)
 
 	first_free_hint = (uint32_t)page_num + (uint32_t)count;
 	// return memory_base + ((uint32_t)page_num * PAGE_SIZE);
+	if (page_num == 0)
+		return 0;
 	return ((uint32_t)page_num * PAGE_SIZE);
 }
 
