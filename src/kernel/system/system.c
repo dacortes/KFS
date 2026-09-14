@@ -127,6 +127,7 @@ void main_loop(system_t *self, multiboot_info_t **info)
 	while (1) {
 		if (*ascii) {
 			unsigned char key = *ascii;
+
 			self->keyboard.input = 0;
 			term->handle_keyboard_input(term, key);
 

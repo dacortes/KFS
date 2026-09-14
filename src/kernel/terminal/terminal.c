@@ -578,9 +578,9 @@ static void write_prefix(terminal_t *self)
 {
 	if (!self)
 		return;
-	// printf("[TRACE] wp prefix='%s' EIP=0x%x\n",
-	// 		self->prefix,
-	// 		(unsigned int)__builtin_return_address(0));
+	//printf("[TRACE] wp prefix='%s' EIP=0x%x\n",
+	//self->prefix,
+	//(unsigned int)__builtin_return_address(0));
 	self->write_string(self, self->prefix);
 }
 
