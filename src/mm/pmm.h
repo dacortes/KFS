@@ -11,6 +11,19 @@
 #define PAGE_SIZE 4096
 #define PAGE_SHIFT 12
 
+#define HHDM_BASE 0xC0000000
+#define HHDM_LIMIT 0x02000000
+
+static inline void *phys_to_virt(uint32_t phys_addr)
+{
+	return ((void *)(phys_addr + HHDM_BASE));
+}
+
+static inline uint32_t virt_to_phys(const void *virt_addr)
+{
+	return ((uint32_t)virt_addr - HHDM_BASE);
+}
+
 extern uint32_t endkernel;
 
 void pmm_init(multiboot_info_t *info);

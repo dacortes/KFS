@@ -28,7 +28,7 @@ static void *memory_alloc(size_t size, uint32_t magic,
 	if (!phys_addr)
 		return NULL;
 
-	header = (memory_header_t *)phys_addr;
+	header = (memory_header_t *)phys_to_virt(phys_addr);
 	header->magic = magic;
 	header->owner = (uint8_t)owner;
 	header->reserved[0] = 0;
@@ -67,7 +67,7 @@ static int memory_free_checked(void *ptr, uint32_t magic,
 
 	header->magic = MEMORY_MAGIC_FREED;
 	header->owner = 0;
-	pmm_free_frame_range((uint32_t)header, header->page_count);
+	pmm_free_frame_range(virt_to_phys(header), header->page_count);
 	return 0;
 }
 

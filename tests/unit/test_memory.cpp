@@ -48,6 +48,7 @@ uint32_t pmm_alloc_frame_range(size_t count)
 		return 0;
 
 	phys_addr = (uint32_t)(uintptr_t)&g_pool[g_next_page * PAGE_SIZE];
+	phys_addr -= HHDM_BASE;
 	g_next_page += count;
 	return phys_addr;
 }

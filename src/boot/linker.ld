@@ -1,39 +1,33 @@
 ENTRY(_start)
 
+KERNEL_BASE = 0xC0000000;
+
 SECTIONS
 {
-	/* Init section GDT */
-	. = 0x800;
-	.gdt : {
-		gdt_phys_start = .;
-		*(.gdt)
-		. = ALIGN(8);
-		gdt_phys_end = .;
-	}
+	/* Kernel virtual address: 3GB + 1MB. Physical load address: 1MB. */
+	. = KERNEL_BASE + 1M;
+	kernel_start = .;
 
-	/* Kernel loaded at 1MB */
-	. = 1M;
-
-	.multiboot : ALIGN(4) {
+	.multiboot ALIGN(4) : AT(ADDR(.multiboot) - KERNEL_BASE) {
 		*(.multiboot)
 	}
 
-	.text : ALIGN(4K) {
+	.text ALIGN(4K) : AT(ADDR(.text) - KERNEL_BASE) {
 		text_start = .;
 		*(.text*)
 	}
 
-	.rodata : ALIGN(4K) {
+	.rodata ALIGN(4K) : AT(ADDR(.rodata) - KERNEL_BASE) {
 		rodata_start = .;
 		*(.rodata*)
 	}
 
-	.data : ALIGN(4K) {
+	.data ALIGN(4K) : AT(ADDR(.data) - KERNEL_BASE) {
 		data_start = .;
 		*(.data*)
 	}
 
-	.bss : ALIGN(4K) {
+	.bss ALIGN(4K) : AT(ADDR(.bss) - KERNEL_BASE) {
 		bss_start = .;
 		*(COMMON)
 		*(.bss*)
@@ -46,10 +40,7 @@ SECTIONS
 	. += 16K;
 	stack_top = .;
 
-
 	endkernel = .;
 	kernel_end = endkernel;
-
-	kernel_start = 1M;
 	kernel_size = endkernel - kernel_start;
 }

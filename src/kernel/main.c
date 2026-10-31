@@ -12,6 +12,7 @@
 #include <print.h>
 #include <multiboot.h>
 #include <pmm.h>
+#include <paging.h>
 #include <memory.h>
 
 /**
@@ -27,6 +28,8 @@
 
 int kernel_main(uint32_t magic, multiboot_info_t *info)
 {
+	uint32_t limit_kb;
+
 	if (magic != MULTIBOOT_MAGIC)
 		return -1;
 
@@ -35,6 +38,13 @@ int kernel_main(uint32_t magic, multiboot_info_t *info)
 
 	init_system();
 	pmm_init(info);
+
+	limit_kb = info->mem_upper + 1024;
+	if (limit_kb > HHDM_LIMIT / 1024)
+		limit_kb = HHDM_LIMIT / 1024;
+	if (paging_init(limit_kb * 1024) != 0)
+		return -1;
+
 	memory_init();
 	printf("[BOOT] memory helpers ready\n");
 	sys.main_loop(&sys, &info);

@@ -145,6 +145,8 @@ void pmm_init(multiboot_info_t *info)
 	// 3. Calculate total number of pages
 	// ============================================================
 	total_pages = (max_addr + PAGE_SIZE - 1) / PAGE_SIZE;
+	if (total_pages > HHDM_LIMIT / PAGE_SIZE)
+		total_pages = HHDM_LIMIT / PAGE_SIZE;
 	bitmap_size = (total_pages + 7) / 8;  // Round up
 
 	printf("Total memory: %d MB\n", (uint32_t)(total_ram / (1024 * 1024)));
@@ -155,16 +157,17 @@ void pmm_init(multiboot_info_t *info)
 	// 4. Get kernel end address (from linker)
 	// ============================================================
 
-	uint32_t kernel_end = (uint32_t)&endkernel;
+	uint32_t kernel_end = virt_to_phys(&endkernel);
 
 	// Align to page (4 KB)
 	uint32_t bitmap_phys = (kernel_end + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
 
-	bitmap = (uint8_t *)bitmap_phys;
+	bitmap = (uint8_t *)phys_to_virt(bitmap_phys);
 
-	printf("Kernel ends at:  0x%x\n", kernel_end);
-	printf("Bitmap at:       0x%x\n", (uint32_t)bitmap);
-	printf("Bitmap occupies: %d pages\n", (bitmap_size + PAGE_SIZE - 1) / PAGE_SIZE);
+	printf("Kernel ends at:  0x%x (phys)\n", kernel_end);
+	printf("Bitmap at:       0x%x (virt)\n", (uint32_t)bitmap);
+	printf("Bitmap occupies: %d pages\n",
+		(bitmap_size + PAGE_SIZE - 1) / PAGE_SIZE);
 
 	// ============================================================
 	// 5. Initialize bitmap (all bits 0 = free)
@@ -245,7 +248,8 @@ void pmm_init(multiboot_info_t *info)
 		(float)used_pages / total_pages * 100);
 	printf("Free pages:     %d (%f%%)\n", total_pages - used_pages,
 		(float)(total_pages - used_pages) / total_pages * 100);
-	printf("Free memory:    %d MB\n", ((total_pages - used_pages) * PAGE_SIZE) / (1024 * 1024));
+	printf("Free memory:    %d MB\n",
+		((total_pages - used_pages) * PAGE_SIZE) / (1024 * 1024));
 	printf("=======================\n\n");
 }
 
